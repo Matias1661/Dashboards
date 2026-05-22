@@ -379,10 +379,10 @@
   <div class="chart-card">
     <div class="card-header">
       <span class="card-title">TA sistólica / diastólica</span>
-      <span class="card-current">últ: 110/80 (×2)</span>
+      <span class="card-current">últ: 110/80</span>
     </div>
     <div class="chart-wrap h160"><canvas id="c-bp"></canvas></div>
-    <p style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:8px;">▸ Sin café: 104–110/71–80 (rango normal). Con café: 129–140/85–90 (elevado). Umbral decisión: >140/90 sin café → revisar protocolo.<br><span style="color:#0d6e40">→ Dos lecturas consecutivas sin café (21 y 22 may) en 110/80 — estables y bajo umbral. Criterio para subida a Testo 3cm en sem 11 cumplido. Seguir midiendo sin café esta semana para confirmación definitiva.</span></p>
+    <p style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:8px;">▸ Sin café: 104–110/71–80 (rango normal). Con café: 129–140/85–90 (elevado). Umbral decisión: >140/90 sin café → revisar protocolo.<br><span style="color:#0d6e40">→ Medir siempre en las mismas condiciones (sin café, tarde, 5 min sentado). Con 1 semana más de lecturas sin café estables, la subida a Testo 3cm en sem 11 está justificada.</span></p>
   </div>
   <div class="chart-card">
     <div class="card-header">
@@ -399,7 +399,6 @@
         <tr><td>19 may</td><td class="bp-ok">104</td><td class="bp-ok">71</td><td>86</td><td>Sin café (prom. 2)</td></tr>
         <tr><td>20 may</td><td class="bp-hi">140</td><td>85</td><td>88</td><td>Con café</td></tr>
         <tr><td>21 may</td><td class="bp-ok">110</td><td class="bp-ok">80</td><td>89</td><td>Sin café</td></tr>
-        <tr><td>22 may</td><td class="bp-ok">110</td><td class="bp-ok">80</td><td>89</td><td>Sin café</td></tr>
       </tbody>
     </table>
     <p style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:10px;">▸ Café sube TA ~26–29 mmHg sistólica. Criterio Testo 3cm en sem 11: lecturas sin café estables bajo 140/90 → <span style="color:#0d6e40">actualmente CUMPLE</span>.</p>
@@ -769,7 +768,6 @@ const bpData = [
   { d: '19 may', sist: 104, diast: 71, tipo: 'nocafe' },
   { d: '20 may', sist: 140, diast: 85, tipo: 'cafe' },
   { d: '21 may', sist: 110, diast: 80, tipo: 'nocafe' },
-  { d: '22 may', sist: 110, diast: 80, tipo: 'nocafe' },
 ];
 
 const bpPtColor = {
