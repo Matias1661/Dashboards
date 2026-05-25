@@ -2,8 +2,11 @@ name: Fetch Hevy Data
 
 on:
   schedule:
-    - cron: '0 5 * * *'   # Diario a las 05:00 UTC (07:00 Madrid)
-  workflow_dispatch:        # Permite ejecución manual desde GitHub
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   fetch:
@@ -17,9 +20,8 @@ jobs:
           HEVY_API_KEY: ${{ secrets.HEVY_API_KEY }}
         run: |
           python3 - <<'PYEOF'
-          import requests, json
+          import requests, json, os
           from datetime import datetime, timezone
-          import os
 
           api_key = os.environ['HEVY_API_KEY']
           all_workouts = []
