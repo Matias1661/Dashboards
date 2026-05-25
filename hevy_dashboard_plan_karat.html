@@ -436,46 +436,13 @@
 
 <script>
 // ─── CONSTANTES ───────────────────────────────────────────────────────────────
-const CYCLE_START  = new Date('2026-03-23T00:00:00');
-const HEVY_START   = new Date('2026-05-25T00:00:00'); // primer día con datos Hevy
-const API_BASE     = 'https://api.hevyapp.com';
-const DEFAULT_KEY  = 'aeb5c165-110c-4e79-ad38-30b3225d4db9';
-
-// ─── HISTÓRICO JEFIT (hardcoded) ──────────────────────────────────────────────
-// Meses may 2025 – abr 2026 (antes de Hevy). May 2026: sesiones pre-25may (19,20,21 may via Jefit)
-const JEFIT_MONTHLY = {
-  '2025-05': { ses: 7,  vol: 39460  },
-  '2025-06': { ses: 9,  vol: 44278  },
-  '2025-07': { ses: 6,  vol: 29330  },
-  '2025-08': { ses: 3,  vol: 13266  },
-  '2025-09': { ses: 4,  vol: 23532  },
-  '2025-10': { ses: 1,  vol: 6839   },
-  '2025-11': { ses: 4,  vol: 20415  },
-  '2025-12': { ses: 0,  vol: 0      },
-  '2026-01': { ses: 2,  vol: 8224   },
-  '2026-02': { ses: 2,  vol: 9097   },
-  '2026-03': { ses: 4,  vol: 19939  },
-  '2026-04': { ses: 7,  vol: 38223  },
-  // May 2026: 3 sesiones Jefit (19-21 may) — Hevy se suma encima
-  '2026-05': { ses: 3,  vol: 12627  },
-};
-
-// Sesiones del ciclo (Jefit) para los gráficos de semana y volumen/sesión
-// Formato: { date: Date, dateStr, vol, durationMin, src, title, exerciseCount, groupSets }
-const JEFIT_CYCLE_SESSIONS = [
-  { date: new Date('2026-03-23'), vol: 5188,  durationMin: null, src: 'Jefit', title: 'Pecho',           exerciseCount: 4, groupSets: { Pecho: 8 } },
-  { date: new Date('2026-03-30'), vol: 6430,  durationMin: null, src: 'Jefit', title: 'Espalda',         exerciseCount: 4, groupSets: { Espalda: 10 } },
-  { date: new Date('2026-04-01'), vol: 4180,  durationMin: null, src: 'Jefit', title: 'Hombro',          exerciseCount: 3, groupSets: { Hombro: 9 } },
-  { date: new Date('2026-04-04'), vol: 6064,  durationMin: null, src: 'Jefit', title: 'Pecho',           exerciseCount: 4, groupSets: { Pecho: 12 } },
-  { date: new Date('2026-04-07'), vol: 6217,  durationMin: null, src: 'Jefit', title: 'Espalda',         exerciseCount: 4, groupSets: { Espalda: 11 } },
-  { date: new Date('2026-04-08'), vol: 4429,  durationMin: null, src: 'Jefit', title: 'Hombro',          exerciseCount: 3, groupSets: { Hombro: 8 } },
-  { date: new Date('2026-04-23'), vol: 4760,  durationMin: null, src: 'Jefit', title: 'Pecho',           exerciseCount: 4, groupSets: { Pecho: 8 } },
-  { date: new Date('2026-04-27'), vol: 7198,  durationMin: null, src: 'Jefit', title: 'Espalda/Bíceps',  exerciseCount: 5, groupSets: { Espalda: 8, Bíceps: 3 } },
-  { date: new Date('2026-04-30'), vol: 5376,  durationMin: null, src: 'Jefit', title: 'Hombro',          exerciseCount: 4, groupSets: { Hombro: 5 } },
-  { date: new Date('2026-05-19'), vol: 4600,  durationMin: null, src: 'Jefit', title: 'Pecho',           exerciseCount: 3, groupSets: { Pecho: 8 } },
-  { date: new Date('2026-05-20'), vol: 4704,  durationMin: null, src: 'Jefit', title: 'Espalda/Bíceps',  exerciseCount: 4, groupSets: { Espalda: 8, Bíceps: 3 } },
-  { date: new Date('2026-05-21'), vol: 3323,  durationMin: null, src: 'Jefit', title: 'Cuádriceps',      exerciseCount: 3, groupSets: { Cuádriceps: 8 } },
-];
+const CYCLE_START    = new Date('2026-03-23T00:00:00');
+const HEVY_START     = new Date('2026-05-25T00:00:00');
+const API_BASE       = 'https://api.hevyapp.com';
+const DEFAULT_KEY    = 'aeb5c165-110c-4e79-ad38-30b3225d4db9';
+const RAW_BASE       = 'https://raw.githubusercontent.com/Matias1661/Dashboards/main';
+const JEFIT_JSON_URL = `${RAW_BASE}/jefit_data.json`;
+const HEVY_JSON_URL  = `${RAW_BASE}/hevy_data.json`;
 
 // ─── MUSCLE GROUP MAPPING (Hevy, keywords en español) ────────────────────────
 const MUSCLE_MAP = [
@@ -518,8 +485,9 @@ function getApiKey() {
   return DEFAULT_KEY;
 }
 
-// ─── FETCH HEVY ───────────────────────────────────────────────────────────────
+// ─── FETCH DATA ───────────────────────────────────────────────────────────────
 async function fetchAllWorkouts(apiKey) {
+  // Llamada directa a la API de Hevy desde el navegador (CORS permitido)
   let page = 1, all = [], pageCount = 1;
   do {
     const res = await fetch(`${API_BASE}/v1/workouts?page=${page}&pageSize=10`, { headers: { 'api-key': apiKey } });
@@ -532,12 +500,19 @@ async function fetchAllWorkouts(apiKey) {
   return all;
 }
 
-function parseHevySessions(rawWorkouts) {
+async function fetchJson(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP ${res.status} fetching ${url}`);
+  return res.json();
+}
+
+// Parser unificado — funciona con workouts de Hevy y de Jefit (mismo formato)
+function parseWorkouts(rawWorkouts, src) {
   return rawWorkouts
     .map(w => {
       const start = new Date(w.start_time);
-      const end   = new Date(w.end_time);
-      const durationMin = Math.round((end - start) / 60000);
+      const end   = w.end_time ? new Date(w.end_time) : null;
+      const durationMin = end ? Math.round((end - start) / 60000) : null;
       let volume = 0, totalSets = 0;
       const groupSets = {};
       (w.exercises || []).forEach(ex => {
@@ -553,13 +528,14 @@ function parseHevySessions(rawWorkouts) {
         dateStr: start.toLocaleDateString('es-ES', { day:'2-digit', month:'short' }).replace('.',''),
         vol: Math.round(volume),
         durationMin,
-        src: 'Hevy',
+        src,
         title: w.title || '—',
         exerciseCount: (w.exercises||[]).length,
         groupSets,
         inCycle: start >= CYCLE_START,
       };
     })
+    .filter(s => s.vol > 0) // descartar sesiones sin volumen registrado
     .sort((a,b) => a.date - b.date);
 }
 
@@ -570,26 +546,23 @@ function destroyChart(id) {
   if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; }
 }
 
-function render(hevySessions) {
+function render(allSessions) {
   const now = new Date();
 
-  // Merge cycle sessions: Jefit base + Hevy (solo inCycle, solo desde HEVY_START para evitar duplicados del 19-21 may)
-  const hevyCycle = hevySessions.filter(s => s.inCycle && s.date >= HEVY_START);
-  const allCycleSessions = [...JEFIT_CYCLE_SESSIONS, ...hevyCycle]
+  // Cycle sessions: todas las sesiones (Jefit + Hevy) desde el inicio del ciclo
+  const allCycleSessions = allSessions.filter(s => s.inCycle)
     .sort((a, b) => a.date - b.date);
 
-  // Build merged monthly map: Jefit base + Hevy encima
+  // Build monthly map desde todas las sesiones
   const monthMap = {};
-  Object.entries(JEFIT_MONTHLY).forEach(([k, v]) => { monthMap[k] = { ...v }; });
-
-  hevySessions.filter(s => s.date >= HEVY_START).forEach(s => {
+  allSessions.forEach(s => {
     const k = getMonthKey(s.date);
     if (!monthMap[k]) monthMap[k] = { ses: 0, vol: 0 };
     monthMap[k].ses += 1;
     monthMap[k].vol += s.vol;
   });
 
-  // Últimos 13 meses a partir del más antiguo en JEFIT_MONTHLY
+  // Últimos 13 meses
   const allMonths = Object.keys(monthMap).sort();
   const show13 = allMonths.slice(-13);
 
@@ -977,16 +950,28 @@ function render(hevySessions) {
 async function init() {
   document.getElementById('loadingArea').style.display = 'block';
   document.getElementById('mainContent').style.display = 'none';
-  document.getElementById('loadingArea').textContent = 'Cargando datos desde Hevy...';
+  document.getElementById('loadingArea').textContent = 'Cargando datos desde Jefit y Hevy...';
 
   try {
     const apiKey = getApiKey();
-    const rawWorkouts = await fetchAllWorkouts(apiKey);
-    const hevySessions = parseHevySessions(rawWorkouts);
-    render(hevySessions);
+
+    // Fetch en paralelo: Jefit JSON (GitHub) + Hevy API (navegador directo)
+    const [jefitData, hevyRaw] = await Promise.all([
+      fetchJson(JEFIT_JSON_URL),
+      fetchAllWorkouts(apiKey)
+    ]);
+
+    const jefitSessions = parseWorkouts(jefitData.workouts || [], 'Jefit');
+    const hevySessions  = parseWorkouts(hevyRaw, 'Hevy');
+
+    // Merge: Jefit hasta 21 may 2026, Hevy desde 25 may 2026 — sin solapamiento
+    const allSessions = [...jefitSessions, ...hevySessions]
+      .sort((a, b) => a.date - b.date);
+
+    render(allSessions);
   } catch(e) {
     document.getElementById('loadingArea').innerHTML =
-      `<div class="error-msg">Error al conectar con la API de Hevy: ${e.message}<br>Verifica tu API key y vuelve a intentarlo.</div>`;
+      `<div class="error-msg">Error al cargar datos: ${e.message}</div>`;
   }
 }
 
