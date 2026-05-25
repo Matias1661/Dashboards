@@ -24,8 +24,6 @@ jobs:
           from datetime import datetime, timezone
 
           api_key = os.environ['HEVY_API_KEY']
-          print(f"API key length: {len(api_key)}, starts with: {api_key[:8]}...")
-
           all_workouts = []
           page = 1
 
@@ -35,27 +33,21 @@ jobs:
                   headers={'api-key': api_key},
                   timeout=15
               )
-              print(f"Page {page}: HTTP {resp.status_code}")
-              print(f"Raw response: {resp.text[:300]}")
               resp.raise_for_status()
               data = resp.json()
-              workouts = data.get('workouts', [])
-              all_workouts.extend(workouts)
-              print(f"Page {page}: got {len(workouts)} workouts, page_count={data.get('page_count')}")
+              all_workouts.extend(data.get('workouts', []))
               if page >= data.get('page_count', 1):
                   break
               page += 1
 
-          output = {
-              'fetched_at': datetime.now(timezone.utc).isoformat(),
-              'total_workouts': len(all_workouts),
-              'workouts': all_workouts
-          }
-
           with open('hevy_data.json', 'w') as f:
-              json.dump(output, f)
+              json.dump({
+                  'fetched_at': datetime.now(timezone.utc).isoformat(),
+                  'total_workouts': len(all_workouts),
+                  'workouts': all_workouts
+              }, f)
 
-          print(f"Done: {len(all_workouts)} workouts saved")
+          print(f"Done: {len(all_workouts)} workouts")
           PYEOF2
 
       - name: Commit and push
