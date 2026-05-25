@@ -795,19 +795,44 @@ function render(hevySessions) {
     ? `▸ Cubiertos: ${worked30.join(', ')}.<br><span style="color:#c94a30">→ Sin sets en 30 días: ${missing30.join(', ')}. Incorporar en próximas sesiones.</span>`
     : '▸ Todos los grupos musculares cubiertos en los últimos 30 días.';
 
-  // ── Insights ────────────────────────────────────────────────────────────────
+  // ── Insights (dinámicos) ────────────────────────────────────────────────────
+  // 1. Constancia: semanas del ciclo sin sesiones
+  const emptyWeeks = Array.from({length:displayWeeks}, (_,i)=>i).filter(i=>weekSesArr[i]===0);
+  const emptyWeekLabels = emptyWeeks.map(i=>`sem ${i+1}`);
+  const constanciaType = emptyWeeks.length === 0 ? 'ok' : emptyWeeks.length <= 2 ? 'warn' : 'bad';
+  const constanciaText = emptyWeeks.length === 0
+    ? `Sin semanas vacías en el ciclo hasta ahora. Consistencia perfecta — mantener ritmo.`
+    : `${emptyWeekLabels.join(', ')} sin sesiones registradas (${emptyWeeks.length} de ${displayWeeks} semanas). Objetivo 8–10 ses/mes requiere eliminar estas caídas.`;
+
+  // 2. Mejor mes del ciclo
+  const cycleMonths = show13.filter(k => k >= '2026-03' && k < curMonthKey);
+  const bestCycleMonth = cycleMonths.length > 0
+    ? cycleMonths.reduce((best,k) => (monthMap[k]?.ses||0) >= (monthMap[best]?.ses||0) ? k : best, cycleMonths[0])
+    : null;
+  const bestCycleSes = bestCycleMonth ? (monthMap[bestCycleMonth]?.ses||0) : 0;
+  const bestCycleVol = bestCycleMonth ? (monthMap[bestCycleMonth]?.vol||0) : 0;
+  const bestMesType = bestCycleSes >= 8 ? 'ok' : bestCycleSes >= 5 ? 'warn' : 'bad';
+  const bestMesText = bestCycleMonth
+    ? `${monthLabel(bestCycleMonth)}: ${bestCycleSes} sesiones, ${(bestCycleVol/1000).toFixed(1)}t de volumen. ${bestCycleSes>=8?'Alineado con el objetivo mínimo (8 ses/mes).':bestCycleSes>=5?'Por debajo del objetivo (8–10 ses/mes). Hay margen de mejora.':'Muy por debajo del objetivo. Priorizar frecuencia.'}`
+    : 'Sin meses completos de ciclo aún.';
+
+  // 3. Mes actual vs objetivo
+  const mesActualProyectado = curMonthSes + fcSesAdd;
+  const mesActualType = mesActualProyectado >= 8 ? 'ok' : mesActualProyectado >= 5 ? 'warn' : 'bad';
+  const mesActualText = `${now.toLocaleDateString('es-ES',{month:'long',year:'numeric'})}: ${curMonthSes} sesiones en ${dayOfMonth} días. Proyección al cierre del mes: ~${mesActualProyectado.toFixed(1)} sesiones. ${mesActualProyectado>=8?'En camino de cumplir el objetivo.':mesActualProyectado>=5?'Por debajo del objetivo — necesita '+Math.ceil(8-curMonthSes)+' sesiones más en los '+daysLeft+' días restantes.':'Ritmo insuficiente — necesita '+Math.ceil(8-curMonthSes)+' sesiones en '+daysLeft+' días.'}`;
+
   document.getElementById('insightsGrid').innerHTML = `
-    <div class="insight warn">
-      <p class="insight-title">Constancia: semanas sin registro</p>
-      <p class="insight-body">Sem 4 (13–19 abr), sem 7 (4–10 may) y sem 8 (11–18 may) sin sesiones. La recuperación en sem 9 es positiva. Objetivo 8–10 ses/mes requiere eliminar estas caídas.</p>
+    <div class="insight ${constanciaType}">
+      <p class="insight-title">Constancia: semanas del ciclo</p>
+      <p class="insight-body">${constanciaText}</p>
     </div>
-    <div class="insight ok">
-      <p class="insight-title">Abr 2026: mejor mes del ciclo</p>
-      <p class="insight-body">7 sesiones en abril, 38,222 kg de volumen. Alineado con el objetivo mínimo. Confirma que el entrenamiento durante el ciclo funciona cuando hay consistencia.</p>
+    <div class="insight ${bestMesType}">
+      <p class="insight-title">Mejor mes del ciclo</p>
+      <p class="insight-body">${bestMesText}</p>
     </div>
-    <div class="insight ok">
-      <p class="insight-title">Hevy: transición activa</p>
-      <p class="insight-body">Desde ${document.getElementById('hevyStartDate').textContent} los datos vienen de Hevy API en tiempo real. Duración por sesión disponible — dato que Jefit no proporcionaba de forma fiable.</p>
+    <div class="insight ${mesActualType}">
+      <p class="insight-title">Mes actual vs objetivo</p>
+      <p class="insight-body">${mesActualText}</p>
     </div>
   `;
 
