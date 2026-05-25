@@ -562,7 +562,13 @@ function render(allSessions) {
     monthMap[k].vol += s.vol;
   });
 
-  // Últimos 13 meses
+  // Rellenar meses vacíos en el rango para que aparezcan con 0
+  const now2 = new Date();
+  for (let i = 12; i >= 0; i--) {
+    const d = new Date(now2.getFullYear(), now2.getMonth() - i, 1);
+    const k = getMonthKey(d);
+    if (!monthMap[k]) monthMap[k] = { ses: 0, vol: 0 };
+  }
   const allMonths = Object.keys(monthMap).sort();
   const show13 = allMonths.slice(-13);
 
