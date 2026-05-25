@@ -511,17 +511,30 @@ function render(hevySessions) {
   const curCycleWeek = Math.max(getWeekIndex(now), 0);
   const displayWeeks = Math.max(maxWeekIdx, curCycleWeek) + 1;
 
-  // Forecasts
+  // Forecasts — solo días laborables (lun–vie)
   const dayOfMonth = now.getDate();
   const daysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
   const daysLeft = daysInMonth - dayOfMonth;
-  const fcSesAdd = curMonthSes > 0 ? +(curMonthSes/dayOfMonth*daysLeft).toFixed(2) : 0;
-  const fcVolAdd = curMonthVol > 0 ? Math.round(curMonthVol/dayOfMonth*daysLeft) : 0;
 
-  const dayOfWeek = ((now.getDay()+6)%7) + 1;
-  const daysLeftWeek = 7 - dayOfWeek;
-  const curWeekSes = allCycleSessions.filter(s => getWeekIndex(s.date) === curCycleWeek).length;
-  const fcWeekSesAdd = curWeekSes > 0 ? +(curWeekSes/dayOfWeek*daysLeftWeek).toFixed(2) : 0;
+  function countWeekdays(from, to) {
+    let count = 0;
+    const d = new Date(from); d.setHours(0,0,0,0);
+    const end = new Date(to); end.setHours(0,0,0,0);
+    while (d <= end) { const dow = d.getDay(); if (dow !== 0 && dow !== 6) count++; d.setDate(d.getDate()+1); }
+    return count;
+  }
+  const monthStart  = new Date(now.getFullYear(), now.getMonth(), 1);
+  const monthEnd    = new Date(now.getFullYear(), now.getMonth()+1, 0);
+  const wdPast      = countWeekdays(monthStart, now);
+  const wdLeft      = countWeekdays(new Date(now.getFullYear(), now.getMonth(), now.getDate()+1), monthEnd);
+  const fcSesAdd    = (curMonthSes > 0 && wdPast > 0) ? +(curMonthSes / wdPast * wdLeft).toFixed(2) : 0;
+  const fcVolAdd    = (curMonthVol > 0 && wdPast > 0) ? Math.round(curMonthVol / wdPast * wdLeft) : 0;
+
+  const dayOfWeek      = ((now.getDay()+6)%7) + 1; // lun=1 … dom=7
+  const wdElapsedWeek  = Math.min(dayOfWeek, 5);
+  const wdLeftWeek     = Math.max(5 - dayOfWeek, 0);
+  const curWeekSes     = allCycleSessions.filter(s => getWeekIndex(s.date) === curCycleWeek).length;
+  const fcWeekSesAdd   = (curWeekSes > 0 && wdElapsedWeek > 0) ? +(curWeekSes / wdElapsedWeek * wdLeftWeek).toFixed(2) : 0;
 
   // Muscle groups
   const grupos = ['Pecho','Espalda','Hombro','Cuádriceps','Bíceps','Tríceps','Isquios/Glúteos'];
