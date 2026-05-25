@@ -446,13 +446,14 @@ const HEVY_JSON_URL  = `${RAW_BASE}/hevy_data.json`;
 
 // ─── MUSCLE GROUP MAPPING (Hevy, keywords en español) ────────────────────────
 const MUSCLE_MAP = [
-  { group: 'Pecho',           kw: ['banca', 'bench', 'press inclinado', 'press plano', 'apertura', 'pec deck', 'chest press', 'cable cross', 'fly'] },
-  { group: 'Espalda',         kw: ['jalón', 'jalon', 'remo', 'dominada', 'pulldown', 'pull-down', 'pull down', 'low row', 'cable row', 'lat ', 't-bar', 'tbar', 'seated row'] },
-  { group: 'Hombro',          kw: ['hombro', 'elevación lateral', 'elevacion lateral', 'elevación frontal', 'elevacion frontal', 'press de hombros', 'press hombros', 'lateral raise', 'face pull', 'upright row'] },
-  { group: 'Cuádriceps',      kw: ['sentadilla', 'prensa', 'hack squat', 'extensión de pierna', 'extension de pierna', 'leg press', 'leg extension', 'split squat', 'búlgara', 'bulgara', 'lunges', 'zancada'] },
-  { group: 'Bíceps',          kw: ['curl bícep', 'curl bicep', 'curl de bícep', 'curl de bicep', 'predicador', 'preacher', 'hammer curl', 'curl con barra', 'curl alterno', 'curl concentrado', 'curl en cable'] },
+  { group: 'Pecho',           kw: ['banca', 'bench', 'press inclinado', 'press plano', 'apertura', 'pec deck', 'chest press', 'cable cross', 'cross over', 'fly', 'push up', 'push-up'] },
+  { group: 'Espalda',         kw: ['jalón', 'jalon', 'remo', 'dominada', 'pulldown', 'pull-down', 'pull down', 'pull-up', 'pull up', 'chin-up', 'chin up', 'low row', 'cable row', 'lat ', 't-bar', 'tbar', 't bar', 'seated row', 'one arm row', 'one-arm row', 'bent over row', 'bent-over row', 'machine row', 'back extension'] },
+  { group: 'Hombro',          kw: ['hombro', 'elevación lateral', 'elevacion lateral', 'elevación frontal', 'elevacion frontal', 'press de hombros', 'press hombros', 'shoulder press', 'shoulder extension', 'military press', 'arnold', 'lateral raise', 'face pull', 'upright row', 'up right row', 'rear delt', 'front raise', 'shrug', 'seated press', 'standing press'] },
+  { group: 'Cuádriceps',      kw: ['sentadilla', 'squat', 'prensa', 'hack squat', 'extensión de pierna', 'extension de pierna', 'leg press', 'leg extension', 'split squat', 'búlgara', 'bulgara', 'lunge', 'zancada'] },
+  { group: 'Bíceps',          kw: ['curl bícep', 'curl bicep', 'curl de bícep', 'curl de bicep', 'bicep curl', 'biceps curl', 'barbell curl', 'predicador', 'preacher', 'hammer curl', 'concentration curl', 'curl con barra', 'curl alterno', 'curl concentrado', 'curl en cable', 'incline curl', 'ez bar curl', 'cable standing curl', 'standing curl', 'curl machine', 'curl alternante'] },
   { group: 'Tríceps',         kw: ['trícep', 'tricep', 'press cerrado', 'extensión de trícep', 'extension de tricep', 'pushdown', 'skull crusher', 'french press', 'dip'] },
-  { group: 'Isquios/Glúteos', kw: ['peso muerto', 'deadlift', 'curl femoral', 'leg curl', 'hip thrust', 'glúteo', 'gluteo', 'isquio', 'rdl', 'romanian', 'nordic', 'femoral'] },
+  { group: 'Isquios/Glúteos', kw: ['peso muerto', 'deadlift', 'curl femoral', 'leg curl', 'hip thrust', 'glúteo', 'gluteo', 'isquio', 'rdl', 'romanian', 'nordic', 'femoral', 'good morning', 'glute bridge', 'leg kickback'] },
+  { group: 'Core',            kw: ['plank', 'crunch', 'hanging knee', 'hanging leg', 'leg raise', 'ab ', 'core', 'bridge', 'ab crunch', 'cable crunch', 'standing crunch'] },
 ];
 
 function getGroup(title) {
@@ -616,7 +617,7 @@ function render(allSessions) {
   const fcWeekSesAdd   = (curWeekSes > 0 && wdElapsedWeek > 0) ? +(curWeekSes / wdElapsedWeek * wdLeftWeek).toFixed(2) : 0;
 
   // Muscle groups
-  const grupos = ['Pecho','Espalda','Hombro','Cuádriceps','Bíceps','Tríceps','Isquios/Glúteos'];
+  const grupos = ['Pecho','Espalda','Hombro','Cuádriceps','Bíceps','Tríceps','Isquios/Glúteos','Core'];
   const monday = new Date(now); monday.setHours(0,0,0,0); monday.setDate(now.getDate()-((now.getDay()+6)%7));
   const sunday = new Date(monday); sunday.setDate(monday.getDate()+6); sunday.setHours(23,59,59,999);
   const d30ago = new Date(now); d30ago.setDate(now.getDate()-30);
