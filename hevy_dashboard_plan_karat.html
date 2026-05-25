@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hevy — Dashboard Plan Karat</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #f8f8f6;
+    --surface: #ffffff;
+    --surface2: #f1f0ed;
+    --border: rgba(0,0,0,0.06);
+    --border2: rgba(0,0,0,0.1);
+    --text: #1a1a18;
+    --text2: #6b6d70;
+    --text3: #a8aab0;
+    --green: #0d8a52;
+    --red: #c94a30;
+    --amber: #9a6200;
+    --blue: #2563be;
+    --ciclo: rgba(13,138,82,0.07);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 0.5px solid var(--border2);
+  }
+  .header-left h1 {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text2);
+    margin-bottom: 4px;
+  }
+  .header-left p { font-size: 22px; font-weight: 300; letter-spacing: -0.02em; }
+  .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+  .pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 0.5px solid;
+  }
+  .pill-green { color: #0d6e40; border-color: rgba(13,110,64,0.3); background: rgba(13,138,82,0.07); }
+  .pill-amber { color: #7a4e00; border-color: rgba(122,78,0,0.3); background: rgba(154,98,0,0.07); }
+  .pill-dim { color: var(--text2); border-color: var(--border2); background: transparent; }
+
+  .api-bar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding: 10px 14px;
+    background: var(--surface);
+    border: 0.5px solid var(--border2);
+    border-radius: 10px;
+  }
+  .api-bar label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--text2);
+    white-space: nowrap;
+  }
+  .api-bar input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text);
+    outline: none;
+  }
+  .api-bar button {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    padding: 5px 14px;
+    border: 0.5px solid var(--border2);
+    border-radius: 6px;
+    background: transparent;
+    cursor: pointer;
+    color: var(--text2);
+    white-space: nowrap;
+  }
+  .api-bar button:hover { background: var(--surface2); }
+
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0,1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 0.5px solid var(--border2);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+  .kpi { background: var(--surface); padding: 1.2rem 1.1rem; position: relative; }
+  .kpi::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 1.1rem; right: 1.1rem;
+    height: 2px; border-radius: 2px; opacity: 0;
+  }
+  .kpi.up::after { background: #0d8a52; opacity: 1; }
+  .kpi.down::after { background: #c94a30; opacity: 1; }
+  .kpi.neutral::after { background: #c8c6c0; opacity: 1; }
+  .kpi-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text2); margin-bottom: 8px; }
+  .kpi-val { font-size: 26px; font-weight: 300; letter-spacing: -0.03em; line-height: 1; margin-bottom: 6px; }
+  .kpi-unit { font-size: 13px; color: var(--text2); font-weight: 400; }
+  .kpi-delta { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.04em; }
+  .kpi-delta.up { color: #0d6e40; }
+  .kpi-delta.down { color: #c94a30; }
+  .kpi-delta.neu { color: var(--text2); }
+
+  .chart-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border2);
+    border-radius: 12px;
+    padding: 1.2rem;
+    margin-bottom: 12px;
+  }
+  .card-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  .card-title { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text2); }
+  .card-current { font-size: 13px; font-weight: 500; color: var(--text); }
+  .chart-wrap { position: relative; width: 100%; }
+  .h200 { height: 200px; }
+  .h180 { height: 180px; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+
+  .ciclo-note {
+    background: var(--ciclo);
+    border: 0.5px solid rgba(61,214,140,0.25);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--green);
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.04em;
+    margin-bottom: 12px;
+  }
+
+  .section-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text2);
+    margin-bottom: 10px;
+    margin-top: 1.5rem;
+    border-bottom: 0.5px solid var(--border);
+    padding-bottom: 6px;
+  }
+
+  .sess-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .sess-table th { text-align: left; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text2); padding: 6px 8px; border-bottom: 0.5px solid var(--border2); }
+  .sess-table td { padding: 6px 8px; color: var(--text); border-bottom: 0.5px solid var(--border); }
+  .sess-table tr:last-child td { border-bottom: none; }
+
+  .loading {
+    text-align: center;
+    padding: 3rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text2);
+    letter-spacing: 0.08em;
+  }
+
+  .error-msg {
+    padding: 12px 16px;
+    background: rgba(201,74,48,0.06);
+    border: 0.5px solid rgba(201,74,48,0.2);
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--red);
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 1rem;
+  }
+
+  .footer {
+    padding-top: 1rem;
+    border-top: 0.5px solid var(--border);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 0.06em;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1.5rem;
+  }
+
+  .unrecognized-badge {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: rgba(154,98,0,0.08);
+    color: var(--amber);
+    border: 0.5px solid rgba(154,98,0,0.2);
+    margin-left: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Entrenamiento — Hevy</h1>
+    <p>Dashboard Plan Karat</p>
+  </div>
+  <div class="header-right">
+    <span class="pill pill-green" id="pill-sem">Plan Karat activo</span>
+    <span class="pill pill-amber">Ciclo inicio: 23 mar 2026</span>
+    <span class="pill pill-dim" id="pill-updated">—</span>
+  </div>
+</div>
+
+<div class="api-bar">
+  <label for="apiKeyInput">API KEY</label>
+  <input type="password" id="apiKeyInput" placeholder="Pega tu API key de Hevy" autocomplete="off" />
+  <button onclick="loadData()">Actualizar ↓</button>
+</div>
+
+<div id="content">
+  <div class="loading">Cargando datos desde Hevy...</div>
+</div>
+
+<script>
+const CYCLE_START = new Date('2026-03-23T00:00:00');
+const API_BASE = 'https://api.hevyapp.com';
+const DEFAULT_KEY = 'aeb5c165-110c-4e79-ad38-30b3225d4db9';
+
+// Muscle group mapping — keyword matching (lowercase, partial)
+const MUSCLE_MAP = [
+  { group: 'Pecho',           kw: ['banca', 'press inclinado', 'press plano', 'apertura', 'fondos pech', 'pec deck', 'chest press', 'cable cross', 'fly'] },
+  { group: 'Espalda',         kw: ['jalón', 'jalon', 'remo', 'dominada', 'pulldown', 'pull-down', 'pull down', 'low row', 'cable row', 'lat ', 't-bar', 'tbar', 'seated row', 'chest supported'] },
+  { group: 'Hombro',          kw: ['hombro', 'elevación lateral', 'elevacion lateral', 'elevación frontal', 'elevacion frontal', 'press de hombros', 'press hombros', 'shoulder press', 'lateral raise', 'face pull', 'upright row'] },
+  { group: 'Cuádriceps',      kw: ['sentadilla', 'prensa', 'hack squat', 'extensión de pierna', 'extension de pierna', 'leg press', 'leg extension', 'split squat', 'búlgara', 'bulgara', 'lunges', 'zancada'] },
+  { group: 'Bíceps',          kw: ['curl bícep', 'curl bicep', 'curl de bícep', 'curl de bicep', 'predicador', 'preacher', 'hammer curl', 'curl con barra', 'curl alterno', 'curl concentrado', 'curl en cable'] },
+  { group: 'Tríceps',         kw: ['trícep', 'tricep', 'press cerrado', 'extensión de trícep', 'extension de tricep', 'pushdown', 'skull crusher', 'french press', 'patada de trícep', 'dip'] },
+  { group: 'Isquios/Glúteos', kw: ['peso muerto', 'deadlift', 'curl femoral', 'leg curl', 'hip thrust', 'glúteo', 'gluteo', 'isquio', 'rdl', 'romanian', 'nordic', 'good morning', 'femoral'] },
+];
+
+function getGroup(title) {
+  const t = title.toLowerCase();
+  for (const { group, kw } of MUSCLE_MAP) {
+    if (kw.some(k => t.includes(k))) return group;
+  }
+  return null; // unrecognized
+}
+
+function getApiKey() {
+  const input = document.getElementById('apiKeyInput').value.trim();
+  if (input) { try { localStorage.setItem('hevy_key', input); } catch(e) {} return input; }
+  try { const s = localStorage.getItem('hevy_key'); if (s) { document.getElementById('apiKeyInput').value = s; return s; } } catch(e) {}
+  document.getElementById('apiKeyInput').value = DEFAULT_KEY;
+  return DEFAULT_KEY;
+}
+
+async function fetchAllWorkouts(apiKey) {
+  let page = 1, all = [], pageCount = 1;
+  do {
+    const res = await fetch(`${API_BASE}/v1/workouts?page=${page}&pageSize=10`, {
+      headers: { 'api-key': apiKey }
+    });
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(`HTTP ${res.status}: ${txt}`);
+    }
+    const data = await res.json();
+    all = all.concat(data.workouts || []);
+    pageCount = data.page_count || 1;
+    page++;
+  } while (page <= pageCount);
+  return all;
+}
+
+function getWeekIndex(date) {
+  const diff = date - CYCLE_START;
+  return diff < 0 ? -1 : Math.floor(diff / (7 * 24 * 60 * 60 * 1000));
+}
+
+function getMonthKey(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+
+function monthLabel(k) {
+  const [y, m] = k.split('-');
+  const names = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  return `${names[parseInt(m)-1]} ${y.slice(2)}`;
+}
+
+function parseWorkouts(rawWorkouts) {
+  rawWorkouts.sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
+
+  const unrecognizedExercises = new Set();
+
+  const sessions = rawWorkouts.map(w => {
+    const start = new Date(w.start_time);
+    const end = new Date(w.end_time);
+    const durationMin = Math.round((end - start) / 60000);
+    let volume = 0, totalSets = 0;
+    const groupSets = {};
+
+    (w.exercises || []).forEach(ex => {
+      const group = getGroup(ex.title);
+      if (!group) unrecognizedExercises.add(ex.title);
+      const effectiveSets = (ex.sets || []).filter(s => s.type !== 'warmup');
+      effectiveSets.forEach(s => {
+        volume += (s.weight_kg || 0) * (s.reps || 0);
+        totalSets++;
+        const g = group || 'Otro';
+        groupSets[g] = (groupSets[g] || 0) + 1;
+      });
+    });
+
+    return {
+      id: w.id,
+      title: w.title || 'Sin título',
+      date: start,
+      dateStr: start.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }).replace('.',''),
+      durationMin,
+      volume: Math.round(volume),
+      totalSets,
+      groupSets,
+      exerciseCount: (w.exercises || []).length,
+      inCycle: start >= CYCLE_START,
+    };
+  });
+
+  return { sessions, unrecognizedExercises: [...unrecognizedExercises] };
+}
+
+function render(sessions, unrecognized) {
+  const content = document.getElementById('content');
+
+  if (sessions.length === 0) {
+    content.innerHTML = '<div class="loading">Sin sesiones. Registra un entrenamiento en Hevy para ver datos.</div>';
+    return;
+  }
+
+  const now = new Date();
+  const curMonthKey = getMonthKey(now);
+
+  // Monthly aggregation
+  const monthMap = {};
+  sessions.forEach(s => {
+    const k = getMonthKey(s.date);
+    if (!monthMap[k]) monthMap[k] = { ses: 0, vol: 0 };
+    monthMap[k].ses++;
+    monthMap[k].vol += s.volume;
+  });
+  const allMonths = Object.keys(monthMap).sort();
+
+  // Cycle sessions & weekly aggregation
+  const cycleSessions = sessions.filter(s => s.inCycle);
+  const currentCycleWeek = getWeekIndex(now);
+  const maxDisplayWeek = Math.max(
+    currentCycleWeek >= 0 ? currentCycleWeek : 0,
+    cycleSessions.length > 0 ? Math.max(...cycleSessions.map(s => getWeekIndex(s.date))) : 0
+  );
+
+  const weekMap = {};
+  for (let i = 0; i <= maxDisplayWeek; i++) weekMap[i] = { ses: 0, vol: 0 };
+  cycleSessions.forEach(s => {
+    const w = getWeekIndex(s.date);
+    if (w >= 0) { weekMap[w].ses++; weekMap[w].vol += s.volume; }
+  });
+
+  // Current week (Mon–Sun)
+  const monday = new Date(now);
+  monday.setHours(0,0,0,0);
+  monday.setDate(now.getDate() - ((now.getDay()+6)%7));
+  const sunday = new Date(monday); sunday.setDate(monday.getDate()+6); sunday.setHours(23,59,59,999);
+
+  const weekSessions = sessions.filter(s => s.date >= monday && s.date <= sunday);
+  const d30 = new Date(now); d30.setDate(now.getDate()-30);
+  const last30Sessions = sessions.filter(s => s.date >= d30);
+
+  // Muscle groups
+  const grupos = ['Pecho','Espalda','Hombro','Cuádriceps','Bíceps','Tríceps','Isquios/Glúteos'];
+  const setsWeek = grupos.map(g => weekSessions.reduce((a, s) => a + (s.groupSets[g]||0), 0));
+  const sets30d = grupos.map(g => last30Sessions.reduce((a, s) => a + (s.groupSets[g]||0), 0));
+
+  // KPIs
+  const curMonthSes = monthMap[curMonthKey]?.ses || 0;
+  const cycleSes = cycleSessions.length;
+  const cycleVol = cycleSessions.reduce((a, s) => a + s.volume, 0);
+  const totalSes = sessions.length;
+  const avgVolSes = totalSes > 0 ? Math.round(sessions.reduce((a,s)=>a+s.volume,0)/totalSes) : 0;
+  const avgDur = totalSes > 0 ? Math.round(sessions.reduce((a,s)=>a+s.durationMin,0)/totalSes) : 0;
+
+  // Forecasts
+  const dayOfMonth = now.getDate();
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+  const daysLeftMonth = daysInMonth - dayOfMonth;
+  const fcMonthSesAdd = curMonthSes > 0 ? Math.max(0, Math.round((curMonthSes/dayOfMonth)*daysLeftMonth)) : 0;
+  const fcMonthVolAdd = (monthMap[curMonthKey]?.vol||0) > 0
+    ? Math.max(0, Math.round(((monthMap[curMonthKey]?.vol||0)/dayOfMonth)*daysLeftMonth)) : 0;
+
+  const dayOfWeek = ((now.getDay()+6)%7) + 1; // Mon=1
+  const daysLeftWeek = 7 - dayOfWeek;
+  const curWeekSes = weekMap[currentCycleWeek]?.ses || 0;
+  const fcWeekSesAdd = curWeekSes > 0 ? parseFloat(((curWeekSes/dayOfWeek)*daysLeftWeek).toFixed(1)) : 0;
+
+  // Update pills
+  document.getElementById('pill-sem').textContent = `Plan Karat — Sem ${maxDisplayWeek+1}`;
+  document.getElementById('pill-updated').textContent =
+    `Actualizado ${now.toLocaleDateString('es-ES',{day:'2-digit',month:'short'})} ${now.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}`;
+
+  // Unrecognized note
+  const unrecNote = unrecognized.length > 0
+    ? `<div class="ciclo-note" style="background:rgba(154,98,0,0.05);border-color:rgba(154,98,0,0.2);color:var(--amber);">
+        <span>⚠</span> Ejercicios sin mapeo de grupo muscular: ${unrecognized.map(e => `<span class="unrecognized-badge">${e}</span>`).join(' ')}. Se contabilizan en volumen pero no en gráficos de grupos.
+       </div>`
+    : '';
+
+  content.innerHTML = `
+  <div class="kpi-grid">
+    <div class="kpi ${curMonthSes >= 2 ? 'up' : 'neutral'}">
+      <p class="kpi-label">Sesiones mes actual</p>
+      <p class="kpi-val">${curMonthSes} <span class="kpi-unit">${now.toLocaleDateString('es-ES',{month:'short',year:'2-digit'})} (parcial)</span></p>
+      <p class="kpi-delta ${curMonthSes >= 2 ? 'up' : 'neu'}">Objetivo: 8–10/mes</p>
+    </div>
+    <div class="kpi up">
+      <p class="kpi-label">Sesiones ciclo total</p>
+      <p class="kpi-val">${cycleSes} <span class="kpi-unit">sesiones</span></p>
+      <p class="kpi-delta up">desde 23 mar 2026</p>
+    </div>
+    <div class="kpi neutral">
+      <p class="kpi-label">Volumen ciclo total</p>
+      <p class="kpi-val">${(cycleVol/1000).toFixed(1)} <span class="kpi-unit">t</span></p>
+      <p class="kpi-delta neu">${cycleVol.toLocaleString('es-ES')} kg acumulados</p>
+    </div>
+    <div class="kpi neutral">
+      <p class="kpi-label">Volumen / sesión</p>
+      <p class="kpi-val">${(avgVolSes/1000).toFixed(1)} <span class="kpi-unit">t media</span></p>
+      <p class="kpi-delta neu">${avgVolSes.toLocaleString('es-ES')} kg</p>
+    </div>
+    <div class="kpi up">
+      <p class="kpi-label">Duración media</p>
+      <p class="kpi-val">${avgDur} <span class="kpi-unit">min</span></p>
+      <p class="kpi-delta up">dato fiable (Hevy)</p>
+    </div>
+  </div>
+
+  <div class="ciclo-note">
+    <span>▸</span> Datos en tiempo real desde la API de Hevy. Ciclo Plan Karat iniciado 23 mar 2026. Duraciones calculadas desde start_time/end_time — dato fiable al contrario que Jefit. Sets de calentamiento excluidos del volumen.
+  </div>
+
+  ${unrecNote}
+
+  <div class="chart-card">
+    <div class="card-header">
+      <span class="card-title">Sesiones mensuales</span>
+      <span class="card-current">${allMonths.length > 1 ? monthLabel(allMonths[0])+' – '+monthLabel(allMonths[allMonths.length-1]) : allMonths.length === 1 ? monthLabel(allMonths[0]) : '—'}</span>
+    </div>
+    <div class="chart-wrap h200"><canvas id="c-sesiones"></canvas></div>
+    <p style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:8px;">▸ Barras verdes oscuras = ciclo activo (≥ mar 2026). <span style="color:rgba(13,138,82,0.7)">Barra verde clara = forecast al ritmo actual del mes en curso.</span> Objetivo 8–10 ses/mes.</p>
+  </div>
+
+  <div class="chart-card">
+    <div class="card-header">
+      <span class="card-title">Volumen total (kg)</span>
+      <span class="card-current">${allMonths.length > 0 ? monthLabel(allMonths[0])+' – '+monthLabel(allMonths[allMonths.length-1]) : '—'}</span>
+    </div>
+    <div class="chart-wrap h200"><canvas id="c-volumen"></canvas></div>
+    <p style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:8px;">▸ Volumen = Σ(peso × reps) por sesión. <span style="color:rgba(13,138,82,0.7)">Forecast mes actual al ritmo diario corriente.</span></p>
+  </div>
+
+  <div class="two-col">
+    <div class="chart-card" style="margin-bottom:0;">
+      <div class="card-header">
+        <span class="card-title">Sesiones por semana — Plan Karat</span>
+        <span class="card-current">sem 1–${maxDisplayWeek+1}</span>
+      </div>
+      <div class="chart-wrap h180"><canvas id="c-karat-sem"></canvas></div>
+      <p style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:8px;">▸ Semanas desde 23 mar 2026. Gris = sin sesiones registradas. <span style="color:rgba(13,138,82,0.7)">Forecast sem actual al ritmo del día en curso.</span></p>
+    </div>
+    <div class="chart-card" style="margin-bottom:0;">
+      <div class="card-header">
+        <span class="card-title">Volumen por sesión — ciclo</span>
+        <span class="card-current">todas las sesiones</span>
+      </div>
+      <div class="chart-wrap h180"><canvas id="c-karat-vol"></canvas></div>
+      <p style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:8px;">▸ Cada barra = una sesión. Tooltip incluye duración real en minutos.</p>
+    </div>
+  </div>
+
+  <p class="section-title">Análisis de grupos musculares</p>
+
+  <div class="two-col">
+    <div class="chart-card" style="margin-bottom:0;">
+      <div class="card-header">
+        <span class="card-title">Semana actual</span>
+        <span class="card-current">sets por grupo</span>
+      </div>
+      <div class="chart-wrap h180"><canvas id="c-grp-week"></canvas></div>
+      <p style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:8px;" id="insight-week">—</p>
+    </div>
+    <div class="chart-card" style="margin-bottom:0;">
+      <div class="card-header">
+        <span class="card-title">Últimos 30 días</span>
+        <span class="card-current">sets por grupo</span>
+      </div>
+      <div class="chart-wrap h180"><canvas id="c-grp-30d"></canvas></div>
+      <p style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:8px;" id="insight-30d">—</p>
+    </div>
+  </div>
+
+  <p class="section-title">Registro de sesiones</p>
+  <div class="chart-card" style="padding:0.8rem;">
+    <table class="sess-table">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Rutina</th>
+          <th>Duración</th>
+          <th>Ejercicios</th>
+          <th>Sets</th>
+          <th>Volumen</th>
+        </tr>
+      </thead>
+      <tbody id="sessBody"></tbody>
+    </table>
+  </div>
+
+  <div class="footer">
+    <span>Hevy API · Plan Karat Dashboard</span>
+    <span id="footer-ts"></span>
+  </div>
+  `;
+
+  document.getElementById('footer-ts').textContent =
+    `Generado ${now.toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})}`;
+
+  // Session table
+  const tbody = document.getElementById('sessBody');
+  [...sessions].reverse().forEach(s => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="font-family:'DM Mono',monospace;">${s.date.toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'2-digit'})}</td>
+      <td>${s.title}</td>
+      <td style="font-family:'DM Mono',monospace;">${s.durationMin} min</td>
+      <td style="font-family:'DM Mono',monospace;">${s.exerciseCount}</td>
+      <td style="font-family:'DM Mono',monospace;">${s.totalSets}</td>
+      <td style="font-family:'DM Mono',monospace;">${(s.volume/1000).toFixed(1)} t</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // ---- CHARTS ----
+  const fcTooltip = {
+    backgroundColor: '#fff', titleColor: '#6b6d70', bodyColor: '#1a1a18',
+    borderColor: 'rgba(0,0,0,0.12)', borderWidth: 1
+  };
+
+  function fcDataset(len, idx, val, label) {
+    return {
+      label,
+      data: Array.from({length: len}, (_, i) => (i === idx && val > 0) ? val : 0),
+      backgroundColor: 'rgba(13,138,82,0.18)',
+      borderColor: Array.from({length: len}, (_, i) => i === idx ? 'rgba(13,138,82,0.6)' : 'transparent'),
+      borderWidth: 1.5,
+      borderDash: [4,3],
+      borderRadius: 4,
+      borderSkipped: false,
+      stack: 'main',
+    };
+  }
+
+  const meses = allMonths.map(monthLabel);
+  const sesData = allMonths.map(k => monthMap[k].ses);
+  const volData = allMonths.map(k => monthMap[k].vol);
+  const curIdx = allMonths.indexOf(curMonthKey);
+  const barColors = allMonths.map(k => {
+    const [y, m] = k.split('-');
+    return new Date(parseInt(y), parseInt(m)-1, 1) >= new Date(2026, 2, 1)
+      ? 'rgba(13,138,82,0.72)'
+      : 'rgba(13,138,82,0.38)';
+  });
+
+  // Monthly sessions
+  new Chart(document.getElementById('c-sesiones'), {
+    type: 'bar',
+    data: {
+      labels: meses,
+      datasets: [
+        { label: 'Sesiones', data: sesData, backgroundColor: barColors, borderRadius: 4, borderSkipped: false, stack: 'main' },
+        fcDataset(meses.length, curIdx, fcMonthSesAdd, 'Forecast'),
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { ...fcTooltip, callbacks: { label: ctx => {
+          if (ctx.dataset.label === 'Forecast' && ctx.raw > 0) return `Forecast: +${ctx.raw} → ~${sesData[ctx.dataIndex]+ctx.raw} ses`;
+          if (ctx.dataset.label === 'Sesiones') return `Sesiones: ${ctx.raw}`;
+          return null;
+        }}}
+      },
+      scales: {
+        x: { stacked: true, ticks: { font: { family: 'DM Mono', size: 9 }, color: '#a8aab0' }, grid: { display: false }, border: { display: false } },
+        y: { stacked: true, min: 0, max: Math.max(12, ...sesData) + 2,
+          ticks: { font: { size: 9 }, color: '#a8aab0', stepSize: 2 },
+          grid: { color: 'rgba(0,0,0,0.05)' }, border: { display: false } }
+      }
+    }
+  });
+
+  // Monthly volume
+  new Chart(document.getElementById('c-volumen'), {
+    type: 'bar',
+    data: {
+      labels: meses,
+      datasets: [
+        { label: 'Volumen', data: volData, backgroundColor: barColors, borderRadius: 4, borderSkipped: false, stack: 'main' },
+        fcDataset(meses.length, curIdx, fcMonthVolAdd, 'Forecast'),
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { ...fcTooltip, callbacks: { label: ctx => {
+          if (ctx.dataset.label === 'Forecast' && ctx.raw > 0) return `Forecast: +${(ctx.raw/1000).toFixed(1)}t → ~${((volData[ctx.dataIndex]+ctx.raw)/1000).toFixed(1)}t`;
+          if (ctx.dataset.label === 'Volumen') return `Vol: ${(ctx.raw/1000).toFixed(1)}t`;
+          return null;
+        }}}
+      },
+      scales: {
+        x: { stacked: true, ticks: { font: { family: 'DM Mono', size: 9 }, color: '#a8aab0' }, grid: { display: false }, border: { display: false } },
+        y: { stacked: true, min: 0,
+          ticks: { font: { size: 9 }, color: '#a8aab0', callback: v => v >= 1000 ? (v/1000).toFixed(0)+'t' : v },
+          grid: { color: 'rgba(0,0,0,0.05)' }, border: { display: false } }
+      }
+    }
+  });
+
+  // Weekly cycle
+  const numWeeks = maxDisplayWeek + 1;
+  const semanas = Array.from({length: numWeeks}, (_, i) => `Sem ${i+1}`);
+  const weekSesArr = Array.from({length: numWeeks}, (_, i) => weekMap[i]?.ses || 0);
+  const weekVolArr = Array.from({length: numWeeks}, (_, i) => weekMap[i]?.vol || 0);
+
+  new Chart(document.getElementById('c-karat-sem'), {
+    type: 'bar',
+    data: {
+      labels: semanas,
+      datasets: [
+        {
+          label: 'Sesiones',
+          data: weekSesArr,
+          backgroundColor: weekSesArr.map(s => s === 0 ? 'rgba(200,198,192,0.4)' : 'rgba(13,138,82,0.7)'),
+          borderRadius: 4, borderSkipped: false, stack: 'main'
+        },
+        {
+          label: 'Forecast',
+          data: semanas.map((_, i) => i === currentCycleWeek ? fcWeekSesAdd : 0),
+          backgroundColor: 'rgba(13,138,82,0.18)',
+          borderColor: semanas.map((_, i) => i === currentCycleWeek ? 'rgba(13,138,82,0.6)' : 'transparent'),
+          borderWidth: 1.5, borderDash: [4,3], borderRadius: 4, borderSkipped: false, stack: 'main'
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { ...fcTooltip, callbacks: { label: ctx => {
+          if (ctx.dataset.label === 'Forecast' && ctx.raw > 0) return `Forecast: +${ctx.raw.toFixed(1)} → ~${(weekSesArr[ctx.dataIndex]+ctx.raw).toFixed(1)} ses`;
+          if (ctx.dataset.label === 'Sesiones') return `Ses: ${ctx.raw} · Vol: ${(weekVolArr[ctx.dataIndex]/1000).toFixed(1)}t`;
+          return null;
+        }}}
+      },
+      scales: {
+        x: { stacked: true, ticks: { font: { family: 'DM Mono', size: 9 }, color: '#a8aab0' }, grid: { display: false }, border: { display: false } },
+        y: { stacked: true, min: 0, max: Math.max(5, ...weekSesArr) + 1,
+          ticks: { font: { size: 9 }, color: '#a8aab0', stepSize: 1 },
+          grid: { color: 'rgba(0,0,0,0.05)' }, border: { display: false } }
+      }
+    }
+  });
+
+  // Volume per session
+  new Chart(document.getElementById('c-karat-vol'), {
+    type: 'bar',
+    data: {
+      labels: cycleSessions.map(s => s.dateStr),
+      datasets: [{
+        data: cycleSessions.map(s => s.volume),
+        backgroundColor: cycleSessions.map((_, i) => i >= cycleSessions.length-3 ? 'rgba(13,138,82,0.75)' : 'rgba(13,138,82,0.45)'),
+        borderRadius: 4, borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { ...fcTooltip, callbacks: {
+          label: ctx => `${(ctx.raw/1000).toFixed(1)} t · ${cycleSessions[ctx.dataIndex]?.durationMin || 0} min`
+        }}
+      },
+      scales: {
+        x: { ticks: { font: { family: 'DM Mono', size: 9 }, color: '#a8aab0', maxRotation: 45 }, grid: { display: false }, border: { display: false } },
+        y: { min: 0, ticks: { font: { size: 9 }, color: '#a8aab0', callback: v => (v/1000).toFixed(0)+'t' }, grid: { color: 'rgba(0,0,0,0.05)' }, border: { display: false } }
+      }
+    }
+  });
+
+  // Muscle group charts
+  const grpColors = [
+    'rgba(37,99,190,0.7)',
+    'rgba(13,138,82,0.7)',
+    'rgba(109,79,194,0.7)',
+    'rgba(201,74,48,0.7)',
+    'rgba(37,99,190,0.45)',
+    'rgba(154,98,0,0.6)',
+    'rgba(200,50,50,0.4)',
+  ];
+
+  function makeHBar(id, data) {
+    new Chart(document.getElementById(id), {
+      type: 'bar',
+      data: {
+        labels: grupos,
+        datasets: [{
+          data,
+          backgroundColor: data.map((v, i) => v === 0 ? 'rgba(200,198,192,0.3)' : grpColors[i]),
+          borderRadius: 3, borderSkipped: false
+        }]
+      },
+      options: {
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { ...fcTooltip, callbacks: { label: ctx => ctx.raw + ' sets' + (ctx.raw === 0 ? ' ⚠ sin trabajar' : '') } }
+        },
+        scales: {
+          x: { min: 0, max: Math.max(5, ...data) + 2, ticks: { font: { size: 9 }, color: '#a8aab0' }, grid: { color: 'rgba(0,0,0,0.05)' }, border: { display: false } },
+          y: { ticks: { font: { family: 'DM Mono', size: 9 }, color: '#a8aab0' }, grid: { display: false }, border: { display: false } }
+        }
+      }
+    });
+  }
+
+  makeHBar('c-grp-week', setsWeek);
+  makeHBar('c-grp-30d', sets30d);
+
+  const missingWeek = grupos.filter((g, i) => setsWeek[i] === 0);
+  const worked30 = grupos.filter((g, i) => sets30d[i] > 0);
+  const missing30 = grupos.filter((g, i) => sets30d[i] === 0);
+
+  document.getElementById('insight-week').innerHTML = missingWeek.length > 0
+    ? `▸ Cubiertos: ${grupos.filter((g,i)=>setsWeek[i]>0).join(', ')||'ninguno'}.<br><span style="color:#9a6200">→ Sin cubrir esta semana: ${missingWeek.join(', ')}.</span>`
+    : '▸ Todos los grupos cubiertos esta semana.';
+
+  document.getElementById('insight-30d').innerHTML = missing30.length > 0
+    ? `▸ Cubiertos: ${worked30.join(', ')}.<br><span style="color:#c94a30">→ Sin sets en 30 días: ${missing30.join(', ')}. Incorporar en próximas sesiones.</span>`
+    : '▸ Todos los grupos musculares cubiertos en los últimos 30 días.';
+}
+
+async function loadData() {
+  const content = document.getElementById('content');
+  content.innerHTML = '<div class="loading">Cargando datos desde Hevy API...</div>';
+
+  try {
+    const apiKey = getApiKey();
+    const rawWorkouts = await fetchAllWorkouts(apiKey);
+    const { sessions, unrecognizedExercises } = parseWorkouts(rawWorkouts);
+    render(sessions, unrecognizedExercises);
+  } catch(e) {
+    content.innerHTML = `<div class="error-msg">Error al conectar con la API de Hevy: ${e.message}<br>Verifica tu API key.</div>`;
+  }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  try { const s = localStorage.getItem('hevy_key'); if (s) document.getElementById('apiKeyInput').value = s; } catch(e) {}
+  loadData();
+});
+</script>
+</body>
+</html>
