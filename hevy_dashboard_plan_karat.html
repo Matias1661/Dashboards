@@ -185,6 +185,65 @@
   .src-hevy  { background: rgba(13,138,82,0.08); color: #0d6e40; border: 0.5px solid rgba(13,138,82,0.2); }
   .src-warn  { background: rgba(154,98,0,0.08); color: var(--amber); border: 0.5px solid rgba(154,98,0,0.2); }
 
+
+  .analysis-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border2);
+    border-left: 3px solid rgba(13,138,82,0.6);
+    border-radius: 12px;
+    padding: 1.2rem 1.4rem;
+    margin-bottom: 1.5rem;
+  }
+  .analysis-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .analysis-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text2);
+  }
+  .analysis-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 0.04em;
+  }
+  .analysis-body { font-size: 13px; line-height: 1.7; color: var(--text); }
+  .analysis-section { margin-bottom: 1rem; }
+  .analysis-section:last-child { margin-bottom: 0; }
+  .analysis-section-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text2);
+    margin-bottom: 6px;
+  }
+  .analysis-item {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 4px;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  .analysis-item::before { content: '▸'; color: var(--text3); flex-shrink: 0; }
+  .analysis-item.ok::before { content: '▸'; color: #0d8a52; }
+  .analysis-item.warn::before { content: '▸'; color: #9a6200; }
+  .analysis-item.bad::before { content: '▸'; color: #c94a30; }
+  .analysis-empty {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 0.04em;
+    font-style: italic;
+  }
   .loading { text-align: center; padding: 2rem; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text2); letter-spacing: 0.08em; }
   .error-msg { padding: 12px 16px; background: rgba(201,74,48,0.06); border: 0.5px solid rgba(201,74,48,0.2); border-radius: 8px; font-size: 12px; color: var(--red); font-family: 'DM Mono', monospace; }
 </style>
@@ -207,6 +266,18 @@
   <label for="apiKeyInput">HEVY API KEY</label>
   <input type="password" id="apiKeyInput" placeholder="Pega tu API key de Hevy" autocomplete="off" />
   <button onclick="init()">Actualizar ↓</button>
+</div>
+
+
+<!-- ANALYSIS SECTION — generado por trigger "analizar entrenamiento" -->
+<div class="analysis-card" id="analysisCard">
+  <div class="analysis-header">
+    <span class="analysis-title">Análisis y recomendaciones</span>
+    <span class="analysis-date" id="analysisDate">Sin análisis generado</span>
+  </div>
+  <div class="analysis-body" id="analysisBody">
+    <p class="analysis-empty">Pide "analizar entrenamiento" en el chat para generar el análisis combinando datos de entrenamiento, composición corporal y contexto del ciclo.</p>
+  </div>
 </div>
 
 <div id="loadingArea" class="loading">Cargando datos desde Hevy...</div>
