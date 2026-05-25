@@ -1,0 +1,59 @@
+name: Fetch Hevy Data
+
+on:
+  schedule:
+    - cron: '0 5 * * *'   # Diario a las 05:00 UTC (07:00 Madrid)
+  workflow_dispatch:        # Permite ejecución manual desde GitHub
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Fetch all Hevy workouts
+        env:
+          HEVY_API_KEY: ${{ secrets.HEVY_API_KEY }}
+        run: |
+          python3 - <<'PYEOF'
+          import requests, json
+          from datetime import datetime, timezone
+          import os
+
+          api_key = os.environ['HEVY_API_KEY']
+          all_workouts = []
+          page = 1
+
+          while True:
+              resp = requests.get(
+                  f'https://api.hevyapp.com/v1/workouts?page={page}&pageSize=10',
+                  headers={'api-key': api_key},
+                  timeout=15
+              )
+              resp.raise_for_status()
+              data = resp.json()
+              all_workouts.extend(data.get('workouts', []))
+              if page >= data.get('page_count', 1):
+                  break
+              page += 1
+
+          output = {
+              'fetched_at': datetime.now(timezone.utc).isoformat(),
+              'total_workouts': len(all_workouts),
+              'workouts': all_workouts
+          }
+
+          with open('hevy_data.json', 'w') as f:
+              json.dump(output, f)
+
+          print(f"Fetched {len(all_workouts)} workouts")
+          PYEOF
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add hevy_data.json
+          git diff --staged --quiet || git commit -m "Update hevy_data.json [$(date -u '+%Y-%m-%d %H:%M UTC')]"
+          git push
