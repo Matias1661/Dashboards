@@ -246,6 +246,26 @@
   }
   .loading { text-align: center; padding: 2rem; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text2); letter-spacing: 0.08em; }
   .error-msg { padding: 12px 16px; background: rgba(201,74,48,0.06); border: 0.5px solid rgba(201,74,48,0.2); border-radius: 8px; font-size: 12px; color: var(--red); font-family: 'DM Mono', monospace; }
+
+  @media (max-width: 640px) {
+    body { padding: 1rem; font-size: 13px; }
+
+    .header { flex-direction: column; gap: 10px; }
+    .header-left p { font-size: 18px; }
+    .header-right { align-items: flex-start; flex-direction: row; flex-wrap: wrap; }
+
+    .api-bar { flex-wrap: wrap; }
+    .api-bar input { min-width: 0; width: 100%; }
+
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .kpi-val { font-size: 20px; }
+
+    .two-col { grid-template-columns: 1fr; }
+    .three-col { grid-template-columns: 1fr; }
+    .insights { grid-template-columns: 1fr; }
+
+    .footer { flex-direction: column; gap: 4px; }
+  }
 </style>
 </head>
 <body>
