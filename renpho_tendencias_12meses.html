@@ -238,24 +238,6 @@
     border-bottom: 0.5px solid var(--border);
     padding-bottom: 6px;
   }
-
-  @media (max-width: 640px) {
-    body { padding: 1rem; font-size: 13px; }
-
-    .header { flex-direction: column; gap: 10px; }
-    .header-left p { font-size: 18px; }
-    .header-right { align-items: flex-start; flex-direction: row; flex-wrap: wrap; }
-
-    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-    .kpi-val { font-size: 20px; }
-
-    .charts-main { grid-template-columns: 1fr; }
-    .charts-row { grid-template-columns: 1fr; }
-    .bp-grid { grid-template-columns: 1fr; }
-    .insights { grid-template-columns: 1fr; }
-
-    .footer { flex-direction: column; gap: 4px; }
-  }
 </style>
 </head>
 <body>
@@ -780,12 +762,18 @@ new Chart(document.getElementById('c-scatter'), {
 // 19 may (sin café): avg(103,104)/avg(70,72) = 104/71
 // 20 may (con café): 140/85
 // 21 may (sin café): 110/80
+// 22 may: 121/82 (sin nota → sin café)
+// 25 may: 115/82 (sin nota → sin café)
+// 26 may: 142/84 (sin nota → clasificado sin café; lectura elevada — confirmar si hubo café)
 const bpData = [
   { d: '14 may', sist: 124, diast: 90, tipo: 'medico' },
   { d: '18 may', sist: 129, diast: 90, tipo: 'cafe' },
   { d: '19 may', sist: 104, diast: 71, tipo: 'nocafe' },
   { d: '20 may', sist: 140, diast: 85, tipo: 'cafe' },
   { d: '21 may', sist: 110, diast: 80, tipo: 'nocafe' },
+  { d: '22 may', sist: 121, diast: 82, tipo: 'nocafe' },
+  { d: '25 may', sist: 115, diast: 82, tipo: 'nocafe' },
+  { d: '26 may', sist: 142, diast: 84, tipo: 'nocafe' },
 ];
 
 const bpPtColor = {
