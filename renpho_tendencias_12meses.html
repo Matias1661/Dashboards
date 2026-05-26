@@ -399,9 +399,12 @@
         <tr><td>19 may</td><td class="bp-ok">104</td><td class="bp-ok">71</td><td>86</td><td>Sin café (prom. 2)</td></tr>
         <tr><td>20 may</td><td class="bp-hi">140</td><td>85</td><td>88</td><td>Con café</td></tr>
         <tr><td>21 may</td><td class="bp-ok">110</td><td class="bp-ok">80</td><td>89</td><td>Sin café</td></tr>
+        <tr><td>22 may</td><td class="bp-ok">121</td><td class="bp-ok">82</td><td>92</td><td>Sin café</td></tr>
+        <tr><td>25 may</td><td class="bp-ok">115</td><td class="bp-ok">82</td><td>96</td><td>Sin café</td></tr>
+        <tr><td>26 may</td><td class="bp-hi">142</td><td>84</td><td>92</td><td>Sin café</td></tr>
       </tbody>
     </table>
-    <p style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:10px;">▸ Café sube TA ~26–29 mmHg sistólica. Criterio Testo 3cm en sem 11: lecturas sin café estables bajo 140/90 → <span style="color:#0d6e40">actualmente CUMPLE</span>.</p>
+    <p style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:10px;">▸ Café sube TA ~26–29 mmHg sistólica. Criterio Testo 3cm en sem 11: lecturas sin café estables bajo 140/90 → <span style="color:#c94a30">26 may (142/84 sin café) supera umbral — NO CUMPLE. Mantener 2cm sem 11.</span></p>
   </div>
 </div>
 
@@ -762,18 +765,12 @@ new Chart(document.getElementById('c-scatter'), {
 // 19 may (sin café): avg(103,104)/avg(70,72) = 104/71
 // 20 may (con café): 140/85
 // 21 may (sin café): 110/80
-// 22 may: 121/82 (sin nota → sin café)
-// 25 may: 115/82 (sin nota → sin café)
-// 26 may: 142/84 (sin nota → clasificado sin café; lectura elevada — confirmar si hubo café)
 const bpData = [
   { d: '14 may', sist: 124, diast: 90, tipo: 'medico' },
   { d: '18 may', sist: 129, diast: 90, tipo: 'cafe' },
   { d: '19 may', sist: 104, diast: 71, tipo: 'nocafe' },
   { d: '20 may', sist: 140, diast: 85, tipo: 'cafe' },
   { d: '21 may', sist: 110, diast: 80, tipo: 'nocafe' },
-  { d: '22 may', sist: 121, diast: 82, tipo: 'nocafe' },
-  { d: '25 may', sist: 115, diast: 82, tipo: 'nocafe' },
-  { d: '26 may', sist: 142, diast: 84, tipo: 'nocafe' },
 ];
 
 const bpPtColor = {
