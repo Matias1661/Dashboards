@@ -637,7 +637,12 @@ const annotPlugin = {
       ctx.beginPath(); ctx.moveTo(tx, chartArea.top); ctx.lineTo(tx, chartArea.bottom); ctx.stroke();
       ctx.fillStyle = 'rgba(37,99,190,0.7)';
       ctx.font = '8px DM Mono, monospace';
-      ctx.fillText('Tamo', tx + 3, chartArea.top + 10);
+      ctx.textAlign = 'right';
+      ctx.fillStyle = 'rgba(37,99,190,0.7)';
+      ctx.font = '8px DM Mono, monospace';
+      const labelW = ctx.measureText('Tamo').width;
+      ctx.fillText('Tamo', tx - labelW - 4, chartArea.top + 10);
+      ctx.textAlign = 'left';
     }
     ctx.restore();
   }
