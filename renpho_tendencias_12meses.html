@@ -286,30 +286,30 @@
 </div>
 
 <div class="kpi-grid">
-  <div class="kpi down">
+  <div class="kpi down" id="kpi-peso">
     <p class="kpi-label">Peso</p>
-    <p class="kpi-val">89.85 <span class="kpi-unit">kg</span></p>
-    <p class="kpi-delta down">+5.85 vs mín 12m (84.00)</p>
+    <p class="kpi-val">— <span class="kpi-unit">kg</span></p>
+    <p class="kpi-delta down">cargando…</p>
   </div>
-  <div class="kpi up">
+  <div class="kpi up" id="kpi-musc">
     <p class="kpi-label">Masa muscular</p>
-    <p class="kpi-val">60.65 <span class="kpi-unit">kg</span></p>
-    <p class="kpi-delta up">+2.25 vs mín 12m (58.40)</p>
+    <p class="kpi-val">— <span class="kpi-unit">kg</span></p>
+    <p class="kpi-delta up">cargando…</p>
   </div>
-  <div class="kpi down">
+  <div class="kpi down" id="kpi-grasa">
     <p class="kpi-label">Grasa corporal</p>
-    <p class="kpi-val">29.0 <span class="kpi-unit">%</span></p>
-    <p class="kpi-delta down">+2.1 pp vs mín 12m (26.9%)</p>
+    <p class="kpi-val">— <span class="kpi-unit">%</span></p>
+    <p class="kpi-delta down">cargando…</p>
   </div>
-  <div class="kpi neutral">
+  <div class="kpi neutral" id="kpi-visc">
     <p class="kpi-label">Grasa visceral</p>
-    <p class="kpi-val">11 <span class="kpi-unit">índice</span></p>
-    <p class="kpi-delta down">+2 vs mín 12m (9)</p>
+    <p class="kpi-val">— <span class="kpi-unit">índice</span></p>
+    <p class="kpi-delta neu">cargando…</p>
   </div>
-  <div class="kpi down">
+  <div class="kpi down" id="kpi-agua">
     <p class="kpi-label">Agua corporal</p>
-    <p class="kpi-val">51.3 <span class="kpi-unit">%</span></p>
-    <p class="kpi-delta down">−1.5 pp vs máx 12m (52.8%)</p>
+    <p class="kpi-val">— <span class="kpi-unit">%</span></p>
+    <p class="kpi-delta down">cargando…</p>
   </div>
 </div>
 
@@ -410,10 +410,10 @@
   <div class="chart-card">
     <div class="card-header">
       <span class="card-title">TA sistólica / diastólica</span>
-      <span class="card-current">últ: 110/80</span>
+      <span class="card-current" id="bp-current">últ: 127/83</span>
     </div>
     <div class="chart-wrap h160"><canvas id="c-bp"></canvas></div>
-    <p style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:8px;">▸ Sin café: 104–110/71–80 (rango normal). Con café: 129–140/85–90 (elevado). Umbral decisión: >140/90 sin café → revisar protocolo.<br><span style="color:#0d6e40">→ Medir siempre en las mismas condiciones (sin café, tarde, 5 min sentado). Con 1 semana más de lecturas sin café estables, la subida a Testo 3cm en sem 11 está justificada.</span></p>
+    <p style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:8px;">▸ Sin café: 104–127/71–83 (rango normal-límite). Tendencia: ligera subida en última lectura (127 vs 104–110 anteriores). Con café: 129–140/85–90 (elevado). Umbral: >140/90 sin café → revisar protocolo.<br><span style="color:#9a6200">→ La subida a 127/83 del 26 may sin café es la más alta registrada sin café. Continuar midiendo diariamente. Confirmar que no hay tendencia alcista antes de subir Testo a 3cm en sem 11.</span></p>
   </div>
   <div class="chart-card">
     <div class="card-header">
@@ -430,9 +430,12 @@
         <tr><td>19 may</td><td class="bp-ok">104</td><td class="bp-ok">71</td><td>86</td><td>Sin café (prom. 2)</td></tr>
         <tr><td>20 may</td><td class="bp-hi">140</td><td>85</td><td>88</td><td>Con café</td></tr>
         <tr><td>21 may</td><td class="bp-ok">110</td><td class="bp-ok">80</td><td>89</td><td>Sin café</td></tr>
+        <tr><td>22 may</td><td>121</td><td>82</td><td>92</td><td>Sin café</td></tr>
+        <tr><td>25 may</td><td>115</td><td>82</td><td>96</td><td>Sin café</td></tr>
+        <tr><td>26 may</td><td class="bp-hi">127</td><td>83</td><td>88</td><td>Sin café</td></tr>
       </tbody>
     </table>
-    <p style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:10px;">▸ Café sube TA ~26–29 mmHg sistólica. Criterio Testo 3cm en sem 11: lecturas sin café estables bajo 140/90 → <span style="color:#0d6e40">actualmente CUMPLE</span>.</p>
+    <p style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:10px;">▸ Café eleva TA ~26–29 mmHg sistólica. Sin café: rango 104–127/71–83 (10 lecturas). 26 may: 127/83 — lectura más alta sin café del período. Criterio Testo 3cm en sem 11: sin café bajo 140/90 → <span style="color:#0d6e40">CUMPLE</span>. Vigilar si sube más.</p>
   </div>
 </div>
 
@@ -791,6 +794,67 @@ function setRange(range) {
   buildCharts(range);
 }
 
+// ── UPDATE KPIs (dinámico) ────────────────────────────────────────────────────
+function updateKPIs() {
+  const real = allData.filter(d => !d.interp);
+  if (!real.length) return;
+  const last = real[real.length - 1];
+
+  const min12 = (key) => Math.min(...real.map(d => d[key]));
+  const max12 = (key) => Math.max(...real.map(d => d[key]));
+  const s     = (v)   => v >= 0 ? '+' : '';
+
+  function setKPI(id, valHTML, deltaText, cardCls, deltaCls) {
+    const card = document.getElementById(id);
+    if (!card) return;
+    card.className = `kpi ${cardCls}`;
+    card.querySelector('.kpi-val').innerHTML = valHTML;
+    const d = card.querySelector('.kpi-delta');
+    d.textContent = deltaText;
+    d.className   = `kpi-delta ${deltaCls}`;
+  }
+
+  // Peso
+  const pesoMin = min12('peso');
+  const pesoDelta = +(last.peso - pesoMin).toFixed(2);
+  setKPI('kpi-peso',
+    `${last.peso} <span class="kpi-unit">kg</span>`,
+    `${s(pesoDelta)}${pesoDelta} vs mín 12m (${pesoMin})`,
+    pesoDelta > 0 ? 'down' : 'up', pesoDelta > 0 ? 'down' : 'up');
+
+  // Músculo
+  const muscMin = min12('musc');
+  const muscDelta = +(last.musc - muscMin).toFixed(2);
+  setKPI('kpi-musc',
+    `${last.musc} <span class="kpi-unit">kg</span>`,
+    `${s(muscDelta)}${muscDelta} vs mín 12m (${muscMin})`,
+    muscDelta > 0 ? 'up' : 'neutral', muscDelta > 0 ? 'up' : 'neu');
+
+  // Grasa
+  const grasaMin = min12('grasa');
+  const grasaDelta = +(last.grasa - grasaMin).toFixed(1);
+  setKPI('kpi-grasa',
+    `${last.grasa} <span class="kpi-unit">%</span>`,
+    `${s(grasaDelta)}${grasaDelta} pp vs mín 12m (${grasaMin}%)`,
+    grasaDelta > 0 ? 'down' : 'up', grasaDelta > 0 ? 'down' : 'up');
+
+  // Visceral
+  const viscMin = min12('visceral');
+  const viscDelta = last.visceral - viscMin;
+  setKPI('kpi-visc',
+    `${last.visceral} <span class="kpi-unit">índice</span>`,
+    `${s(viscDelta)}${viscDelta} vs mín 12m (${viscMin})`,
+    viscDelta > 0 ? 'neutral' : 'up', viscDelta > 0 ? 'down' : 'up');
+
+  // Agua
+  const aguaMax = max12('agua');
+  const aguaDelta = +(last.agua - aguaMax).toFixed(1);
+  setKPI('kpi-agua',
+    `${last.agua} <span class="kpi-unit">%</span>`,
+    `${s(aguaDelta)}${aguaDelta} pp vs máx 12m (${aguaMax}%)`,
+    aguaDelta < 0 ? 'down' : 'up', aguaDelta < 0 ? 'down' : 'up');
+}
+
 // ── FETCH & INIT ──────────────────────────────────────────────────────────────
 async function fetchAndBuild() {
   try {
@@ -818,6 +882,7 @@ async function fetchAndBuild() {
     }
 
     buildCharts(activeRange);
+    updateKPIs();
   } catch(err) {
     console.error('Error cargando renpho_data.json:', err);
     const pillEl = document.getElementById('pill-datos');
@@ -832,6 +897,9 @@ const bpData = [
   { d: '19 may', sist: 104, diast: 71, tipo: 'nocafe' },
   { d: '20 may', sist: 140, diast: 85, tipo: 'cafe' },
   { d: '21 may', sist: 110, diast: 80, tipo: 'nocafe' },
+  { d: '22 may', sist: 121, diast: 82, tipo: 'nocafe' },
+  { d: '25 may', sist: 115, diast: 82, tipo: 'nocafe' },
+  { d: '26 may', sist: 127, diast: 83, tipo: 'nocafe' },
 ];
 const bpPtColor   = { medico: 'rgba(109,79,194,0.85)', cafe: 'rgba(201,74,48,0.9)', nocafe: 'rgba(13,138,82,0.9)' };
 const bpPtBorder  = { medico: '#6d4fc2', cafe: '#c94a30', nocafe: '#0d8a52' };
