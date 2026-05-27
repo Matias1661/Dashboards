@@ -792,19 +792,20 @@ function buildCharts(range) {
     options: { ...baseOpts(...yRange('prot')) }
   });
 
-  // SCATTER
+  // SCATTER — siempre muestra los 12 meses completos (puntos reales, sin agregar)
+  const scatter12m = allData.filter(d => !d.interp);
   chartInstances['scatter'] = new Chart(document.getElementById('c-scatter'), {
     type: 'scatter',
     data: {
       datasets: [
         {
           label: 'Pre-ciclo',
-          data: vd.filter(d => !d.ciclo && !d.interp).map(d => ({ x: d.peso, y: d.grasa, label: d.label })),
+          data: scatter12m.filter(d => !d.ciclo).map(d => ({ x: d.peso, y: d.grasa, label: d.d })),
           backgroundColor: 'rgba(107,109,112,0.5)', pointRadius: 5, pointHoverRadius: 7
         },
         {
           label: 'Ciclo activo',
-          data: vd.filter(d => d.ciclo).map(d => ({ x: d.peso, y: d.grasa, label: d.label })),
+          data: scatter12m.filter(d => d.ciclo).map(d => ({ x: d.peso, y: d.grasa, label: d.d })),
           backgroundColor: 'rgba(13,138,82,0.75)', pointRadius: 6, pointHoverRadius: 8
         }
       ]
