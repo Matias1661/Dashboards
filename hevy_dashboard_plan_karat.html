@@ -426,6 +426,22 @@
   </div>
 </div>
 
+<!-- ACTIVACIÓN MUSCULAR HEVY (nativa — primaria + secundaria) -->
+<!-- Este card se muestra automáticamente cuando hevy_data.json tenga workouts con primary_muscle_group -->
+<div id="hevyMuscleCard" style="display:none; margin-top:12px;">
+  <div class="chart-card" style="margin-bottom:0;">
+    <div class="card-header">
+      <span class="card-title">Activación muscular — datos nativos Hevy</span>
+      <span class="card-current" id="hevyMuscleRange">—</span>
+    </div>
+    <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--text3);margin-bottom:8px;">
+      Primario = 1× sets · Secundario = 0.5× sets · Fuente: primary_muscle_group / secondary_muscle_groups
+    </div>
+    <div class="chart-wrap" style="height:220px;"><canvas id="c-hevy-muscle"></canvas></div>
+    <p style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:8px;" id="p-hevy-muscle">—</p>
+  </div>
+</div>
+
 <!-- INSIGHTS -->
 <div class="insights" id="insightsGrid"></div>
 
@@ -484,6 +500,29 @@ function getGroup(title) {
   return 'Otro';
 }
 
+// ─── MAPA MÚSCULOS NATIVOS HEVY (inglés → español) ───────────────────────────
+// Hevy devuelve primary_muscle_group y secondary_muscle_groups en inglés.
+// Este mapa convierte a los grupos del dashboard. No eliminar — lo usa renderHevyMuscle().
+const HEVY_MUSCLE_MAP = {
+  chest:       'Pecho',
+  back:        'Espalda',
+  lats:        'Espalda',
+  upper_back:  'Espalda',
+  middle_back: 'Espalda',
+  lower_back:  'Espalda',
+  shoulders:   'Hombro',
+  traps:       'Hombro',
+  biceps:      'Bíceps',
+  forearms:    'Bíceps',
+  triceps:     'Tríceps',
+  quadriceps:  'Cuádriceps',
+  hamstrings:  'Isquios/Glúteos',
+  glutes:      'Isquios/Glúteos',
+  abdominals:  'Core',
+  abs:         'Core',
+  calves:      'Gemelos',
+};
+
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 function getMonthKey(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
 
@@ -527,7 +566,6 @@ async function fetchJson(url) {
   return res.json();
 }
 
-// Parser unificado — funciona con workouts de Hevy y de Jefit (mismo formato)
 function parseWorkouts(rawWorkouts, src) {
   return rawWorkouts
     .map(w => {
@@ -536,13 +574,27 @@ function parseWorkouts(rawWorkouts, src) {
       const durationMin = end ? Math.round((end - start) / 60000) : null;
       let volume = 0, totalSets = 0;
       const groupSets = {};
+      const musclePrimary   = {};  // grupo → sets (músculo primario nativo)
+      const muscleSecondary = {};  // grupo → sets equivalentes (0.5× secundario)
+
       (w.exercises || []).forEach(ex => {
         const group = getGroup(ex.title);
-        (ex.sets || []).filter(s => s.type !== 'warmup').forEach(s => {
+        const workingSets = (ex.sets || []).filter(s => s.type !== 'warmup');
+        workingSets.forEach(s => {
           volume += (s.weight_kg || 0) * (s.reps || 0);
           totalSets++;
           groupSets[group] = (groupSets[group] || 0) + 1;
         });
+        // Datos nativos Hevy: primary_muscle_group / secondary_muscle_groups
+        const n = workingSets.length;
+        if (n > 0) {
+          const pg = HEVY_MUSCLE_MAP[ex.primary_muscle_group];
+          if (pg) musclePrimary[pg] = (musclePrimary[pg] || 0) + n;
+          (ex.secondary_muscle_groups || []).forEach(sm => {
+            const sg = HEVY_MUSCLE_MAP[sm];
+            if (sg) muscleSecondary[sg] = (muscleSecondary[sg] || 0) + n * 0.5;
+          });
+        }
       });
       return {
         date: start,
@@ -553,10 +605,13 @@ function parseWorkouts(rawWorkouts, src) {
         title: w.title || '—',
         exerciseCount: (w.exercises||[]).length,
         groupSets,
+        musclePrimary,
+        muscleSecondary,
+        hasNativeMuscle: Object.keys(musclePrimary).length > 0,
         inCycle: start >= CYCLE_START,
       };
     })
-    .filter(s => s.vol > 0) // descartar sesiones sin volumen registrado
+    .filter(s => s.vol > 0)
     .sort((a,b) => a.date - b.date);
 }
 
@@ -907,6 +962,55 @@ function render(allSessions) {
   document.getElementById('p-grp-30d').innerHTML = missing30.length>0
     ? `▸ Cubiertos: ${worked30.join(', ')}.<br><span style="color:#c94a30">→ Sin sets en 30 días: ${missing30.join(', ')}. Incorporar en próximas sesiones.</span>`
     : '▸ Todos los grupos musculares cubiertos en los últimos 30 días.';
+
+  // ── Activación muscular nativa Hevy ────────────────────────────────────────
+  // Se muestra cuando hay sesiones Hevy con primary_muscle_group en los datos.
+  // Primario = 1× sets, Secundario = 0.5× sets (misma lógica que el gráfico de Hevy).
+  const hevyNative = allCycleSessions.filter(s => s.src === 'Hevy' && s.hasNativeMuscle);
+  const muscleCard = document.getElementById('hevyMuscleCard');
+  if (hevyNative.length > 0) {
+    muscleCard.style.display = '';
+    const aggPrim = {}, aggSec = {};
+    hevyNative.forEach(s => {
+      Object.entries(s.musclePrimary).forEach(([g,v])   => { aggPrim[g] = (aggPrim[g]||0) + v; });
+      Object.entries(s.muscleSecondary).forEach(([g,v]) => { aggSec[g]  = (aggSec[g] ||0) + v; });
+    });
+    // Todos los grupos que aparecen, ordenados por activación total desc
+    const allHevyGroups = [...new Set([...Object.keys(aggPrim), ...Object.keys(aggSec)])]
+      .sort((a,b) => ((aggPrim[b]||0)+(aggSec[b]||0)) - ((aggPrim[a]||0)+(aggSec[a]||0)));
+    const primData = allHevyGroups.map(g => aggPrim[g] || 0);
+    const secData  = allHevyGroups.map(g => +(aggSec[g]  || 0).toFixed(1));
+    const maxVal   = Math.max(...allHevyGroups.map((g,i) => primData[i] + secData[i]));
+    destroyChart('c-hevy-muscle');
+    chartInstances['c-hevy-muscle'] = new Chart(document.getElementById('c-hevy-muscle'), {
+      type: 'bar',
+      data: {
+        labels: allHevyGroups,
+        datasets: [
+          { label: 'Primario',   data: primData, backgroundColor: 'rgba(13,138,82,0.75)', borderRadius: 3, borderSkipped: false, stack: 'a' },
+          { label: 'Secundario', data: secData,  backgroundColor: 'rgba(13,138,82,0.28)', borderRadius: 3, borderSkipped: false, stack: 'a' }
+        ]
+      },
+      options: {
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: true, labels: { font: { family: 'DM Mono', size: 9 }, color: '#6b6d70', boxWidth: 8 } },
+          tooltip: { backgroundColor:'#fff', titleColor:'#6b6d70', bodyColor:'#1a1a18',
+            borderColor:'rgba(0,0,0,0.12)', borderWidth:1,
+            callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw} sets` } }
+        },
+        scales: {
+          x: { stacked: true, min: 0, max: Math.ceil(maxVal) + 2,
+               ticks: { font:{size:9}, color:'#a8aab0' }, grid: { color:'rgba(0,0,0,0.05)' }, border:{display:false} },
+          y: { stacked: true, ticks: { font:{family:'DM Mono',size:9}, color:'#a8aab0' }, grid:{display:false}, border:{display:false} }
+        }
+      }
+    });
+    const topPrim = Object.entries(aggPrim).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([g])=>g);
+    document.getElementById('hevyMuscleRange').textContent = `${hevyNative.length} ses · ciclo`;
+    document.getElementById('p-hevy-muscle').innerHTML =
+      `▸ Top músculos primarios: ${topPrim.join(', ')}. Barras apiladas: verde oscuro = primario, verde claro = secundario (0.5× sets).`;
+  }
 
   // ── Insights (dinámicos) ────────────────────────────────────────────────────
   // 1. Constancia: semanas del ciclo sin sesiones
