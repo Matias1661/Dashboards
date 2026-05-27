@@ -641,7 +641,7 @@ const annotPlugin = {
       ctx.fillStyle = 'rgba(37,99,190,0.7)';
       ctx.font = '8px DM Mono, monospace';
       const labelW = ctx.measureText('Tamo').width;
-      ctx.fillText('Tamo', tx - labelW - 2, chartArea.top + 10);
+      ctx.fillText('Tamo', tx - labelW, chartArea.top + 10);
       ctx.textAlign = 'left';
     }
     ctx.restore();
