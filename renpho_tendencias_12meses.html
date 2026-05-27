@@ -238,6 +238,15 @@
     border-bottom: 0.5px solid var(--border);
     padding-bottom: 6px;
   }
+
+  #loading-bar {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+    text-align: center;
+    padding: 2rem;
+    letter-spacing: 0.08em;
+  }
 </style>
 </head>
 <body>
@@ -248,42 +257,46 @@
     <p>Tendencias 12 meses</p>
   </div>
   <div class="header-right">
-    <span class="pill pill-green">Plan Karat activo — Sem 9</span>
+    <span class="pill pill-green" id="pill-semana">Plan Karat activo — Sem ...</span>
     <span class="pill pill-amber">Ciclo inicio: 23 mar 2026</span>
-    <span class="pill pill-dim">Datos: may 2025 → 21 may 2026</span>
+    <span class="pill pill-dim" id="pill-datos">Datos: cargando...</span>
   </div>
 </div>
 
+<div id="loading-bar">Cargando datos...</div>
+
+<div id="dashboard-content" style="display:none">
+
 <div class="kpi-grid">
-  <div class="kpi down">
+  <div class="kpi" id="kpi-peso">
     <p class="kpi-label">Peso</p>
-    <p class="kpi-val">89.85 <span class="kpi-unit">kg</span></p>
-    <p class="kpi-delta down">+5.85 vs mín 12m (84.00)</p>
+    <p class="kpi-val"><span id="kpi-peso-val">—</span> <span class="kpi-unit">kg</span></p>
+    <p class="kpi-delta" id="kpi-peso-delta">—</p>
   </div>
-  <div class="kpi up">
+  <div class="kpi" id="kpi-musc">
     <p class="kpi-label">Masa muscular</p>
-    <p class="kpi-val">60.65 <span class="kpi-unit">kg</span></p>
-    <p class="kpi-delta up">+2.25 vs mín 12m (58.40)</p>
+    <p class="kpi-val"><span id="kpi-musc-val">—</span> <span class="kpi-unit">kg</span></p>
+    <p class="kpi-delta" id="kpi-musc-delta">—</p>
   </div>
-  <div class="kpi down">
+  <div class="kpi" id="kpi-grasa">
     <p class="kpi-label">Grasa corporal</p>
-    <p class="kpi-val">29.0 <span class="kpi-unit">%</span></p>
-    <p class="kpi-delta down">+2.1 pp vs mín 12m (26.9%)</p>
+    <p class="kpi-val"><span id="kpi-grasa-val">—</span> <span class="kpi-unit">%</span></p>
+    <p class="kpi-delta" id="kpi-grasa-delta">—</p>
   </div>
-  <div class="kpi neutral">
+  <div class="kpi" id="kpi-visc">
     <p class="kpi-label">Grasa visceral</p>
-    <p class="kpi-val">11 <span class="kpi-unit">índice</span></p>
-    <p class="kpi-delta down">+2 vs mín 12m (9)</p>
+    <p class="kpi-val"><span id="kpi-visc-val">—</span> <span class="kpi-unit">índice</span></p>
+    <p class="kpi-delta" id="kpi-visc-delta">—</p>
   </div>
-  <div class="kpi down">
+  <div class="kpi" id="kpi-agua">
     <p class="kpi-label">Agua corporal</p>
-    <p class="kpi-val">51.3 <span class="kpi-unit">%</span></p>
-    <p class="kpi-delta down">−1.5 pp vs máx 12m (52.8%)</p>
+    <p class="kpi-val"><span id="kpi-agua-val">—</span> <span class="kpi-unit">%</span></p>
+    <p class="kpi-delta" id="kpi-agua-delta">—</p>
   </div>
 </div>
 
 <div class="ciclo-note">
-  <span>▸</span> Inicio Plan Karat: 23 mar 2026 — zona sombreada = ciclo activo. Referencia pre-ciclo: 11 mar 2026 (86.20 kg / 59.22 kg músculo / 27.7% grasa). <span style="color:rgba(13,138,82,0.5)">◦ Puntos gris = interpolación lineal (nov 2025 – ene 2026, sin mediciones).</span>
+  <span>▸</span> Inicio Plan Karat: 23 mar 2026 — zona sombreada = ciclo activo. Referencia pre-ciclo: 11 mar 2026 (86.20 kg / 59.22 kg músculo / 27.7% grasa). <span style="color:rgba(13,214,140,0.5)">◦ Puntos gris = interpolación lineal (gaps sin mediciones).</span>
 </div>
 
 <div class="tamo-note">
@@ -295,24 +308,24 @@
   <div class="chart-card">
     <div class="card-header">
       <span class="card-title">Peso total</span>
-      <span class="card-current">89.85 kg</span>
+      <span class="card-current" id="cur-peso">— kg</span>
     </div>
     <div class="legend">
       <span><span class="ld" style="background:#2563be"></span>Peso (kg)</span>
     </div>
     <div class="chart-wrap h200"><canvas id="c-peso"></canvas></div>
-    <p style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:8px;">▸ Ganancia ciclo: +3.65 kg desde baseline (86.20). Ritmo ≈ +0.4 kg/sem — en rango objetivo (0.3–0.5 kg/sem).<br><span style="color:#0d6e40">→ Próximas semanas: pesar cada semana el mismo día. Si superas 91 kg en dos pesadas consecutivas, reduce ~200 kcal/día. Si bajas de 89 kg, aumenta ligeramente porción de carbos.</span></p>
+    <p style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:8px;">▸ Ganancia ciclo: <span id="dyn-peso-ganancia">—</span> kg desde baseline (<span id="dyn-peso-baseline">86.20</span>). Ritmo ≈ <span id="dyn-peso-ritmo">—</span> kg/sem — en rango objetivo (0.3–0.5 kg/sem).<br><span style="color:#0d6e40">→ Próximas semanas: pesar cada semana el mismo día. Si superas 91 kg en dos pesadas consecutivas, reduce ~200 kcal/día. Si bajas de 89 kg, aumenta ligeramente porción de carbos.</span></p>
   </div>
   <div class="chart-card">
     <div class="card-header">
       <span class="card-title">Masa muscular</span>
-      <span class="card-current">60.65 kg</span>
+      <span class="card-current" id="cur-musc">— kg</span>
     </div>
     <div class="legend">
       <span><span class="ld" style="background:#0d8a52"></span>Músculo (kg)</span>
     </div>
     <div class="chart-wrap h200"><canvas id="c-musc"></canvas></div>
-    <p style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:8px;">▸ +1.43 kg de músculo desde baseline (59.22). Tendencia positiva sostenida en ciclo.<br><span style="color:#0d6e40">→ El músculo responde directamente a la frecuencia de entrenamiento. Para mantener la curva, apunta a 8–10 sesiones en junio. Sem 9 (3 ses en 3 días) es el modelo a replicar.</span></p>
+    <p style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:8px;">▸ <span id="dyn-musc-ganancia">—</span> kg de músculo desde baseline (<span id="dyn-musc-baseline">59.22</span>). Tendencia positiva sostenida en ciclo.<br><span style="color:#0d6e40">→ El músculo responde directamente a la frecuencia de entrenamiento. Para mantener la curva, apunta a 8–10 sesiones en junio.</span></p>
   </div>
 </div>
 
@@ -321,25 +334,25 @@
   <div class="chart-card">
     <div class="card-header">
       <span class="card-title">Grasa corporal</span>
-      <span class="card-current">29.0%</span>
+      <span class="card-current" id="cur-grasa">—%</span>
     </div>
     <div class="legend">
       <span><span class="ld" style="background:#c94a30"></span>Grasa total %</span>
       <span><span class="ld" style="background:#9a6200;opacity:.8"></span>Subcutánea %</span>
     </div>
     <div class="chart-wrap h200"><canvas id="c-grasa"></canvas></div>
-    <p style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:8px;">▸ +1.3 pp desde baseline (27.7%). Incremento esperado en fase de volumen. Visceral sube a 11, a vigilar.<br><span style="color:#9a6200">→ Si grasa supera 30% o visceral alcanza 12 en próximas mediciones, considera reducir sodio y ajustar calorías. Priorizar proteína sobre carbos simples en las cenas.</span></p>
+    <p style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:8px;">▸ <span id="dyn-grasa-delta">—</span> pp desde baseline (27.7%). Incremento esperado en fase de volumen. Visceral <span id="dyn-visc-nivel">—</span>, a vigilar.<br><span style="color:#9a6200">→ Si grasa supera 30% o visceral alcanza 12, considera reducir sodio y ajustar calorías. Priorizar proteína sobre carbos simples en las cenas.</span></p>
   </div>
   <div class="chart-card">
     <div class="card-header">
       <span class="card-title">Agua corporal</span>
-      <span class="card-current">51.3%</span>
+      <span class="card-current" id="cur-agua">—%</span>
     </div>
     <div class="legend">
       <span><span class="ld" style="background:#6d4fc2"></span>Agua %</span>
     </div>
     <div class="chart-wrap h200"><canvas id="c-agua"></canvas></div>
-    <p style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:8px;">▸ Bajó de 52.2% (baseline) a 51.3%. En contexto de ciclo con retención, indica menor hidratación relativa.<br><span style="color:#9a6200">→ Apunta a 2.5–3 L de agua diarios. Mide siempre por la mañana, en ayunas. Si en la próxima pesada sigue bajo 51.5%, revisa ingesta hídrica la semana previa.</span></p>
+    <p style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:8px;">▸ En contexto de ciclo con retención, agua refleja hidratación relativa.<br><span style="color:#9a6200">→ Apunta a 2.5–3 L de agua diarios. Mide siempre por la mañana, en ayunas.</span></p>
   </div>
 </div>
 
@@ -355,20 +368,20 @@
       <span><span class="ld" style="background:#0d8a52"></span>Ciclo activo</span>
     </div>
     <div class="chart-wrap h200"><canvas id="c-scatter"></canvas></div>
-    <p style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:8px;">▸ Pre-ciclo: nube compacta 84–87 kg / 26.9–27.7%. Ciclo: desplazamiento hacia arriba-derecha (+3.6 kg peso, +1.3 pp grasa). La nube verde muestra que el aumento de peso no es proporcional en grasa — parte es músculo y agua. El punto en 90.4 kg (23 abr) es el pico de retención.<br><span style="color:#9a6200">→ Si el siguiente punto entra por encima de 29.5% con peso igual o menor a 89.5 kg, señala acumulación de grasa real. Objetivo: que los próximos puntos verdes no superen la diagonal del 30% de grasa.</span></p>
+    <p style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:8px;">▸ Ciclo: desplazamiento hacia arriba-derecha (<span id="dyn-scatter-peso">—</span> kg peso, <span id="dyn-scatter-grasa">—</span> pp grasa). La nube verde muestra que el aumento no es proporcional en grasa — parte es músculo y agua.<br><span style="color:#9a6200">→ Objetivo: que los próximos puntos verdes no superen la diagonal del 30% de grasa.</span></p>
   </div>
   <div class="chart-card">
     <div class="card-header">
       <span class="card-title">Grasa visceral</span>
-      <span class="card-current">índice 11</span>
+      <span class="card-current" id="cur-visc">índice —</span>
     </div>
     <div class="chart-wrap" style="height:90px;margin-bottom:16px;"><canvas id="c-visceral"></canvas></div>
     <div class="card-header" style="margin-top:8px;">
       <span class="card-title">Proteína %</span>
-      <span class="card-current">16.2%</span>
+      <span class="card-current" id="cur-prot">—%</span>
     </div>
     <div class="chart-wrap" style="height:90px;"><canvas id="c-prot"></canvas></div>
-    <p style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:8px;">▸ Visceral subió de 9 (baseline) a 11 en sem 5+. Índice 11 es frontera — 12+ requeriría acción. Proteína % cayó de 16.7% (sep 25) a 16.2% actual, mínimo del período.<br><span style="color:#9a6200">→ Si visceral alcanza 12, priorizar reducción de sodio y ultra-procesados. Para proteína: aumentar ingesta proteica relativa (al menos 2 g/kg de peso) — objetivo 16.5%+ en la próxima pesada.</span></p>
+    <p style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:8px;">▸ Visceral índice <span id="dyn-visc2">—</span> — frontera 12 requeriría acción. Proteína % a vigilar para mantener >16.5%.<br><span style="color:#9a6200">→ Si visceral alcanza 12, priorizar reducción de sodio y ultra-procesados. Aumentar ingesta proteica (2 g/kg peso).</span></p>
   </div>
 </div>
 
@@ -382,7 +395,7 @@
       <span class="card-current">últ: 115/81</span>
     </div>
     <div class="chart-wrap h160"><canvas id="c-bp"></canvas></div>
-    <p style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:8px;">▸ Sin café: 104–127/70–83 (rango normal–aceptable). Con café: 129–140/85–90 (elevado). Umbral decisión: >140/90 sin café → revisar protocolo.<br><span style="color:#0d6e40">→ 10 lecturas desde 18 may, todas sin café bajo 140/90. Criterio para subida a Testo 3cm en sem 11 cumplido.</span></p>
+    <p style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:8px;">▸ Sin café: 104–127/70–83 (rango normal–aceptable). Con café: 129–140/85–90 (elevado). Umbral decisión: >140/90 sin café → revisar protocolo.<br><span style="color:#0d6e40">→ Criterio para subida a Testo 3cm en sem 11 cumplido. Todas las lecturas sin café bajo 140/90.</span></p>
   </div>
   <div class="chart-card">
     <div class="card-header">
@@ -411,13 +424,13 @@
 
 <!-- INSIGHTS -->
 <div class="insights">
-  <div class="insight warn">
+  <div class="insight warn" id="insight-grasa">
     <p class="insight-title">Grasa: incremento moderado en ciclo</p>
-    <p class="insight-body">+1.3 pp desde baseline (27.7% → 29.0%). La grasa visceral subió a 11 en las últimas semanas del ciclo. Esperable en fase de volumen pero a vigilar para sem 11+.</p>
+    <p class="insight-body"><span id="ins-grasa-delta">—</span> pp desde baseline (27.7% → <span id="ins-grasa-cur">—</span>%). Grasa visceral índice <span id="ins-visc-cur">—</span>. Esperable en fase de volumen pero a vigilar para sem 11+.</p>
   </div>
-  <div class="insight ok">
+  <div class="insight ok" id="insight-musc">
     <p class="insight-title">Músculo: progresión positiva</p>
-    <p class="insight-body">+1.43 kg desde baseline (59.22 → 60.65 kg) en 9 semanas de ciclo. Progreso consistente. Sem 8–9 con 3 sesiones/sem muestra el mejor ritmo de entrenamiento del ciclo.</p>
+    <p class="insight-body"><span id="ins-musc-delta">—</span> kg desde baseline (59.22 → <span id="ins-musc-cur">—</span> kg) en ciclo. Progreso consistente. Mantener 8–10 sesiones/mes.</p>
   </div>
   <div class="insight ok">
     <p class="insight-title">TA sin café: dentro de rango</p>
@@ -426,111 +439,88 @@
 </div>
 
 <div class="footer">
-  <span>Fuente: Renpho + Notion DB · matiaso81</span>
-  <span>Generado: 27 may 2026 · Plan Karat Semana 10</span>
+  <span>Fuente: renpho_data.json (auto) · matiaso81</span>
+  <span id="footer-date">—</span>
 </div>
 
-<script>
-// ── DATOS COMPLETOS 12 MESES (may 2025 → may 2026) ───────────────────────────
-const data = [
-  { d: '08 May 25', peso: 85.05, musc: 58.80, grasa: 27.3, subcutanea: 24.1, agua: 52.5, magra: 61.80, tmb: 1705, visceral: 9, prot: 16.6, ciclo: false },
-  { d: '20 May 25', peso: 85.50, musc: 58.90, grasa: 27.5, subcutanea: 24.3, agua: 52.4, magra: 62.00, tmb: 1709, visceral: 9, prot: 16.5, ciclo: false },
-  { d: '27 Jun 25', peso: 84.80, musc: 58.70, grasa: 27.2, subcutanea: 24.0, agua: 52.6, magra: 61.80, tmb: 1703, visceral: 9, prot: 16.6, ciclo: false },
-  { d: '26 Ago 25', peso: 85.10, musc: 58.80, grasa: 27.3, subcutanea: 24.1, agua: 52.5, magra: 61.90, tmb: 1706, visceral: 9, prot: 16.6, ciclo: false },
-  { d: '29 Ago 25', peso: 84.80, musc: 58.70, grasa: 27.2, subcutanea: 24.0, agua: 52.6, magra: 61.70, tmb: 1703, visceral: 9, prot: 16.6, ciclo: false },
-  { d: '03 Sep 25', peso: 84.00, musc: 58.40, grasa: 26.9, subcutanea: 23.8, agua: 52.8, magra: 61.40, tmb: 1697, visceral: 9, prot: 16.7, ciclo: false },
-  { d: '01 Oct 25', peso: 85.00, musc: 58.70, grasa: 27.3, subcutanea: 24.1, agua: 52.5, magra: 61.80, tmb: 1705, visceral: 9, prot: 16.6, ciclo: false },
-  { d: '27 Oct 25', peso: 84.30, musc: 58.50, grasa: 27.0, subcutanea: 23.9, agua: 52.7, magra: 61.60, tmb: 1699, visceral: 9, prot: 16.7, ciclo: false },
-  // GAP nov 25 – ene 26
-  { d: '04 Feb 26', peso: 85.75, musc: 59.00, grasa: 27.6, subcutanea: 24.6, agua: 52.3, magra: 62.10, tmb: 1711, visceral: 9, prot: 16.5, ciclo: false },
-  { d: '12 Feb 26', peso: 87.75, musc: 59.85, grasa: 28.2, subcutanea: 25.0, agua: 51.8, magra: 63.00, tmb: 1730, visceral: 10, prot: 16.4, ciclo: false },
-  { d: '14 Feb 26', peso: 85.55, musc: 59.03, grasa: 27.4, subcutanea: 24.4, agua: 52.4, magra: 62.11, tmb: 1700, visceral: 9, prot: 16.6, ciclo: false },
-  { d: '19 Feb 26', peso: 86.40, musc: 59.36, grasa: 27.7, subcutanea: 24.6, agua: 52.2, magra: 62.47, tmb: 1713, visceral: 9, prot: 16.5, ciclo: false },
-  { d: '04 Mar 26', peso: 85.30, musc: 58.94, grasa: 27.3, subcutanea: 24.3, agua: 52.5, magra: 62.01, tmb: 1696, visceral: 9, prot: 16.6, ciclo: false },
-  { d: '05 Mar 26', peso: 84.95, musc: 58.79, grasa: 27.2, subcutanea: 24.2, agua: 52.6, magra: 61.84, tmb: 1687, visceral: 9, prot: 16.6, ciclo: false },
-  { d: '11 Mar 26', peso: 86.20, musc: 59.22, grasa: 27.7, subcutanea: 24.6, agua: 52.2, magra: 62.32, tmb: 1708, visceral: 9, prot: 16.5, ciclo: false },
-  // CICLO ACTIVO desde 23 mar 2026
-  { d: '30 Mar 26', peso: 87.40, musc: 59.69, grasa: 28.1, subcutanea: 25.0, agua: 51.9, magra: 62.84, tmb: 1730, visceral: 10, prot: 16.4, ciclo: true },
-  { d: '02 Abr 26', peso: 88.10, musc: 60.00, grasa: 28.3, subcutanea: 25.1, agua: 51.8, magra: 63.17, tmb: 1739, visceral: 10, prot: 16.4, ciclo: true },
-  { d: '06 Abr 26', peso: 87.60, musc: 59.74, grasa: 28.2, subcutanea: 25.0, agua: 51.8, magra: 62.90, tmb: 1734, visceral: 10, prot: 16.4, ciclo: true },
-  { d: '08 Abr 26', peso: 87.95, musc: 59.89, grasa: 28.3, subcutanea: 25.1, agua: 51.8, magra: 63.06, tmb: 1739, visceral: 10, prot: 16.4, ciclo: true },
-  { d: '10 Abr 26', peso: 87.55, musc: 59.80, grasa: 28.1, subcutanea: 25.0, agua: 51.9, magra: 62.95, tmb: 1730, visceral: 10, prot: 16.4, ciclo: true },
-  { d: '22 Abr 26', peso: 88.80, musc: 60.12, grasa: 28.7, subcutanea: 25.5, agua: 51.5, magra: 63.31, tmb: 1747, visceral: 10, prot: 16.3, ciclo: true },
-  { d: '23 Abr 26', peso: 90.40, musc: 60.84, grasa: 29.2, subcutanea: 25.8, agua: 51.1, magra: 64.00, tmb: 1734, visceral: 11, prot: 16.1, ciclo: true },
-  { d: '30 Abr 26', peso: 89.65, musc: 60.51, grasa: 29.0, subcutanea: 25.7, agua: 51.3, magra: 63.65, tmb: 1726, visceral: 11, prot: 16.2, ciclo: true },
-  { d: '07 May 26', peso: 90.10, musc: 60.73, grasa: 29.1, subcutanea: 25.8, agua: 51.2, magra: 63.88, tmb: 1730, visceral: 11, prot: 16.2, ciclo: true },
-  { d: '13 May 26', peso: 88.95, musc: 60.22, grasa: 28.7, subcutanea: 25.5, agua: 51.5, magra: 63.42, tmb: 1752, visceral: 10, prot: 16.3, ciclo: true },
-  { d: '19 May 26', peso: 89.65, musc: 60.51, grasa: 29.0, subcutanea: 25.7, agua: 51.3, magra: 63.65, tmb: 1726, visceral: 11, prot: 16.2, ciclo: true },
-  { d: '20 May 26', peso: 89.15, musc: 60.27, grasa: 28.8, subcutanea: 25.5, agua: 51.4, magra: 63.47, tmb: 1752, visceral: 10, prot: 16.2, ciclo: true },
-  { d: '21 May 26', peso: 89.85, musc: 60.65, grasa: 29.0, subcutanea: 25.7, agua: 51.3, magra: 63.79, tmb: 1726, visceral: 11, prot: 16.2, ciclo: true },
-  { d: '25 May 26', peso: 89.75, musc: 60.58, grasa: 29.0, subcutanea: 25.7, agua: 51.3, magra: 63.72, tmb: 1726, visceral: 11, prot: 16.2, ciclo: true },
-  { d: '26 May 26', peso: 89.40, musc: 60.35, grasa: 28.9, subcutanea: 25.6, agua: 51.3, magra: 63.56, tmb: 1756, visceral: 10, prot: 16.2, ciclo: true },
-];
+</div><!-- /#dashboard-content -->
 
-// Interpolación gap nov 2025 – ene 2026
-const rawData = [...data];
-const gapStart = rawData[7];  // 27 Oct 25
-const gapEnd   = rawData[8];  // 04 Feb 26
-const gapSteps = 4;
+<script>
+// ── CONSTANTES ────────────────────────────────────────────────────────────────
+const DATA_URL    = 'https://raw.githubusercontent.com/Matias1661/Dashboards/main/renpho_data.json';
+const CYCLE_START = '2026-03-23';
+const TAMO_DATE   = '2026-05-14';
+const BASELINE    = { peso: 86.20, musc: 59.22, grasa: 27.7, visc: 9 };
+const MESES       = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+// Estado global para el plugin de anotaciones
+let _allData = [], _cicloIdx = -1, _tamoIdx = -1;
+
+// ── UTILIDADES ────────────────────────────────────────────────────────────────
+function fmtDate(iso) {
+  const [y, m, d] = iso.split('-');
+  return `${String(+d).padStart(2,'0')} ${MESES[+m-1]} ${y.slice(2)}`;
+}
+
+function cycleWeek() {
+  const start = new Date(CYCLE_START);
+  const today = new Date();
+  const days  = Math.floor((today - start) / 86400000);
+  return days >= 0 ? Math.ceil((days + 1) / 7) : null;
+}
 
 function lerp(a, b, t) { return +(a + (b - a) * t).toFixed(2); }
 
-const interpolated = [
-  { d: '15 Nov 25', interp: true, ciclo: false },
-  { d: '15 Dic 25', interp: true, ciclo: false },
-  { d: '15 Ene 26', interp: true, ciclo: false },
-].map((pt, i) => {
-  const t = (i + 1) / gapSteps;
-  ['peso','musc','grasa','subcutanea','agua','magra','tmb','visceral','prot'].forEach(k => {
-    pt[k] = lerp(gapStart[k], gapEnd[k], t);
-  });
-  return pt;
-});
+function fmtSign(val, decimals) {
+  const v = +val.toFixed(decimals);
+  return v >= 0 ? `+${v}` : `${v}`;
+}
 
-const allData = [
-  ...rawData.slice(0, 8),
-  ...interpolated,
-  ...rawData.slice(8),
-];
+function setEl(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
 
-const labels = allData.map(d => d.d);
-const cicloIdx = allData.findIndex(d => d.ciclo);
-// Tamoxifen index: '13 May 26' is the last point before May 14
-const tamoIdx = allData.findIndex(d => d.d === '13 May 26');
+function setClass(id, cls) {
+  const el = document.getElementById(id);
+  if (el) { el.className = el.className.replace(/\b(up|down|neutral)\b/g, ''); el.classList.add(cls); }
+}
 
-const ptColor = (alpha) => allData.map(d =>
-  d.interp ? 'rgba(255,255,255,0)' :
-  d.ciclo  ? `rgba(13,138,82,${alpha})` : `rgba(37,99,190,${alpha})`
-);
-const ptBorder = () => allData.map(d =>
-  d.interp ? '#c8c6c0' :
-  d.ciclo  ? '#0d8a52' : '#2563be'
-);
-const ptRadius = () => allData.map(d => d.interp ? 3 : 4);
-const withGap = (key) => allData.map(d => d[key]);
+function setDeltaClass(id, cls) {
+  const el = document.getElementById(id);
+  if (el) { el.className = 'kpi-delta'; el.classList.add(cls); }
+}
 
-// Plugin: ciclo shading + tamo line
+// ── PLUGIN ANOTACIONES (ciclo + tamo) ────────────────────────────────────────
 const annotPlugin = {
   id: 'annotPlugin',
   beforeDraw(chart) {
     const { ctx, chartArea, scales } = chart;
     if (!chartArea || !scales.x) return;
     const xs = scales.x;
-    // Ciclo shading
-    const cx = xs.getPixelForValue(cicloIdx);
-    ctx.save();
-    ctx.fillStyle = 'rgba(13,138,82,0.05)';
-    ctx.fillRect(cx, chartArea.top, chartArea.right - cx, chartArea.bottom - chartArea.top);
-    ctx.strokeStyle = 'rgba(13,138,82,0.3)';
-    ctx.lineWidth = 1;
-    ctx.setLineDash([4, 4]);
-    ctx.beginPath();
-    ctx.moveTo(cx, chartArea.top);
-    ctx.lineTo(cx, chartArea.bottom);
-    ctx.stroke();
-    // Tamoxifen line
-    if (tamoIdx >= 0) {
-      const tx = xs.getPixelForValue(tamoIdx) + (xs.getPixelForValue(tamoIdx + 1) - xs.getPixelForValue(tamoIdx)) * 0.5;
+
+    // Zona ciclo activo
+    if (_cicloIdx >= 0) {
+      const cx = xs.getPixelForValue(_cicloIdx);
+      ctx.save();
+      ctx.fillStyle = 'rgba(13,138,82,0.05)';
+      ctx.fillRect(cx, chartArea.top, chartArea.right - cx, chartArea.bottom - chartArea.top);
+      ctx.strokeStyle = 'rgba(13,138,82,0.3)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(cx, chartArea.top);
+      ctx.lineTo(cx, chartArea.bottom);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Línea Tamoxifen
+    if (_tamoIdx >= 0 && _tamoIdx < _allData.length - 1) {
+      const x0 = xs.getPixelForValue(_tamoIdx);
+      const x1 = xs.getPixelForValue(_tamoIdx + 1);
+      const tx  = x0 + (x1 - x0) * 0.5;
+      ctx.save();
       ctx.strokeStyle = 'rgba(37,99,190,0.5)';
       ctx.lineWidth = 1.5;
       ctx.setLineDash([3, 3]);
@@ -541,345 +531,421 @@ const annotPlugin = {
       ctx.fillStyle = 'rgba(37,99,190,0.7)';
       ctx.font = '8px DM Mono, monospace';
       ctx.fillText('Tamo', tx + 3, chartArea.top + 10);
+      ctx.restore();
     }
-    ctx.restore();
   }
 };
 Chart.register(annotPlugin);
 
-const baseOpts = (yMin, yMax) => ({
-  responsive: true,
-  maintainAspectRatio: false,
-  spanGaps: true,
-  plugins: {
-    legend: { display: false },
-    tooltip: {
-      backgroundColor: '#ffffff',
-      titleColor: '#6b6d70',
-      bodyColor: '#1a1a18',
-      borderColor: 'rgba(0,0,0,0.12)',
-      borderWidth: 1,
-      padding: 10,
-      titleFont: { family: 'DM Mono', size: 10 },
-      bodyFont: { family: 'DM Sans', size: 12 },
-    }
-  },
-  scales: {
-    x: {
-      ticks: { font: { size: 9, family: 'DM Mono' }, color: '#a8aab0', maxRotation: 45, autoSkip: true },
-      grid: { display: false },
-      border: { display: false }
-    },
-    y: {
-      min: yMin, max: yMax,
-      ticks: { font: { size: 9 }, color: '#a8aab0' },
-      grid: { color: 'rgba(0,0,0,0.05)' },
-      border: { display: false }
-    }
-  }
-});
+// ── CARGA Y RENDERIZADO ───────────────────────────────────────────────────────
+async function init() {
+  try {
+    const res  = await fetch(DATA_URL);
+    const json = await res.json();
 
-// PESO
-new Chart(document.getElementById('c-peso'), {
-  type: 'line',
-  data: {
-    labels,
-    datasets: [{
-      data: withGap('peso'),
-      borderColor: '#2563be',
-      backgroundColor: 'rgba(37,99,190,0.07)',
-      borderWidth: 2,
-      pointBackgroundColor: ptColor(0.9),
-      pointBorderColor: ptBorder(),
-      pointRadius: ptRadius(),
-      pointHoverRadius: 6,
-      fill: true,
-      tension: 0.35,
-      segment: { borderColor: ctx => allData[ctx.p1DataIndex]?.ciclo ? '#0d8a52' : '#2563be' }
-    }]
-  },
-  options: { ...baseOpts(83, 92) }
-});
+    // 1. Filtrar: últimos 12 meses + skeletal_muscle válido
+    const cutoff = new Date();
+    cutoff.setFullYear(cutoff.getFullYear() - 1);
+    const cutoffISO = cutoff.toISOString().slice(0, 10);
 
-// MÚSCULO
-new Chart(document.getElementById('c-musc'), {
-  type: 'line',
-  data: {
-    labels,
-    datasets: [{
-      data: withGap('musc'),
-      borderColor: '#0d8a52',
-      backgroundColor: 'rgba(13,138,82,0.07)',
-      borderWidth: 2,
-      pointBackgroundColor: ptColor(0.9),
-      pointBorderColor: ptBorder(),
-      pointRadius: ptRadius(),
-      pointHoverRadius: 6,
-      fill: true,
-      tension: 0.35
-    }]
-  },
-  options: { ...baseOpts(57.5, 62) }
-});
+    const rawFiltered = json.measurements
+      .filter(m => m.date >= cutoffISO && m.skeletal_muscle > 0)
+      .sort((a, b) => a.date.localeCompare(b.date));
 
-// GRASA
-new Chart(document.getElementById('c-grasa'), {
-  type: 'line',
-  data: {
-    labels,
-    datasets: [
-      {
-        data: withGap('grasa'),
-        borderColor: '#c94a30',
-        backgroundColor: 'rgba(201,74,48,0.07)',
-        borderWidth: 2,
-        pointBackgroundColor: ptColor(0.8),
-        pointBorderColor: ptBorder(),
-        pointRadius: ptRadius(),
-        fill: true,
-        tension: 0.35
-      },
-      {
-        data: withGap('subcutanea'),
-        borderColor: 'rgba(154,98,0,0.6)',
-        backgroundColor: 'transparent',
-        borderWidth: 1.5,
-        pointRadius: 2,
-        fill: false,
-        tension: 0.35,
-        borderDash: [3, 3]
-      }
-    ]
-  },
-  options: { ...baseOpts(23, 30) }
-});
+    if (!rawFiltered.length) throw new Error('Sin datos válidos en el rango');
 
-// AGUA
-new Chart(document.getElementById('c-agua'), {
-  type: 'line',
-  data: {
-    labels,
-    datasets: [{
-      data: withGap('agua'),
-      borderColor: '#6d4fc2',
-      backgroundColor: 'rgba(109,79,194,0.07)',
-      borderWidth: 2,
-      pointBackgroundColor: ptColor(0.8),
-      pointBorderColor: ptBorder(),
-      pointRadius: ptRadius(),
-      fill: true,
-      tension: 0.35
-    }]
-  },
-  options: { ...baseOpts(50.5, 53.5) }
-});
+    // 2. Mapear campos
+    const mapped = rawFiltered.map(m => ({
+      date:       m.date,
+      d:          fmtDate(m.date),
+      peso:       m.weight,
+      musc:       +(m.skeletal_muscle).toFixed(2),
+      grasa:      m.body_fat,
+      subcutanea: m.subcutaneous_fat,
+      agua:       m.water,
+      magra:      +(m.weight * (1 - m.body_fat / 100)).toFixed(2),
+      tmb:        m.bmr,
+      visceral:   m.visceral_fat,
+      prot:       m.protein,
+      ciclo:      m.date >= CYCLE_START,
+      interp:     false
+    }));
 
-// VISCERAL
-new Chart(document.getElementById('c-visceral'), {
-  type: 'bar',
-  data: {
-    labels,
-    datasets: [{
-      data: allData.map(d => d.visceral),
-      backgroundColor: allData.map(d => d.interp ? 'rgba(200,198,192,0.5)' : d.visceral >= 10 ? 'rgba(201,74,48,0.65)' : 'rgba(37,99,190,0.35)'),
-      borderRadius: 3,
-      borderSkipped: false
-    }]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { display: false } },
-    scales: {
-      x: { ticks: { font: { size: 8 }, color: '#a8aab0', maxRotation: 45, autoSkip: true }, grid: { display: false }, border: { display: false } },
-      y: { min: 8, max: 12, ticks: { font: { size: 9 }, color: '#a8aab0', stepSize: 1 }, grid: { color: 'rgba(0,0,0,0.05)' }, border: { display: false } }
-    }
-  }
-});
-
-// PROTEÍNA
-new Chart(document.getElementById('c-prot'), {
-  type: 'line',
-  data: {
-    labels,
-    datasets: [{
-      data: withGap('prot'),
-      borderColor: 'rgba(109,79,194,0.7)',
-      backgroundColor: 'transparent',
-      borderWidth: 1.5,
-      pointRadius: 2,
-      tension: 0.35,
-      borderDash: [3, 2]
-    }]
-  },
-  options: { ...baseOpts(16.0, 16.9) }
-});
-
-// SCATTER
-new Chart(document.getElementById('c-scatter'), {
-  type: 'scatter',
-  data: {
-    datasets: [
-      {
-        label: 'Pre-ciclo',
-        data: allData.filter(d => !d.ciclo && !d.interp).map(d => ({ x: d.peso, y: d.grasa, label: d.d })),
-        backgroundColor: 'rgba(107,109,112,0.5)',
-        pointRadius: 5,
-        pointHoverRadius: 7
-      },
-      {
-        label: 'Ciclo activo',
-        data: allData.filter(d => d.ciclo).map(d => ({ x: d.peso, y: d.grasa, label: d.d })),
-        backgroundColor: 'rgba(13,138,82,0.75)',
-        pointRadius: 6,
-        pointHoverRadius: 8
-      }
-    ]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        backgroundColor: '#ffffff', titleColor: '#6b6d70', bodyColor: '#1a1a18',
-        borderColor: 'rgba(0,0,0,0.12)', borderWidth: 1,
-        callbacks: { label: ctx => `${ctx.raw.label}: ${ctx.raw.x} kg — ${ctx.raw.y}% grasa` }
-      }
-    },
-    scales: {
-      x: {
-        min: 83.5, max: 92,
-        title: { display: true, text: 'Peso (kg)', color: '#a8aab0', font: { size: 10 } },
-        ticks: { font: { size: 9 }, color: '#a8aab0' },
-        grid: { color: 'rgba(0,0,0,0.05)' }, border: { display: false }
-      },
-      y: {
-        min: 26.5, max: 30,
-        title: { display: true, text: 'Grasa %', color: '#a8aab0', font: { size: 10 } },
-        ticks: { font: { size: 9 }, color: '#a8aab0' },
-        grid: { color: 'rgba(0,0,0,0.05)' }, border: { display: false }
+    // 3. Gap-fill: gaps > 45 días → puntos interpolados
+    const filled = [];
+    for (let i = 0; i < mapped.length; i++) {
+      filled.push(mapped[i]);
+      if (i < mapped.length - 1) {
+        const tA = new Date(mapped[i].date).getTime();
+        const tB = new Date(mapped[i + 1].date).getTime();
+        const gapDays = (tB - tA) / 86400000;
+        if (gapDays > 45) {
+          const steps = gapDays > 90 ? 3 : (gapDays > 60 ? 2 : 1);
+          for (let s = 1; s <= steps; s++) {
+            const t   = s / (steps + 1);
+            const iso = new Date(tA + t * (tB - tA)).toISOString().slice(0, 10);
+            const pt  = { date: iso, d: fmtDate(iso), interp: true, ciclo: iso >= CYCLE_START };
+            ['peso','musc','grasa','subcutanea','agua','magra','tmb','visceral','prot']
+              .forEach(k => { pt[k] = lerp(mapped[i][k], mapped[i + 1][k], t); });
+            filled.push(pt);
+          }
+        }
       }
     }
-  }
-});
+    filled.sort((a, b) => a.date.localeCompare(b.date));
 
-// BP CHART — un promedio por día
-// 14 may (chequeo médico ASPY): 124/90 — condiciones no controladas
-// 18 may (con café): avg(132,126)/avg(90,90) = 129/90
-// 19 may (sin café): avg(103,104)/avg(70,72) = 104/71
-// 20 may (con café): 140/85
-// 21 may (sin café): 110/80
-// 22 may (sin café): 121/82
-// 25 may (sin café): 115/82
-// 26 may (sin café, confirmado): 127/83
-// 27 may (sin café): 115/81
-const bpData = [
-  { d: '14 may', sist: 124, diast: 90, tipo: 'medico' },
-  { d: '18 may', sist: 129, diast: 90, tipo: 'cafe' },
-  { d: '19 may', sist: 104, diast: 71, tipo: 'nocafe' },
-  { d: '20 may', sist: 140, diast: 85, tipo: 'cafe' },
-  { d: '21 may', sist: 110, diast: 80, tipo: 'nocafe' },
-  { d: '22 may', sist: 121, diast: 82, tipo: 'nocafe' },
-  { d: '25 may', sist: 115, diast: 82, tipo: 'nocafe' },
-  { d: '26 may', sist: 127, diast: 83, tipo: 'nocafe' },
-  { d: '27 may', sist: 115, diast: 81, tipo: 'nocafe' },
-];
-
-const bpPtColor = {
-  medico:  'rgba(109,79,194,0.85)',
-  cafe:    'rgba(201,74,48,0.9)',
-  nocafe:  'rgba(13,138,82,0.9)'
-};
-const bpPtBorder = { medico: '#6d4fc2', cafe: '#c94a30', nocafe: '#0d8a52' };
-const bpTipoLabel = { medico: 'chequeo médico', cafe: 'con café', nocafe: 'sin café' };
-
-const bpN = bpData.length;
-new Chart(document.getElementById('c-bp'), {
-  type: 'line',
-  data: {
-    labels: bpData.map(d => d.d),
-    datasets: [
-      {
-        label: 'Sistólica',
-        data: bpData.map(d => d.sist),
-        borderColor: '#c94a30',
-        backgroundColor: 'rgba(201,74,48,0.07)',
-        borderWidth: 2,
-        pointBackgroundColor: bpData.map(d => bpPtColor[d.tipo]),
-        pointBorderColor: bpData.map(d => bpPtBorder[d.tipo]),
-        pointRadius: 5,
-        fill: true,
-        tension: 0.3,
-        order: 1
-      },
-      {
-        label: 'Diastólica',
-        data: bpData.map(d => d.diast),
-        borderColor: '#9a6200',
-        backgroundColor: 'transparent',
-        borderWidth: 1.5,
-        pointRadius: 4,
-        fill: false,
-        tension: 0.3,
-        borderDash: [4, 3],
-        order: 2
-      },
-      {
-        label: 'Límite sist. (140)',
-        data: new Array(bpN).fill(140),
-        borderColor: 'rgba(201,74,48,0.55)',
-        backgroundColor: 'transparent',
-        borderWidth: 1.5,
-        borderDash: [6, 4],
-        pointRadius: 0,
-        fill: false,
-        order: 3
-      },
-      {
-        label: 'Límite diast. (90)',
-        data: new Array(bpN).fill(90),
-        borderColor: 'rgba(154,98,0,0.55)',
-        backgroundColor: 'transparent',
-        borderWidth: 1.5,
-        borderDash: [6, 4],
-        pointRadius: 0,
-        fill: false,
-        order: 4
+    _allData    = filled;
+    _cicloIdx   = filled.findIndex(d => d.ciclo);
+    _tamoIdx    = (() => {
+      for (let i = filled.length - 1; i >= 0; i--) {
+        if (filled[i].date < TAMO_DATE && !filled[i].interp) return i;
       }
-    ]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: true,
-        labels: { font: { family: 'DM Mono', size: 10 }, color: '#6b6d70', boxWidth: 8,
-          filter: item => !item.text.startsWith('Límite') }
+      return -1;
+    })();
+
+    // 4. Estadísticos sobre datos reales (no interpolados)
+    const real  = filled.filter(d => !d.interp);
+    const last  = real[real.length - 1];
+    const vals  = k => real.map(m => m[k]);
+    const min12 = k => Math.min(...vals(k));
+    const max12 = k => Math.max(...vals(k));
+
+    const dPeso  = +(last.peso  - BASELINE.peso).toFixed(2);
+    const dMusc  = +(last.musc  - BASELINE.musc).toFixed(2);
+    const dGrasa = +(last.grasa - BASELINE.grasa).toFixed(1);
+    const sem    = cycleWeek();
+    const ritmo  = sem ? +(dPeso / sem).toFixed(2) : '—';
+
+    // 5. Actualizar DOM — pills
+    setEl('pill-semana', `Plan Karat activo — Sem ${sem || '—'}`);
+    setEl('pill-datos',  `Datos: ${real[0].d} → ${last.d}`);
+
+    // 6. KPIs
+    setEl('kpi-peso-val',   last.peso);
+    setEl('kpi-peso-delta', `${fmtSign(last.peso - min12('peso'), 2)} vs mín 12m (${min12('peso')})`);
+    setClass('kpi-peso', 'down');
+    setDeltaClass('kpi-peso-delta', 'down');
+
+    setEl('kpi-musc-val',   last.musc);
+    setEl('kpi-musc-delta', `${fmtSign(last.musc - min12('musc'), 2)} vs mín 12m (${min12('musc')})`);
+    setClass('kpi-musc', dMusc >= 0 ? 'up' : 'down');
+    setDeltaClass('kpi-musc-delta', dMusc >= 0 ? 'up' : 'down');
+
+    setEl('kpi-grasa-val',   last.grasa);
+    setEl('kpi-grasa-delta', `${fmtSign(last.grasa - min12('grasa'), 1)} pp vs mín 12m (${min12('grasa')}%)`);
+    setClass('kpi-grasa', 'down');
+    setDeltaClass('kpi-grasa-delta', 'down');
+
+    setEl('kpi-visc-val',   last.visceral);
+    setEl('kpi-visc-delta', `${fmtSign(last.visceral - min12('visceral'), 0)} vs mín 12m (${min12('visceral')})`);
+    setClass('kpi-visc', last.visceral > min12('visceral') ? 'down' : 'neutral');
+    setDeltaClass('kpi-visc-delta', last.visceral > min12('visceral') ? 'down' : 'neu');
+
+    setEl('kpi-agua-val',   last.agua);
+    setEl('kpi-agua-delta', `${fmtSign(last.agua - max12('agua'), 1)} pp vs máx 12m (${max12('agua')}%)`);
+    setClass('kpi-agua', last.agua < max12('agua') ? 'down' : 'up');
+    setDeltaClass('kpi-agua-delta', last.agua < max12('agua') ? 'down' : 'up');
+
+    // 7. Card current values
+    setEl('cur-peso',  `${last.peso} kg`);
+    setEl('cur-musc',  `${last.musc} kg`);
+    setEl('cur-grasa', `${last.grasa}%`);
+    setEl('cur-agua',  `${last.agua}%`);
+    setEl('cur-visc',  `índice ${last.visceral}`);
+    setEl('cur-prot',  `${last.prot}%`);
+
+    // 8. Description spans
+    setEl('dyn-peso-ganancia', fmtSign(dPeso, 2));
+    setEl('dyn-peso-baseline', BASELINE.peso);
+    setEl('dyn-peso-ritmo',    ritmo);
+    setEl('dyn-musc-ganancia', fmtSign(dMusc, 2));
+    setEl('dyn-musc-baseline', BASELINE.musc);
+    setEl('dyn-grasa-delta',   fmtSign(dGrasa, 1) + ' pp');
+    setEl('dyn-visc-nivel',    `visceral ${last.visceral}`);
+    setEl('dyn-visc2',         last.visceral);
+    setEl('dyn-scatter-peso',  fmtSign(dPeso, 2));
+    setEl('dyn-scatter-grasa', fmtSign(dGrasa, 1));
+
+    // 9. Insights
+    setEl('ins-grasa-delta', fmtSign(dGrasa, 1));
+    setEl('ins-grasa-cur',   last.grasa);
+    setEl('ins-visc-cur',    last.visceral);
+    setEl('ins-musc-delta',  fmtSign(dMusc, 2));
+    setEl('ins-musc-cur',    last.musc);
+
+    // 10. Footer
+    const now = new Date();
+    setEl('footer-date', `Plan Karat Sem ${sem} · Actualizado: ${fmtDate(now.toISOString().slice(0,10))}`);
+
+    // ── GRÁFICOS ──────────────────────────────────────────────────────────────
+    const labels   = _allData.map(d => d.d);
+    const withGap  = k  => _allData.map(d => d[k]);
+    const ptColor  = al => _allData.map(d =>
+      d.interp ? 'rgba(255,255,255,0)' :
+      d.ciclo  ? `rgba(13,138,82,${al})` : `rgba(37,99,190,${al})`
+    );
+    const ptBorder = ()  => _allData.map(d =>
+      d.interp ? '#c8c6c0' : d.ciclo ? '#0d8a52' : '#2563be'
+    );
+    const ptRadius = ()  => _allData.map(d => d.interp ? 3 : 4);
+
+    // Rangos de ejes basados en datos (+ padding)
+    const axRange = (k, pad) => [+(min12(k) - pad).toFixed(1), +(max12(k) + pad).toFixed(1)];
+    const [pesoMin, pesoMax]   = axRange('peso',  0.5);
+    const [muscMin, muscMax]   = axRange('musc',  0.5);
+    const [grasaMin, grasaMax] = axRange('grasa', 0.5);
+    const [aguaMin, aguaMax]   = axRange('agua',  0.3);
+    const viscMin = min12('visceral') - 1;
+    const viscMax = max12('visceral') + 1;
+    const protMin = +(min12('prot') - 0.1).toFixed(1);
+    const protMax = +(max12('prot') + 0.1).toFixed(1);
+
+    const baseOpts = (yMin, yMax) => ({
+      responsive: true,
+      maintainAspectRatio: false,
+      spanGaps: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#ffffff',
+          titleColor: '#6b6d70',
+          bodyColor: '#1a1a18',
+          borderColor: 'rgba(0,0,0,0.12)',
+          borderWidth: 1,
+          padding: 10,
+          titleFont: { family: 'DM Mono', size: 10 },
+          bodyFont:  { family: 'DM Sans',  size: 12 }
+        }
       },
-      tooltip: {
-        backgroundColor: '#fff', titleColor: '#6b6d70', bodyColor: '#1a1a18',
-        borderColor: 'rgba(0,0,0,0.12)', borderWidth: 1,
-        filter: item => item.datasetIndex < 2,
-        callbacks: { afterLabel: (ctx) => ctx.datasetIndex === 0 ? '(' + bpTipoLabel[bpData[ctx.dataIndex].tipo] + ')' : '' }
-      }
-    },
-    scales: {
-      x: { ticks: { font: { family: 'DM Mono', size: 9 }, color: '#a8aab0' }, grid: { display: false }, border: { display: false } },
-      y: {
-        min: 60, max: 150,
-        ticks: {
-          font: { size: 9 }, color: '#a8aab0',
-          callback: v => (v === 140 || v === 90) ? v + ' ←' : v
+      scales: {
+        x: {
+          ticks: { font: { size: 8 }, color: '#a8aab0', maxRotation: 45, autoSkip: true },
+          grid:  { display: false },
+          border: { display: false }
         },
-        grid: {
-          color: ctx => (ctx.tick.value === 140 || ctx.tick.value === 90)
-            ? (ctx.tick.value === 140 ? 'rgba(201,74,48,0.2)' : 'rgba(154,98,0,0.2)')
-            : 'rgba(0,0,0,0.05)'
-        },
-        border: { display: false }
+        y: {
+          min: yMin, max: yMax,
+          ticks:  { font: { size: 9 }, color: '#a8aab0' },
+          grid:   { color: 'rgba(0,0,0,0.05)' },
+          border: { display: false }
+        }
       }
-    }
+    });
+
+    // PESO
+    new Chart(document.getElementById('c-peso'), {
+      type: 'line',
+      data: { labels, datasets: [{
+        data: withGap('peso'),
+        borderColor: '#2563be', backgroundColor: 'rgba(37,99,190,0.07)',
+        borderWidth: 2, fill: true, tension: 0.35,
+        pointBackgroundColor: ptColor(0.8), pointBorderColor: ptBorder(), pointRadius: ptRadius()
+      }]},
+      options: { ...baseOpts(pesoMin, pesoMax) }
+    });
+
+    // MÚSCULO
+    new Chart(document.getElementById('c-musc'), {
+      type: 'line',
+      data: { labels, datasets: [{
+        data: withGap('musc'),
+        borderColor: '#0d8a52', backgroundColor: 'rgba(13,138,82,0.07)',
+        borderWidth: 2, fill: true, tension: 0.35,
+        pointBackgroundColor: ptColor(0.8), pointBorderColor: ptBorder(), pointRadius: ptRadius()
+      }]},
+      options: { ...baseOpts(muscMin, muscMax) }
+    });
+
+    // GRASA
+    new Chart(document.getElementById('c-grasa'), {
+      type: 'line',
+      data: { labels, datasets: [
+        {
+          data: withGap('grasa'),
+          borderColor: '#c94a30', backgroundColor: 'rgba(201,74,48,0.07)',
+          borderWidth: 2, fill: true, tension: 0.35,
+          pointBackgroundColor: ptColor(0.8), pointBorderColor: ptBorder(), pointRadius: ptRadius()
+        },
+        {
+          data: withGap('subcutanea'),
+          borderColor: 'rgba(154,98,0,0.6)', backgroundColor: 'transparent',
+          borderWidth: 1.5, pointRadius: 2, fill: false, tension: 0.35, borderDash: [3, 3]
+        }
+      ]},
+      options: { ...baseOpts(grasaMin, grasaMax) }
+    });
+
+    // AGUA
+    new Chart(document.getElementById('c-agua'), {
+      type: 'line',
+      data: { labels, datasets: [{
+        data: withGap('agua'),
+        borderColor: '#6d4fc2', backgroundColor: 'rgba(109,79,194,0.07)',
+        borderWidth: 2, fill: true, tension: 0.35,
+        pointBackgroundColor: ptColor(0.8), pointBorderColor: ptBorder(), pointRadius: ptRadius()
+      }]},
+      options: { ...baseOpts(aguaMin, aguaMax) }
+    });
+
+    // VISCERAL
+    new Chart(document.getElementById('c-visceral'), {
+      type: 'bar',
+      data: { labels, datasets: [{
+        data: withGap('visceral'),
+        backgroundColor: _allData.map(d =>
+          d.interp       ? 'rgba(200,198,192,0.5)' :
+          d.visceral >= 10 ? 'rgba(201,74,48,0.65)'  : 'rgba(37,99,190,0.35)'),
+        borderRadius: 3, borderSkipped: false
+      }]},
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { font: { size: 8 }, color: '#a8aab0', maxRotation: 45, autoSkip: true }, grid: { display: false }, border: { display: false } },
+          y: { min: viscMin, max: viscMax, ticks: { font: { size: 9 }, color: '#a8aab0', stepSize: 1 }, grid: { color: 'rgba(0,0,0,0.05)' }, border: { display: false } }
+        }
+      }
+    });
+
+    // PROTEÍNA
+    new Chart(document.getElementById('c-prot'), {
+      type: 'line',
+      data: { labels, datasets: [{
+        data: withGap('prot'),
+        borderColor: 'rgba(109,79,194,0.7)', backgroundColor: 'transparent',
+        borderWidth: 1.5, pointRadius: 2, tension: 0.35, borderDash: [3, 2]
+      }]},
+      options: { ...baseOpts(protMin, protMax) }
+    });
+
+    // SCATTER
+    new Chart(document.getElementById('c-scatter'), {
+      type: 'scatter',
+      data: { datasets: [
+        {
+          label: 'Pre-ciclo',
+          data: _allData.filter(d => !d.ciclo && !d.interp).map(d => ({ x: d.peso, y: d.grasa, label: d.d })),
+          backgroundColor: 'rgba(107,109,112,0.5)', pointRadius: 5, pointHoverRadius: 7
+        },
+        {
+          label: 'Ciclo activo',
+          data: _allData.filter(d => d.ciclo).map(d => ({ x: d.peso, y: d.grasa, label: d.d })),
+          backgroundColor: 'rgba(13,138,82,0.75)', pointRadius: 6, pointHoverRadius: 8
+        }
+      ]},
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#ffffff', titleColor: '#6b6d70', bodyColor: '#1a1a18',
+            borderColor: 'rgba(0,0,0,0.12)', borderWidth: 1,
+            callbacks: { label: ctx => `${ctx.raw.label}: ${ctx.raw.x} kg — ${ctx.raw.y}% grasa` }
+          }
+        },
+        scales: {
+          x: {
+            min: Math.floor(min12('peso') - 0.5), max: Math.ceil(max12('peso') + 0.5),
+            title: { display: true, text: 'Peso (kg)', color: '#a8aab0', font: { size: 10 } },
+            ticks: { font: { size: 9 }, color: '#a8aab0' },
+            grid: { color: 'rgba(0,0,0,0.05)' }, border: { display: false }
+          },
+          y: {
+            min: +(min12('grasa') - 0.5).toFixed(1), max: +(max12('grasa') + 0.5).toFixed(1),
+            title: { display: true, text: 'Grasa %', color: '#a8aab0', font: { size: 10 } },
+            ticks: { font: { size: 9 }, color: '#a8aab0' },
+            grid: { color: 'rgba(0,0,0,0.05)' }, border: { display: false }
+          }
+        }
+      }
+    });
+
+    // ── GRÁFICO TA (hardcoded — actualización manual) ─────────────────────────
+    const bpData = [
+      { d: '14 may', sist: 124, diast: 90, tipo: 'medico' },
+      { d: '18 may', sist: 129, diast: 90, tipo: 'cafe'   },
+      { d: '19 may', sist: 104, diast: 71, tipo: 'nocafe' },
+      { d: '20 may', sist: 140, diast: 85, tipo: 'cafe'   },
+      { d: '21 may', sist: 110, diast: 80, tipo: 'nocafe' },
+      { d: '22 may', sist: 121, diast: 82, tipo: 'nocafe' },
+      { d: '25 may', sist: 115, diast: 82, tipo: 'nocafe' },
+      { d: '26 may', sist: 127, diast: 83, tipo: 'nocafe' },
+      { d: '27 may', sist: 115, diast: 81, tipo: 'nocafe' },
+    ];
+    const bpPtColor  = { medico: 'rgba(109,79,194,0.85)', cafe: 'rgba(201,74,48,0.9)',   nocafe: 'rgba(13,138,82,0.9)' };
+    const bpPtBorder = { medico: '#6d4fc2',               cafe: '#c94a30',               nocafe: '#0d8a52'             };
+    const bpTipo     = { medico: 'chequeo médico',         cafe: 'con café',              nocafe: 'sin café'            };
+    const bpN = bpData.length;
+
+    new Chart(document.getElementById('c-bp'), {
+      type: 'line',
+      data: { labels: bpData.map(d => d.d), datasets: [
+        {
+          label: 'Sistólica',
+          data: bpData.map(d => d.sist),
+          borderColor: '#c94a30', backgroundColor: 'rgba(201,74,48,0.07)',
+          borderWidth: 2, fill: true, tension: 0.3, order: 1,
+          pointBackgroundColor: bpData.map(d => bpPtColor[d.tipo]),
+          pointBorderColor:     bpData.map(d => bpPtBorder[d.tipo]),
+          pointRadius: 5
+        },
+        {
+          label: 'Diastólica',
+          data: bpData.map(d => d.diast),
+          borderColor: '#9a6200', backgroundColor: 'transparent',
+          borderWidth: 1.5, pointRadius: 4, fill: false, tension: 0.3, borderDash: [4, 3], order: 2
+        },
+        {
+          label: 'Límite sist. (140)',
+          data: new Array(bpN).fill(140),
+          borderColor: 'rgba(201,74,48,0.55)', backgroundColor: 'transparent',
+          borderWidth: 1.5, borderDash: [6, 4], pointRadius: 0, fill: false, order: 3
+        },
+        {
+          label: 'Límite diast. (90)',
+          data: new Array(bpN).fill(90),
+          borderColor: 'rgba(154,98,0,0.55)', backgroundColor: 'transparent',
+          borderWidth: 1.5, borderDash: [6, 4], pointRadius: 0, fill: false, order: 4
+        }
+      ]},
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+            labels: { font: { family: 'DM Mono', size: 10 }, color: '#6b6d70', boxWidth: 8,
+              filter: item => !item.text.startsWith('Límite') }
+          },
+          tooltip: {
+            backgroundColor: '#fff', titleColor: '#6b6d70', bodyColor: '#1a1a18',
+            borderColor: 'rgba(0,0,0,0.12)', borderWidth: 1,
+            filter: item => item.datasetIndex < 2,
+            callbacks: { afterLabel: ctx => ctx.datasetIndex === 0 ? '(' + bpTipo[bpData[ctx.dataIndex].tipo] + ')' : '' }
+          }
+        },
+        scales: {
+          x: { ticks: { font: { family: 'DM Mono', size: 9 }, color: '#a8aab0' }, grid: { display: false }, border: { display: false } },
+          y: {
+            min: 60, max: 150,
+            ticks: { font: { size: 9 }, color: '#a8aab0', callback: v => (v === 140 || v === 90) ? v + ' ←' : v },
+            grid: { color: ctx => ctx.tick.value === 140 ? 'rgba(201,74,48,0.2)' : ctx.tick.value === 90 ? 'rgba(154,98,0,0.2)' : 'rgba(0,0,0,0.05)' },
+            border: { display: false }
+          }
+        }
+      }
+    });
+
+    // Mostrar dashboard
+    document.getElementById('loading-bar').style.display = 'none';
+    document.getElementById('dashboard-content').style.display = 'block';
+
+  } catch (err) {
+    document.getElementById('loading-bar').textContent = 'Error cargando datos: ' + err.message;
+    console.error(err);
   }
-});
+}
+
+init();
 </script>
 </body>
 </html>
