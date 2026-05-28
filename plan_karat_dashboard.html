@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plan Karat · Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg:#f8f8f6; --surface:#ffffff; --surface2:#f1f0ed;
+  --border:rgba(0,0,0,0.06); --border2:rgba(0,0,0,0.10);
+  --text:#1a1a18; --text2:#6b6d70; --text3:#a8aab0;
+  --green:#0d8a52; --green-dim:rgba(13,138,82,0.08);
+  --red:#c94a30;   --red-dim:rgba(201,74,48,0.08);
+  --amber:#9a6200; --amber-dim:rgba(154,98,0,0.08);
+  --blue:#2563be;  --blue-dim:rgba(37,99,190,0.08);
+  --purple:#6d4fc2;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+
+/* ── Layout ─────────────────────────────────────────────── */
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px 40px}
+
+/* ── Header ─────────────────────────────────────────────── */
+header{background:var(--surface);border-bottom:1px solid var(--border2);padding:14px 0;position:sticky;top:0;z-index:100}
+.header-inner{max-width:1100px;margin:0 auto;padding:0 16px;display:flex;align-items:center;gap:12px}
+.logo{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;letter-spacing:0.08em;color:var(--text)}
+.week-badge{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;padding:3px 9px;border-radius:20px;background:var(--green-dim);color:var(--green);border:0.5px solid rgba(13,138,82,0.25)}
+.spacer{flex:1}
+#btnRefresh{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.08em;padding:5px 14px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s}
+#btnRefresh:hover{background:var(--surface2)}
+#btnRefresh.loading{color:var(--amber);border-color:var(--amber)}
+.btn-settings{width:28px;height:28px;border-radius:6px;border:0.5px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:background .15s}
+.btn-settings:hover{background:var(--surface2)}
+#refreshMsg{font-family:'DM Mono',monospace;font-size:10px;color:var(--amber);display:none}
+
+/* ── Sections ────────────────────────────────────────────── */
+.section{margin-top:28px}
+.section-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3);padding-bottom:8px;border-bottom:0.5px solid var(--border2);margin-bottom:14px}
+
+/* ── Cards ───────────────────────────────────────────────── */
+.card{background:var(--surface);border:0.5px solid var(--border2);border-radius:10px;padding:16px;margin-bottom:12px}
+.card-header{display:flex;align-items:center;margin-bottom:12px}
+.card-title{font-size:11px;font-weight:500;color:var(--text2);letter-spacing:0.02em}
+.card-badge{margin-left:auto;font-family:'DM Mono',monospace;font-size:9px;color:var(--text3)}
+.chart-wrap{position:relative}
+
+/* ── Grid helpers ────────────────────────────────────────── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:600px){.two-col,.three-col{grid-template-columns:1fr}}
+
+/* ── KPIs ────────────────────────────────────────────────── */
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}
+@media(max-width:700px){.kpi-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:420px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--surface);border:0.5px solid var(--border2);border-radius:8px;padding:12px 14px}
+.kpi-label{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:5px}
+.kpi-val{font-size:22px;font-weight:300;letter-spacing:-0.03em;line-height:1}
+.kpi-unit{font-size:11px;font-weight:400;color:var(--text2)}
+.kpi-delta{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:4px}
+.kpi-delta.up{color:var(--green)} .kpi-delta.down{color:var(--red)} .kpi-delta.ok{color:var(--green)}
+.train-kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+
+/* ── Range toggle ────────────────────────────────────────── */
+.range-btns{display:flex;gap:4px}
+.range-btn{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.06em;padding:3px 10px;border-radius:4px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s}
+.range-btn:hover{background:var(--surface2)}
+.range-btn.active{background:var(--text);color:var(--bg);border-color:var(--text)}
+
+/* ── Protocol panel ──────────────────────────────────────── */
+.proto-card{background:var(--surface);border:0.5px solid var(--border2);border-radius:10px;padding:18px}
+.proto-top{display:flex;align-items:flex-start;gap:16px;margin-bottom:16px}
+.proto-week{font-size:42px;font-weight:300;letter-spacing:-0.05em;line-height:1;color:var(--text)}
+.proto-week span{font-size:14px;font-weight:400;color:var(--text3);letter-spacing:0;margin-left:2px}
+.proto-info{flex:1}
+.proto-label{font-size:13px;color:var(--text);margin-bottom:4px}
+.proto-next{font-family:'DM Mono',monospace;font-size:10px;color:var(--amber);margin-top:2px}
+.proto-note{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:2px}
+.proto-progress-track{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:12px;overflow:hidden}
+.proto-progress-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--green),#1ab069);transition:width .6s ease}
+.week-timeline{display:flex;gap:3px;flex-wrap:wrap}
+.wk{width:26px;height:20px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:8px;cursor:default;transition:all .15s}
+.wk.past{background:var(--green-dim);color:var(--green)}
+.wk.current{background:var(--green);color:#fff;font-weight:500;box-shadow:0 0 0 2px rgba(13,138,82,0.3)}
+.wk.future{background:var(--surface2);color:var(--text3)}
+.wk.pct-past{background:var(--amber-dim);color:var(--amber)}
+.wk.pct-current{background:var(--amber);color:#fff;font-weight:500}
+.wk.pct-future{background:var(--surface2);color:var(--text3)}
+
+/* ── Analysis ────────────────────────────────────────────── */
+.analysis-section{margin-bottom:14px}
+.analysis-section-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.analysis-item{font-size:12px;color:var(--text2);padding:7px 10px 7px 28px;border-radius:6px;margin-bottom:4px;position:relative;background:var(--surface2)}
+.analysis-item::before{position:absolute;left:9px;top:7px;font-size:10px}
+.analysis-item.ok{background:var(--green-dim);color:#0a5c36}.analysis-item.ok::before{content:'✓'}
+.analysis-item.warn{background:var(--amber-dim);color:#6b4400}.analysis-item.warn::before{content:'⚠'}
+.analysis-item.info::before{content:'→'}
+
+/* ── Settings modal ──────────────────────────────────────── */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--surface);border-radius:12px;padding:24px;width:340px;max-width:calc(100vw - 32px)}
+.modal h3{font-size:14px;font-weight:500;margin-bottom:16px}
+.modal label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.06em;color:var(--text2);display:block;margin-bottom:6px}
+.modal input{width:100%;border:0.5px solid var(--border2);border-radius:6px;padding:8px 10px;font-family:'DM Mono',monospace;font-size:11px;background:var(--bg);color:var(--text);outline:none}
+.modal input:focus{border-color:var(--blue)}
+.modal-actions{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
+.btn-primary{font-family:'DM Mono',monospace;font-size:10px;padding:6px 16px;border-radius:6px;border:none;background:var(--text);color:var(--bg);cursor:pointer}
+.btn-ghost{font-family:'DM Mono',monospace;font-size:10px;padding:6px 16px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer}
+.modal-note{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:10px;line-height:1.5}
+
+/* ── Loading ─────────────────────────────────────────────── */
+.loading-bar{height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent);background-size:200% 100%;animation:slide 1.2s linear infinite;display:none;margin-bottom:0}
+@keyframes slide{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.loading-bar.active{display:block}
+.load-msg{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);text-align:center;padding:40px;display:none}
+.load-msg.active{display:block}
+
+footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:40px;padding-bottom:20px}
+</style>
+</head>
+<body>
+
+<div class="loading-bar active" id="loadBar"></div>
+
+<header>
+  <div class="header-inner">
+    <span class="logo">PLAN KARAT</span>
+    <span class="week-badge" id="weekBadge">cargando…</span>
+    <span class="spacer"></span>
+    <span id="refreshMsg">Actualizando…</span>
+    <button id="btnRefresh" onclick="triggerRefresh()">↻ Actualizar</button>
+    <button class="btn-settings" onclick="openSettings()" title="Configuración">⚙</button>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- PROTOCOLO -->
+  <div class="section">
+    <div class="section-title">Protocolo del ciclo</div>
+    <div class="proto-card">
+      <div class="proto-top">
+        <div class="proto-week" id="protoWeekNum">—<span>/ 20</span></div>
+        <div class="proto-info">
+          <div class="proto-label" id="protoLabel">cargando…</div>
+          <div class="proto-next" id="protoNext"></div>
+          <div class="proto-note" id="protoNote"></div>
+        </div>
+      </div>
+      <div class="proto-progress-track"><div class="proto-progress-fill" id="protoFill" style="width:0%"></div></div>
+      <div class="week-timeline" id="weekTimeline"></div>
+    </div>
+  </div>
+
+  <!-- COMPOSICIÓN CORPORAL -->
+  <div class="section">
+    <div class="section-title" style="display:flex;align-items:center">
+      <span style="flex:1">Composición corporal</span>
+      <div class="range-btns">
+        <button class="range-btn" data-m="6" onclick="applyRange(6)">6m</button>
+        <button class="range-btn active" data-m="12" onclick="applyRange(12)">12m</button>
+      </div>
+    </div>
+    <div class="kpi-grid" id="bodyKpis">
+      <div class="kpi"><div class="kpi-label">Peso</div><div class="kpi-val" id="kPeso">—</div><div class="kpi-delta" id="kPesoDelta">—</div></div>
+      <div class="kpi"><div class="kpi-label">Músculo</div><div class="kpi-val" id="kMusc">—</div><div class="kpi-delta up" id="kMuscDelta">—</div></div>
+      <div class="kpi"><div class="kpi-label">Grasa</div><div class="kpi-val" id="kGrasa">—</div><div class="kpi-delta" id="kGrasaDelta">—</div></div>
+      <div class="kpi"><div class="kpi-label">Visceral</div><div class="kpi-val" id="kVisc">—</div><div class="kpi-delta" id="kViscDelta">—</div></div>
+      <div class="kpi"><div class="kpi-label">Agua</div><div class="kpi-val" id="kAgua">—</div><div class="kpi-delta" id="kAguaDelta">—</div></div>
+    </div>
+    <div class="two-col">
+      <div class="card"><div class="card-header"><span class="card-title">Peso</span><span class="card-badge" id="cbPeso"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-peso"></canvas></div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Masa muscular</span><span class="card-badge" id="cbMusc"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-musc"></canvas></div></div>
+    </div>
+    <div class="two-col">
+      <div class="card"><div class="card-header"><span class="card-title">Grasa corporal</span><span class="card-badge" id="cbGrasa"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-grasa"></canvas></div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Agua · Grasa visceral</span></div><div class="chart-wrap" style="height:160px"><canvas id="c-agua"></canvas></div></div>
+    </div>
+    <div class="card" style="margin-top:0">
+      <div class="card-header"><span class="card-title">Peso vs grasa — dispersión</span><span class="card-badge">● pre-ciclo &nbsp;● ciclo</span></div>
+      <div class="chart-wrap" style="height:200px"><canvas id="c-scatter"></canvas></div>
+    </div>
+  </div>
+
+  <!-- TENSIÓN ARTERIAL -->
+  <div class="section">
+    <div class="section-title">Tensión arterial</div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Lecturas · <span style="color:var(--purple)">■</span> médico &nbsp;<span style="color:var(--red)">■</span> con café &nbsp;<span style="color:var(--green)">■</span> sin café</span>
+        <span class="card-badge" id="bpBadge"></span>
+      </div>
+      <div class="chart-wrap" style="height:180px"><canvas id="c-bp"></canvas></div>
+      <p id="bpNote" style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:8px"></p>
+    </div>
+  </div>
+
+  <!-- ENTRENAMIENTO -->
+  <div class="section">
+    <div class="section-title">Entrenamiento</div>
+    <div class="train-kpi-grid">
+      <div class="kpi"><div class="kpi-label">Sesiones (mes)</div><div class="kpi-val" id="tSes">—</div><div class="kpi-delta" id="tSesDelta">—</div></div>
+      <div class="kpi"><div class="kpi-label">Volumen (mes)</div><div class="kpi-val" id="tVol">—</div><div class="kpi-delta" id="tVolDelta">—</div></div>
+      <div class="kpi"><div class="kpi-label">Última sesión</div><div class="kpi-val" id="tLast" style="font-size:14px;padding-top:4px">—</div><div class="kpi-delta" id="tLastVol">—</div></div>
+    </div>
+    <div class="two-col">
+      <div class="card"><div class="card-header"><span class="card-title">Volumen por sesión — ciclo</span><span class="card-badge" id="volBadge"></span></div><div class="chart-wrap" style="height:180px"><canvas id="c-vol"></canvas></div></div>
+      <div class="card" id="radarCard" style="display:none"><div class="card-header"><span class="card-title">Distribución muscular — Hevy</span><span class="card-badge" id="radarBadge"></span></div><div class="chart-wrap" style="height:180px"><canvas id="c-radar"></canvas></div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Frecuencia mensual</span></div><div class="chart-wrap" style="height:180px"><canvas id="c-freq"></canvas></div></div>
+    </div>
+  </div>
+
+  <!-- ANÁLISIS -->
+  <div class="section">
+    <div class="section-title" style="display:flex;align-items:center">
+      <span style="flex:1">Análisis automático</span>
+      <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3)" id="analysisDate"></span>
+    </div>
+    <div id="analysisBody"></div>
+  </div>
+
+</div><!-- /wrap -->
+
+<footer><span id="footerTxt">Plan Karat · matias1661.github.io/Dashboards</span></footer>
+
+<!-- Settings modal -->
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeSettings()">
+  <div class="modal">
+    <h3>Configuración</h3>
+    <label>GitHub Personal Access Token</label>
+    <input type="password" id="ghTokenInput" placeholder="ghp_…" autocomplete="off">
+    <div class="modal-note">Necesario para el botón Actualizar (dispatches GitHub Actions).<br>Se guarda solo en este dispositivo (localStorage).</div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="clearToken()">Borrar token</button>
+      <button class="btn-ghost" onclick="closeSettings()">Cancelar</button>
+      <button class="btn-primary" onclick="saveToken()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// CONSTANTES DEL CICLO — actualizar cuando cambie el protocolo
+// ═══════════════════════════════════════════════════════════════════════════
+const CYCLE_START = new Date('2026-03-23');
+const TAMO_DATE   = new Date('2026-05-14');
+const CYCLE_WEEKS = 20;
+const BASELINE    = { peso: 86.20, musc: 59.22, grasa: 27.7 };
+
+const PROTOCOL = [
+  { from:1,  to:8,  label:'Testo 2cm · Deca 0.5cm · Masteron 1cm · Tamo 20mg/2d', note:'' },
+  { from:9,  to:10, label:'Testo 2cm · Masteron 1cm · Tamo 20mg/2d', note:'Deca eliminado sem 9' },
+  { from:11, to:13, label:'Testo 3cm · Masteron 1cm · Tamo 20mg/2d', note:'Subida Testo condicionada a TA <140/90' },
+  { from:14, to:16, label:'Testo 2cm · Tamo 20mg/2d', note:'Masteron finalizado' },
+  { from:17, to:17, label:'PCT · HCG 5000UI×3 + Tamo 40mg + Clomid 50mg', note:'' },
+  { from:18, to:19, label:'PCT · HCG 5000UI×3 + Tamo 20mg + Clomid 25mg', note:'' },
+  { from:20, to:20, label:'PCT · Tamo 10mg', note:'' },
+];
+
+const RENPHO_URL = 'https://raw.githubusercontent.com/Matias1661/Dashboards/main/renpho_data.json';
+const HEVY_URL   = 'https://raw.githubusercontent.com/Matias1661/Dashboards/main/hevy_data.json';
+const JEFIT_URL  = 'https://raw.githubusercontent.com/Matias1661/Dashboards/main/jefit_data.json';
+const BP_URL     = 'https://raw.githubusercontent.com/Matias1661/Dashboards/main/bp_data.json';
+const GH_REPO    = 'Matias1661/Dashboards';
+const GH_WF      = ['fetch_renpho.yml','fetch_hevy.yml','fetch_bp.yml'];
+
+const MESES_ES  = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const MESES_CAP = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════════════════
+function parseDateISO(s){ const[y,m,d]=s.split('-'); return new Date(+y,+m-1,+d); }
+function fmtLabel(d){ return d.getDate()+' '+MESES_CAP[d.getMonth()]+' '+String(d.getFullYear()).slice(2); }
+function fmtMonth(d){ return MESES_ES[d.getMonth()]+' '+String(d.getFullYear()).slice(2); }
+function fmtWeek(d){ return d.getDate()+' '+MESES_ES[d.getMonth()]; }
+function getMonday(d){const r=new Date(d);const day=r.getDay();r.setDate(r.getDate()-(day===0?6:day-1));r.setHours(0,0,0,0);return r;}
+function getCurrentWeek(){ return Math.max(1,Math.ceil((new Date()-CYCLE_START)/(7*864e5))); }
+function getProtocolForWeek(w){ return PROTOCOL.find(p=>w>=p.from&&w<=p.to)||null; }
+function getNextChange(w){
+  for(const p of PROTOCOL){ if(p.from>w){
+    const start=new Date(CYCLE_START); start.setDate(start.getDate()+(p.from-1)*7);
+    const days=Math.ceil((start-new Date())/864e5);
+    return {...p, startDate:start, daysUntil:days, dateStr:start.getDate()+' '+MESES_ES[start.getMonth()]};
+  }}
+  return null;
+}
+function fmt1d(n){ return n>=0?'+'+n.toFixed(1):n.toFixed(1); }
+function fmt2d(n){ return n>=0?'+'+n.toFixed(2):n.toFixed(2); }
+function avgs(arr,k){ return arr.length?+(arr.reduce((s,r)=>s+(r[k]||0),0)/arr.length).toFixed(2):null; }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MUSCLE GROUP MAPPINGS (shared Jefit + Hevy)
+// ═══════════════════════════════════════════════════════════════════════════
+const MUSCLE_MAP=[
+  {group:'Pecho',      kw:['pecho','press banca','press inclinado','aperturas','chest','bench','fly','pec']},
+  {group:'Espalda',    kw:['espalda','jalón','remo','dominadas','pull','row','lat','deadlift','peso muerto','back','rdl','romanian']},
+  {group:'Hombro',     kw:['hombro','press militar','elevaciones','lateral','deltoid','shoulder','press arnold']},
+  {group:'Bíceps',     kw:['bíceps','bicep','curl','predicador','martillo']},
+  {group:'Tríceps',    kw:['tríceps','tricep','fondos','pushdown','press francés','extensión']},
+  {group:'Cuádriceps', kw:['cuádriceps','leg press','sentadilla','squat','hack','extensión pierna','lunge','zancada']},
+  {group:'Isquios',    kw:['curl femoral','leg curl','isquio','nordic','good morning']},
+  {group:'Glúteos',    kw:['hip thrust','glúteo','gluteo','glute bridge','kickback','hip extension','hip abduct']},
+];
+const HEVY_MUSCLE_MAP={chest:'Pecho',back:'Espalda',lats:'Espalda',upper_back:'Espalda',middle_back:'Espalda',lower_back:'Espalda',shoulders:'Hombros',traps:'Hombros',biceps:'Bíceps',triceps:'Tríceps',forearms:'Bíceps',quadriceps:'Piernas',hamstrings:'Piernas',glutes:'Glúteos',calves:'Piernas'};
+const RADAR_GROUPS=['Pecho','Glúteos','Hombros','Brazos','Piernas','Espalda'];
+const KW_TO_RADAR={'Pecho':'Pecho','Espalda':'Espalda','Hombro':'Hombros','Bíceps':'Brazos','Tríceps':'Brazos','Cuádriceps':'Piernas','Isquios':'Piernas','Glúteos':'Glúteos'};
+function getGroup(t){const tl=t.toLowerCase();for(const{group,kw}of MUSCLE_MAP){if(kw.some(k=>tl.includes(k)))return group;}return 'Otro';}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CHART PLUGIN: ciclo shading + Tamoxifen line
+// ═══════════════════════════════════════════════════════════════════════════
+let activeCicloIdx=-1, activeTamoIdx=-1;
+Chart.register({
+  id:'annotPlugin',
+  beforeDraw(chart){
+    if(chart.config.type==='scatter'||chart.config.type==='radar'||chart.config.type==='bar')return;
+    const{ctx,chartArea,scales}=chart;
+    if(!chartArea||!scales.x)return;
+    const xs=scales.x;
+    if(activeCicloIdx>=0){
+      const cx=xs.getPixelForValue(activeCicloIdx);
+      ctx.save();ctx.fillStyle='rgba(13,138,82,0.05)';
+      ctx.fillRect(cx,chartArea.top,chartArea.right-cx,chartArea.bottom-chartArea.top);
+      ctx.strokeStyle='rgba(13,138,82,0.25)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+      ctx.beginPath();ctx.moveTo(cx,chartArea.top);ctx.lineTo(cx,chartArea.bottom);ctx.stroke();
+      ctx.restore();
+    }
+    if(activeTamoIdx>=0&&activeTamoIdx+1<=xs.max){
+      const step=xs.getPixelForValue(Math.min(activeTamoIdx+1,xs.max))-xs.getPixelForValue(activeTamoIdx);
+      const tx=xs.getPixelForValue(activeTamoIdx)+step*0.5;
+      ctx.save();ctx.strokeStyle='rgba(37,99,190,0.45)';ctx.lineWidth=1.5;ctx.setLineDash([3,3]);
+      ctx.beginPath();ctx.moveTo(tx,chartArea.top);ctx.lineTo(tx,chartArea.bottom);ctx.stroke();
+      ctx.fillStyle='rgba(37,99,190,0.6)';ctx.font='8px DM Mono,monospace';
+      ctx.fillText('Tamo',tx+3,chartArea.top+10);ctx.restore();
+    }
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BASE CHART OPTIONS
+// ═══════════════════════════════════════════════════════════════════════════
+const baseOpts=(yMin,yMax)=>({responsive:true,maintainAspectRatio:false,spanGaps:true,
+  plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#6b6d70',bodyColor:'#1a1a18',borderColor:'rgba(0,0,0,0.1)',borderWidth:1,padding:8,titleFont:{family:'DM Mono',size:9},bodyFont:{family:'DM Sans',size:12}}},
+  scales:{x:{ticks:{font:{size:8,family:'DM Mono'},color:'#a8aab0',maxRotation:45,autoSkip:true},grid:{display:false},border:{display:false}},
+    y:{min:yMin,max:yMax,ticks:{font:{size:8},color:'#a8aab0'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CHART INSTANCES (empty → populated by render functions)
+// ═══════════════════════════════════════════════════════════════════════════
+const chartPeso=new Chart(document.getElementById('c-peso'),{type:'line',data:{labels:[],datasets:[{data:[],borderColor:'#2563be',backgroundColor:'rgba(37,99,190,0.07)',borderWidth:2,pointRadius:[],fill:true,tension:0.35}]},options:baseOpts(83,92)});
+const chartMusc=new Chart(document.getElementById('c-musc'),{type:'line',data:{labels:[],datasets:[{data:[],borderColor:'#0d8a52',backgroundColor:'rgba(13,138,82,0.07)',borderWidth:2,pointRadius:[],fill:true,tension:0.35}]},options:baseOpts(57.5,62)});
+const chartGrasa=new Chart(document.getElementById('c-grasa'),{type:'line',data:{labels:[],datasets:[
+  {data:[],borderColor:'#c94a30',backgroundColor:'rgba(201,74,48,0.07)',borderWidth:2,pointRadius:[],fill:true,tension:0.35},
+  {data:[],borderColor:'rgba(154,98,0,0.5)',backgroundColor:'transparent',borderWidth:1.5,pointRadius:2,fill:false,tension:0.35,borderDash:[3,3]}
+]},options:baseOpts(23,30)});
+const chartAgua=new Chart(document.getElementById('c-agua'),{type:'line',data:{labels:[],datasets:[
+  {data:[],borderColor:'#6d4fc2',backgroundColor:'rgba(109,79,194,0.07)',borderWidth:2,pointRadius:[],fill:true,tension:0.35,label:'Agua %'},
+]},options:{...baseOpts(50,54),plugins:{legend:{display:false}}}});
+const chartScatter=new Chart(document.getElementById('c-scatter'),{type:'scatter',data:{datasets:[
+  {label:'Pre-ciclo',data:[],backgroundColor:'rgba(107,109,112,0.45)',pointRadius:5,pointHoverRadius:7},
+  {label:'Ciclo activo',data:[],backgroundColor:'rgba(13,138,82,0.75)',pointRadius:6,pointHoverRadius:8}
+]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#6b6d70',bodyColor:'#1a1a18',borderColor:'rgba(0,0,0,0.1)',borderWidth:1,callbacks:{label:ctx=>`${ctx.raw.label}: ${ctx.raw.x} kg — ${ctx.raw.y}% grasa`}}},scales:{x:{min:83.5,max:92,title:{display:true,text:'Peso (kg)',color:'#a8aab0',font:{size:9}},ticks:{font:{size:8},color:'#a8aab0'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}},y:{min:26.5,max:30,title:{display:true,text:'Grasa %',color:'#a8aab0',font:{size:9}},ticks:{font:{size:8},color:'#a8aab0'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}});
+
+const chartBP=new Chart(document.getElementById('c-bp'),{type:'line',data:{labels:[],datasets:[
+  {label:'Sistólica',data:[],borderColor:'#c94a30',backgroundColor:'rgba(201,74,48,0.07)',borderWidth:2,pointRadius:[],fill:true,tension:0.3},
+  {label:'Diastólica',data:[],borderColor:'#9a6200',backgroundColor:'transparent',borderWidth:1.5,pointRadius:[],fill:false,tension:0.3,borderDash:[4,3]},
+  {data:[],borderColor:'rgba(201,74,48,0.4)',backgroundColor:'transparent',borderWidth:1,borderDash:[6,4],pointRadius:0,fill:false},
+  {data:[],borderColor:'rgba(154,98,0,0.4)',backgroundColor:'transparent',borderWidth:1,borderDash:[6,4],pointRadius:0,fill:false},
+]},options:{responsive:true,maintainAspectRatio:false,spanGaps:true,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#6b6d70',bodyColor:'#1a1a18',borderColor:'rgba(0,0,0,0.1)',borderWidth:1,filter:item=>item.datasetIndex<2}},scales:{x:{ticks:{font:{family:'DM Mono',size:8},color:'#a8aab0'},grid:{display:false},border:{display:false}},y:{min:60,max:155,ticks:{font:{size:8},color:'#a8aab0',callback:v=>(v===140||v===90)?v+' ←':v},grid:{color:ctx=>(ctx.tick.value===140||ctx.tick.value===90)?(ctx.tick.value===140?'rgba(201,74,48,0.15)':'rgba(154,98,0,0.15)'):'rgba(0,0,0,0.04)'},border:{display:false}}}}});
+
+const chartVol=new Chart(document.getElementById('c-vol'),{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:[],borderRadius:3,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#6b6d70',bodyColor:'#1a1a18',borderColor:'rgba(0,0,0,0.1)',borderWidth:1}},scales:{x:{ticks:{font:{family:'DM Mono',size:8},color:'#a8aab0',maxRotation:45,autoSkip:true},grid:{display:false},border:{display:false}},y:{ticks:{font:{size:8},color:'#a8aab0',callback:v=>v>=1000?Math.round(v/1000)+'k':v},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}});
+
+const chartFreq=new Chart(document.getElementById('c-freq'),{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:[],borderRadius:3,borderSkipped:false,label:'Sesiones'},{data:[],borderColor:'rgba(37,99,190,0.5)',backgroundColor:'transparent',type:'line',pointRadius:0,borderDash:[3,3],label:'Objetivo (8)'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{family:'DM Mono',size:8},color:'#a8aab0'},grid:{display:false},border:{display:false}},y:{min:0,ticks:{font:{size:8},color:'#a8aab0',stepSize:2},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}});
+
+let chartRadar=null;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GLOBAL STATE
+// ═══════════════════════════════════════════════════════════════════════════
+let allData=[]; let allSessions=[]; let bpReadings=[];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DATA PROCESSING
+// ═══════════════════════════════════════════════════════════════════════════
+function processRenpho(json){
+  const raw=json.measurements||json;
+  const cutoff=new Date(); cutoff.setMonth(cutoff.getMonth()-13);
+  allData=raw.map(r=>({
+    d:fmtLabel(parseDateISO(r.date)), _date:parseDateISO(r.date),
+    peso:+r.weight, musc:+(r.skeletal_muscle||0), grasa:+r.body_fat,
+    subcutanea:+(r.subcutaneous_fat||0), agua:+r.water, visceral:+r.visceral_fat, prot:+(r.protein||0),
+    ciclo:parseDateISO(r.date)>=CYCLE_START, interp:false,
+  })).filter(r=>r._date>=cutoff).sort((a,b)=>a._date-b._date);
+}
+
+function parseWorkouts(workouts,src){
+  return workouts.map(w=>{
+    const start=new Date(w.start_time);
+    const end=w.end_time?new Date(w.end_time):null;
+    let vol=0; const groupSets={}; const musclePrimary={}; const muscleSecondary={};
+    (w.exercises||[]).forEach(ex=>{
+      const kwg=getGroup(ex.title);
+      (ex.sets||[]).filter(s=>s.type!=='warmup').forEach(s=>{
+        vol+=(s.weight_kg||0)*(s.reps||0);
+        groupSets[kwg]=(groupSets[kwg]||0)+1;
+      });
+      const n=(ex.sets||[]).filter(s=>s.type!=='warmup').length;
+      if(n>0){
+        const np=HEVY_MUSCLE_MAP[ex.primary_muscle_group];
+        const pg=np||KW_TO_RADAR[kwg];
+        if(pg)musclePrimary[pg]=(musclePrimary[pg]||0)+n;
+        (ex.secondary_muscle_groups||[]).forEach(sm=>{const sg=HEVY_MUSCLE_MAP[sm];if(sg)muscleSecondary[sg]=(muscleSecondary[sg]||0)+n*0.5;});
+      }
+    });
+    return {date:start,dateStr:fmtLabel(start),vol:Math.round(vol),durationMin:end?Math.round((end-start)/60000):null,src,title:w.title||'—',exerciseCount:(w.exercises||[]).length,groupSets,musclePrimary,muscleSecondary,hasNativeMuscle:Object.keys(musclePrimary).length>0,inCycle:start>=CYCLE_START};
+  }).filter(s=>s.vol>0).sort((a,b)=>a.date-b.date);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AGGREGATION (6m weekly / 12m monthly)
+// ═══════════════════════════════════════════════════════════════════════════
+const METRICS=['peso','musc','grasa','subcutanea','agua','visceral','prot'];
+function aggregate(type){
+  const now=new Date(); const n=type==='monthly'?12:26; const buckets=[];
+  for(let i=n-1;i>=0;i--){
+    let label,pts,refDate;
+    if(type==='monthly'){
+      const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+      pts=allData.filter(r=>r._date.getFullYear()===d.getFullYear()&&r._date.getMonth()===d.getMonth());
+      label=fmtMonth(d); refDate=new Date(d);
+    }else{
+      const monday=getMonday(new Date(now)); monday.setDate(monday.getDate()-i*7);
+      const sunday=new Date(monday); sunday.setDate(sunday.getDate()+6); sunday.setHours(23,59,59);
+      pts=allData.filter(r=>r._date>=monday&&r._date<=sunday);
+      label=fmtWeek(monday); refDate=new Date(monday);
+    }
+    const b={label,pts,ciclo:pts.some(r=>r.ciclo),interp:pts.length===0,d:refDate};
+    if(pts.length)METRICS.forEach(k=>{b[k]=avgs(pts,k);});
+    buckets.push(b);
+  }
+  METRICS.forEach(k=>{
+    for(let i=0;i<buckets.length;i++){
+      if(buckets[i][k]==null){
+        let prev=-1,next=-1;
+        for(let j=i-1;j>=0;j--)if(buckets[j][k]!=null){prev=j;break;}
+        for(let j=i+1;j<buckets.length;j++)if(buckets[j][k]!=null){next=j;break;}
+        if(prev>=0&&next>=0){const t=(i-prev)/(next-prev);buckets[i][k]=+(buckets[prev][k]+(buckets[next][k]-buckets[prev][k])*t).toFixed(2);}
+        else if(prev>=0)buckets[i][k]=buckets[prev][k];
+        else if(next>=0)buckets[i][k]=buckets[next][k];
+        buckets[i].interp=true;
+      }
+    }
+  });
+  return buckets;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RENDER PROTOCOL
+// ═══════════════════════════════════════════════════════════════════════════
+function renderProtocol(){
+  const w=getCurrentWeek();
+  const proto=getProtocolForWeek(w);
+  const next=getNextChange(w);
+  const pct=Math.min(100,(w/CYCLE_WEEKS)*100);
+  document.getElementById('protoWeekNum').innerHTML=w+'<span>/ '+CYCLE_WEEKS+'</span>';
+  document.getElementById('protoLabel').textContent=proto?proto.label:'Ciclo finalizado';
+  document.getElementById('protoNext').textContent=next?`↑ sem ${next.from} (${next.dateStr}) — ${next.daysUntil}d`:'';
+  document.getElementById('protoNote').textContent=proto&&proto.note?proto.note:'';
+  document.getElementById('protoFill').style.width=pct+'%';
+  document.getElementById('weekBadge').textContent=`Sem ${w} · Ciclo activo`;
+
+  const tl=document.getElementById('weekTimeline'); tl.innerHTML='';
+  for(let i=1;i<=CYCLE_WEEKS;i++){
+    const isPCT=i>=17; const isCurrent=i===w;
+    const isPast=i<w; const isFuture=i>w;
+    let cls='wk ';
+    if(isPCT){ cls+=isCurrent?'pct-current':isPast?'pct-past':'pct-future'; }
+    else { cls+=isCurrent?'current':isPast?'past':'future'; }
+    const div=document.createElement('div'); div.className=cls; div.textContent=i;
+    if(isCurrent){div.title='Semana actual';}
+    tl.appendChild(div);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RENDER BODY COMPOSITION
+// ═══════════════════════════════════════════════════════════════════════════
+function updateBodyKPIs(){
+  if(!allData.length)return;
+  const latest=allData[allData.length-1];
+  const d12=new Date(); d12.setMonth(d12.getMonth()-12);
+  const d12m=allData.filter(r=>r._date>=d12);
+  if(!d12m.length)return;
+  const minP=Math.min(...d12m.map(r=>r.peso)),minM=Math.min(...d12m.map(r=>r.musc));
+  const minG=Math.min(...d12m.map(r=>r.grasa)),minV=Math.min(...d12m.map(r=>r.visceral));
+  const maxA=Math.max(...d12m.map(r=>r.agua));
+  document.getElementById('kPeso').innerHTML=`${latest.peso.toFixed(2)} <span class="kpi-unit">kg</span>`;
+  document.getElementById('kPesoDelta').textContent=`${fmt2d(latest.peso-minP)} vs mín 12m (${minP.toFixed(2)})`;
+  document.getElementById('kMusc').innerHTML=`${latest.musc.toFixed(2)} <span class="kpi-unit">kg</span>`;
+  document.getElementById('kMuscDelta').textContent=`${fmt2d(latest.musc-minM)} vs mín 12m (${minM.toFixed(2)})`;
+  document.getElementById('kGrasa').innerHTML=`${latest.grasa.toFixed(1)} <span class="kpi-unit">%</span>`;
+  document.getElementById('kGrasaDelta').textContent=`${fmt1d(latest.grasa-minG)} pp vs mín 12m`;
+  document.getElementById('kVisc').innerHTML=`${latest.visceral} <span class="kpi-unit">índice</span>`;
+  document.getElementById('kViscDelta').textContent=`${latest.visceral>minV?'+':''}${latest.visceral-minV} vs mín 12m (${minV})`;
+  document.getElementById('kAgua').innerHTML=`${latest.agua.toFixed(1)} <span class="kpi-unit">%</span>`;
+  document.getElementById('kAguaDelta').textContent=`−${(maxA-latest.agua).toFixed(1)} pp vs máx 12m`;
+  // Scatter
+  chartScatter.data.datasets[0].data=allData.filter(d=>!d.ciclo).map(d=>({x:d.peso,y:d.grasa,label:d.d}));
+  chartScatter.data.datasets[1].data=allData.filter(d=>d.ciclo).map(d=>({x:d.peso,y:d.grasa,label:d.d}));
+  chartScatter.update();
+}
+
+function applyRange(months){
+  document.querySelectorAll('.range-btn').forEach(b=>b.classList.toggle('active',+b.dataset.m===months));
+  const type=months===6?'weekly':'monthly';
+  const buckets=aggregate(type);
+  activeCicloIdx=buckets.findIndex(b=>b.ciclo);
+  activeTamoIdx=-1;
+  for(let i=0;i<buckets.length;i++){const nd=i+1<buckets.length?buckets[i+1].d:new Date(9999,0,1);if(buckets[i].d<=TAMO_DATE&&nd>TAMO_DATE){activeTamoIdx=i;break;}}
+  const fl=buckets.map(b=>b.label);
+  const fw=k=>buckets.map(b=>b[k]);
+  const ptC=a=>buckets.map(b=>b.interp?'rgba(255,255,255,0)':b.ciclo?`rgba(13,138,82,${a})`:`rgba(37,99,190,${a})`);
+  const ptB=()=>buckets.map(b=>b.interp?'#c8c6c0':b.ciclo?'#0d8a52':'#2563be');
+  const ptR=()=>buckets.map(b=>b.interp?3:4);
+  chartPeso.data.labels=fl; chartPeso.data.datasets[0].data=fw('peso');
+  chartPeso.data.datasets[0].pointBackgroundColor=ptC(0.9); chartPeso.data.datasets[0].pointBorderColor=ptB(); chartPeso.data.datasets[0].pointRadius=ptR();
+  chartPeso.data.datasets[0].segment={borderColor:ctx=>buckets[ctx.p1DataIndex]?.ciclo?'#0d8a52':'#2563be'};
+  chartMusc.data.labels=fl; chartMusc.data.datasets[0].data=fw('musc');
+  chartMusc.data.datasets[0].pointBackgroundColor=ptC(0.9); chartMusc.data.datasets[0].pointBorderColor=ptB(); chartMusc.data.datasets[0].pointRadius=ptR();
+  chartGrasa.data.labels=fl; chartGrasa.data.datasets[0].data=fw('grasa'); chartGrasa.data.datasets[1].data=fw('subcutanea');
+  chartGrasa.data.datasets[0].pointBackgroundColor=ptC(0.8); chartGrasa.data.datasets[0].pointBorderColor=ptB(); chartGrasa.data.datasets[0].pointRadius=ptR();
+  chartAgua.data.labels=fl; chartAgua.data.datasets[0].data=fw('agua');
+  chartAgua.data.datasets[0].pointBackgroundColor=ptC(0.8); chartAgua.data.datasets[0].pointBorderColor=ptB(); chartAgua.data.datasets[0].pointRadius=ptR();
+  const lastLabel=fl[fl.length-1]||''; const lastPeso=fw('peso'); const lp=lastPeso[lastPeso.length-1]||0;
+  document.getElementById('cbPeso').textContent=lastLabel+' · '+lp.toFixed(2)+' kg';
+  document.getElementById('cbMusc').textContent=lastLabel+' · '+( fw('musc')[fw('musc').length-1]||0).toFixed(2)+' kg';
+  document.getElementById('cbGrasa').textContent=lastLabel+' · '+( fw('grasa')[fw('grasa').length-1]||0).toFixed(1)+'%';
+  [chartPeso,chartMusc,chartGrasa,chartAgua].forEach(ch=>ch.update());
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RENDER BP
+// ═══════════════════════════════════════════════════════════════════════════
+const BP_TIPO_COLOR={medico:'rgba(109,79,194,0.85)',cafe:'rgba(201,74,48,0.9)',nocafe:'rgba(13,138,82,0.9)'};
+const BP_TIPO_BORDER={medico:'#6d4fc2',cafe:'#c94a30',nocafe:'#0d8a52'};
+const BP_TIPO_LABEL={medico:'chequeo médico',cafe:'con café',nocafe:'sin café'};
+
+function renderBP(){
+  if(!bpReadings.length)return;
+  const labels=bpReadings.map(r=>r.d);
+  const n=bpReadings.length;
+  chartBP.data.labels=labels;
+  chartBP.data.datasets[0].data=bpReadings.map(r=>r.sist);
+  chartBP.data.datasets[0].pointBackgroundColor=bpReadings.map(r=>BP_TIPO_COLOR[r.tipo]);
+  chartBP.data.datasets[0].pointBorderColor=bpReadings.map(r=>BP_TIPO_BORDER[r.tipo]);
+  chartBP.data.datasets[0].pointRadius=5;
+  chartBP.data.datasets[1].data=bpReadings.map(r=>r.diast);
+  chartBP.data.datasets[1].pointBackgroundColor=bpReadings.map(r=>BP_TIPO_COLOR[r.tipo]);
+  chartBP.data.datasets[1].pointBorderColor=bpReadings.map(r=>BP_TIPO_BORDER[r.tipo]);
+  chartBP.data.datasets[1].pointRadius=4;
+  chartBP.data.datasets[2].data=new Array(n).fill(140);
+  chartBP.data.datasets[3].data=new Array(n).fill(90);
+  chartBP.options.plugins.tooltip.callbacks={
+    afterLabel:ctx=>ctx.datasetIndex<2?'('+BP_TIPO_LABEL[bpReadings[ctx.dataIndex]?.tipo]+')':''
+  };
+  chartBP.update();
+  const nocafe=bpReadings.filter(r=>r.tipo==='nocafe');
+  const avgS=nocafe.length?Math.round(nocafe.reduce((s,r)=>s+r.sist,0)/nocafe.length):null;
+  const avgD=nocafe.length?Math.round(nocafe.reduce((s,r)=>s+r.diast,0)/nocafe.length):null;
+  if(avgS)document.getElementById('bpBadge').textContent=`media sin café: ${avgS}/${avgD}`;
+  document.getElementById('bpNote').textContent=nocafe.length?`${nocafe.length} lecturas sin café · media ${avgS}/${avgD} mmHg · ${avgS<140?'✓ bajo umbral 140/90':'⚠ sobre umbral 140/90'}` : '';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RENDER TRAINING
+// ═══════════════════════════════════════════════════════════════════════════
+function renderTraining(){
+  if(!allSessions.length)return;
+  const now=new Date();
+  const monthStart=new Date(now.getFullYear(),now.getMonth(),1);
+  const sessMonth=allSessions.filter(s=>s.date>=monthStart);
+  const volMonth=sessMonth.reduce((s,w)=>s+w.vol,0);
+  const last=allSessions[allSessions.length-1];
+  // KPIs
+  document.getElementById('tSes').innerHTML=`${sessMonth.length} <span class="kpi-unit">ses</span>`;
+  document.getElementById('tSesDelta').textContent=sessMonth.length>=8?'✓ objetivo 8–10/mes':sessMonth.length>=5?`+${8-sessMonth.length} para objetivo`:`${8-sessMonth.length} sesiones hasta objetivo`;
+  document.getElementById('tVol').innerHTML=`${(volMonth/1000).toFixed(1)} <span class="kpi-unit">t</span>`;
+  document.getElementById('tVolDelta').textContent=sessMonth.length?`${Math.round(volMonth/sessMonth.length/1000*10)/10}t prom/ses`:'—';
+  document.getElementById('tLast').innerHTML=last?last.dateStr:`—`;
+  document.getElementById('tLastVol').textContent=last?`${(last.vol/1000).toFixed(1)}t · ${last.src}`:'—';
+
+  // Volume chart — cycle sessions
+  const cycleSessions=allSessions.filter(s=>s.inCycle);
+  chartVol.data.labels=cycleSessions.map(s=>s.dateStr);
+  chartVol.data.datasets[0].data=cycleSessions.map(s=>s.vol);
+  chartVol.data.datasets[0].backgroundColor=cycleSessions.map(s=>s.src==='Hevy'?'rgba(13,138,82,0.65)':'rgba(37,99,190,0.45)');
+  document.getElementById('volBadge').textContent=`${cycleSessions.length} ses · ${(cycleSessions.reduce((s,w)=>s+w.vol,0)/1000).toFixed(1)}t · verde=Hevy azul=Jefit`;
+  chartVol.update();
+
+  // Frequency by month (last 6 months)
+  const months=[]; const freqs=[];
+  for(let i=5;i>=0;i--){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    const end=new Date(now.getFullYear(),now.getMonth()-i+1,0);
+    const count=allSessions.filter(s=>s.date>=d&&s.date<=end).length;
+    months.push(fmtMonth(d));
+    freqs.push(count);
+  }
+  chartFreq.data.labels=months;
+  chartFreq.data.datasets[0].data=freqs;
+  chartFreq.data.datasets[0].backgroundColor=freqs.map(f=>f>=8?'rgba(13,138,82,0.65)':f>=5?'rgba(37,99,190,0.45)':'rgba(201,74,48,0.45)');
+  chartFreq.data.datasets[1].data=new Array(months.length).fill(8);
+  chartFreq.update();
+
+  // Muscle radar
+  const hevyNative=cycleSessions.filter(s=>s.hasNativeMuscle);
+  if(hevyNative.length>0){
+    document.getElementById('radarCard').style.display='';
+    const aggP={},aggS={};
+    hevyNative.forEach(s=>{
+      Object.entries(s.musclePrimary).forEach(([g,v])=>{aggP[g]=(aggP[g]||0)+v;});
+      Object.entries(s.muscleSecondary).forEach(([g,v])=>{aggS[g]=(aggS[g]||0)+v;});
+    });
+    const pData=RADAR_GROUPS.map(g=>aggP[g]||0);
+    const sData=RADAR_GROUPS.map(g=>+(aggS[g]||0).toFixed(1));
+    const maxV=Math.max(1,...pData,...sData);
+    if(chartRadar)chartRadar.destroy();
+    chartRadar=new Chart(document.getElementById('c-radar'),{type:'radar',data:{labels:RADAR_GROUPS,datasets:[
+      {label:'Primario',data:pData,backgroundColor:'rgba(37,99,190,0.15)',borderColor:'rgba(37,99,190,0.9)',borderWidth:2,pointBackgroundColor:'rgba(37,99,190,0.9)',pointRadius:3},
+      {label:'Secundario',data:sData,backgroundColor:'rgba(160,160,160,0.07)',borderColor:'rgba(160,160,160,0.45)',borderWidth:1.5,borderDash:[4,3],pointBackgroundColor:'rgba(160,160,160,0.5)',pointRadius:2}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{font:{family:'DM Mono',size:9},color:'#6b6d70',boxWidth:8,padding:12}}},scales:{r:{min:0,suggestedMax:Math.ceil(maxV)+1,ticks:{font:{size:8,family:'DM Mono'},color:'#a8aab0',backdropColor:'transparent'},grid:{color:'rgba(0,0,0,0.06)'},angleLines:{color:'rgba(0,0,0,0.06)'},pointLabels:{font:{family:'DM Mono',size:9},color:'#1a1a18'}}}}});
+    document.getElementById('radarBadge').textContent=`${hevyNative.length} ses Hevy · ciclo`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AUTO-ANALYSIS
+// ═══════════════════════════════════════════════════════════════════════════
+function renderAnalysis(){
+  const w=getCurrentWeek();
+  const latest=allData.length?allData[allData.length-1]:null;
+  const now=new Date();
+  const monthStart=new Date(now.getFullYear(),now.getMonth(),1);
+  const sessMonth=allSessions.filter(s=>s.date>=monthStart);
+  const nocafe=bpReadings.filter(r=>r.tipo==='nocafe');
+  const avgS=nocafe.length?Math.round(nocafe.reduce((s,r)=>s+r.sist,0)/nocafe.length):null;
+  const avgD=nocafe.length?Math.round(nocafe.reduce((s,r)=>s+r.diast,0)/nocafe.length):null;
+  const proto=getProtocolForWeek(w);
+  const next=getNextChange(w);
+
+  const sections=[];
+
+  if(latest){
+    const dP=(latest.peso-BASELINE.peso),dM=(latest.musc-BASELINE.musc),dG=(latest.grasa-BASELINE.grasa);
+    sections.push({title:'Composición corporal',items:[
+      {cls:'ok',text:`Peso ${latest.peso.toFixed(2)} kg (${fmt2d(dP)} vs baseline). Músculo ${latest.musc.toFixed(2)} kg (${fmt2d(dM)} vs baseline 59.22).`},
+      {cls:dG>2?'warn':'ok',text:`Grasa ${latest.grasa.toFixed(1)}% (${fmt1d(dG)} pp vs baseline 27.7%). Visceral índice ${latest.visceral}${latest.visceral>=11?' — elevado; controlar ingesta de sodio y carbohidratos.':'.'}` },
+    ]});
+  }
+  if(nocafe.length){
+    const ok=avgS<140&&avgD<90;
+    sections.push({title:'Tensión arterial',items:[
+      {cls:ok?'ok':'warn',text:`Sin café (${nocafe.length} lecturas): media ${avgS}/${avgD} mmHg. ${ok?'Criterio Testo 3cm sem 11 cumplido.':'Por encima del umbral 140/90 — revisar protocolo.'}`},
+      {cls:'info',text:`Con café: lecturas elevadas (~130–140/85–90). Medir siempre tarde, sentado, sin café, 5 min de reposo.`},
+    ]});
+  }
+  sections.push({title:'Entrenamiento',items:[
+    {cls:sessMonth.length>=8?'ok':sessMonth.length>=5?'info':'warn',
+     text:`${now.toLocaleDateString('es-ES',{month:'long'})}: ${sessMonth.length} sesión${sessMonth.length!==1?'es':''}. Objetivo sem 11–13 (dosis máxima): 8–10 ses/mes para maximizar el ciclo.`},
+    {cls:'info',text:`Ciclo total (sem 1–${w}): ${allSessions.filter(s=>s.inCycle).length} sesiones. Histórico Jefit pre-ciclo disponible en gráficos.`},
+  ]});
+  if(proto){
+    const prItems=[{cls:'ok',text:`Sem ${w} — ${proto.label}.${proto.note?' ('+proto.note+')':''}`}];
+    if(next)prItems.push({cls:next.daysUntil<=7?'warn':'info',text:`Próximo cambio: sem ${next.from} (${next.dateStr}) — ${next.label.split('·')[0].trim()}. ${next.daysUntil} día${next.daysUntil!==1?'s':''}.`});
+    sections.push({title:'Protocolo',items:prItems});
+  }
+
+  const body=document.getElementById('analysisBody');
+  body.innerHTML=sections.map(sec=>`
+    <div class="analysis-section">
+      <div class="analysis-section-title">${sec.title}</div>
+      ${sec.items.map(it=>`<div class="analysis-item ${it.cls||''}">${it.text}</div>`).join('')}
+    </div>`).join('');
+  document.getElementById('analysisDate').textContent=`${now.toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})}`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PILLS & FOOTER
+// ═══════════════════════════════════════════════════════════════════════════
+function updateMeta(){
+  const w=getCurrentWeek();
+  const latest=allData.length?allData[allData.length-1]:null;
+  if(latest){
+    const now=new Date();
+    document.getElementById('footerTxt').textContent=`Datos: ${fmtLabel(allData[0]._date).toLowerCase()} → ${latest.d.toLowerCase()} · Plan Karat Sem ${w} · ${now.toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})}`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DATA LOADING
+// ═══════════════════════════════════════════════════════════════════════════
+async function loadAll(){
+  document.getElementById('loadBar').classList.add('active');
+  try{
+    const t=Date.now();
+    const [rJson,hJson,jJson,bJson]=await Promise.all([
+      fetch(RENPHO_URL+'?t='+t).then(r=>r.json()),
+      fetch(HEVY_URL+'?t='+t).then(r=>r.json()).catch(()=>({workouts:[]})),
+      fetch(JEFIT_URL+'?t='+t).then(r=>r.json()).catch(()=>[]),
+      fetch(BP_URL+'?t='+t).then(r=>r.json()).catch(()=>({readings:[]})),
+    ]);
+    processRenpho(rJson);
+    const hevySessions=parseWorkouts(hJson.workouts||[],'Hevy');
+    const jeitRaw=Array.isArray(jJson)?jJson:(jJson.workouts||[]);
+    const jeitSessions=parseWorkouts(jeitRaw,'Jefit');
+    allSessions=[...jeitSessions,...hevySessions].sort((a,b)=>a.date-b.date);
+    bpReadings=(bJson.readings||[]);
+    renderProtocol();
+    updateBodyKPIs();
+    applyRange(12);
+    renderBP();
+    renderTraining();
+    renderAnalysis();
+    updateMeta();
+  }catch(e){console.error('Load error:',e);}
+  finally{document.getElementById('loadBar').classList.remove('active');}
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// REFRESH (dispatch GitHub Actions)
+// ═══════════════════════════════════════════════════════════════════════════
+async function triggerRefresh(){
+  const token=localStorage.getItem('gh_token');
+  if(!token){openSettings();return;}
+  const btn=document.getElementById('btnRefresh');
+  const msg=document.getElementById('refreshMsg');
+  btn.classList.add('loading');
+  btn.textContent='↻ Enviando…';
+  msg.style.display='inline';
+  let ok=0;
+  for(const wf of GH_WF){
+    try{
+      await fetch(`https://api.github.com/repos/${GH_REPO}/actions/workflows/${wf}/dispatches`,{
+        method:'POST',headers:{'Authorization':`token ${token}`,'Content-Type':'application/json'},
+        body:JSON.stringify({ref:'main'})
+      });
+      ok++;
+    }catch(e){}
+  }
+  if(ok===GH_WF.length){
+    btn.textContent='↻ Lanzado';
+    msg.textContent='Actualizando… recargando en 90s';
+    setTimeout(()=>{location.reload();},90000);
+    setTimeout(()=>{btn.textContent='↻ Actualizar';btn.classList.remove('loading');},5000);
+  }else{
+    btn.textContent='↻ Error';
+    msg.textContent='Token inválido o sin permisos';
+    btn.classList.remove('loading');
+    setTimeout(()=>{btn.textContent='↻ Actualizar';msg.style.display='none';},4000);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SETTINGS MODAL
+// ═══════════════════════════════════════════════════════════════════════════
+function openSettings(){
+  document.getElementById('ghTokenInput').value=localStorage.getItem('gh_token')||'';
+  document.getElementById('modalBg').classList.add('open');
+}
+function closeSettings(){document.getElementById('modalBg').classList.remove('open');}
+function saveToken(){
+  const v=document.getElementById('ghTokenInput').value.trim();
+  if(v)localStorage.setItem('gh_token',v);
+  closeSettings();
+}
+function clearToken(){localStorage.removeItem('gh_token');document.getElementById('ghTokenInput').value='';closeSettings();}
+
+// ── Init ────────────────────────────────────────────────────────────────────
+loadAll();
+</script>
+</body>
+</html>
