@@ -1,0 +1,26 @@
+name: Diagnose Hevy Templates
+on: [workflow_dispatch]
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test exercise_templates endpoint
+        env:
+          HEVY_API_KEY: ${{ secrets.HEVY_API_KEY }}
+        run: |
+          python3 - <<'PYEOF2'
+          import requests, os
+          key = os.environ['HEVY_API_KEY']
+          h = {'api-key': key}
+
+          # List templates
+          r = requests.get('https://api.hevyapp.com/v1/exercise_templates?page=1&pageSize=3', headers=h, timeout=15)
+          print(f"LIST → {r.status_code}: {r.text[:400]}")
+
+          # Single template
+          for tid in ['7EB3F7C3', '3601968B']:
+              r2 = requests.get(f'https://api.hevyapp.com/v1/exercise_templates/{tid}', headers=h, timeout=15)
+              print(f"GET {tid} → {r2.status_code}: {r2.text[:300]}")
+          PYEOF2
