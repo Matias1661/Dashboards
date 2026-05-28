@@ -485,8 +485,8 @@ const MUSCLE_MAP = [
   { group: 'Cuádriceps',      kw: ['sentadilla', 'squat', 'prensa', 'hack squat', 'extensión de pierna', 'extension de pierna', 'leg press', 'leg extension', 'split squat', 'búlgara', 'bulgara', 'lunge', 'zancada'] },
   { group: 'Bíceps',          kw: ['curl bícep', 'curl bicep', 'curl de bícep', 'curl de bicep', 'bicep curl', 'biceps curl', 'barbell curl', 'predicador', 'preacher', 'hammer curl', 'concentration curl', 'curl con barra', 'curl alterno', 'curl concentrado', 'curl en cable', 'incline curl', 'ez bar curl', 'cable standing curl', 'standing curl', 'curl machine', 'curl alternante'] },
   { group: 'Tríceps',         kw: ['trícep', 'tricep', 'press cerrado', 'extensión de trícep', 'extension de tricep', 'pushdown', 'skull crusher', 'french press', 'dip'] },
-  { group: 'Isquios/Glúteos', kw: ['peso muerto', 'deadlift', 'curl femoral', 'leg curl', 'hip thrust', 'glúteo', 'gluteo', 'isquio', 'rdl', 'romanian', 'nordic', 'femoral', 'good morning', 'glute bridge', 'leg kickback'] },
-  { group: 'Core',            kw: ['plank', 'crunch', 'hanging knee', 'hanging leg', 'leg raise', 'ab ', 'core', 'bridge', 'ab crunch', 'cable crunch', 'standing crunch'] },
+  { group: 'Isquios',        kw: ['curl femoral', 'leg curl', 'isquio', 'rdl', 'romanian', 'nordic', 'femoral', 'good morning', 'peso muerto', 'deadlift'] },
+  { group: 'Glúteos',        kw: ['hip thrust', 'glúteo', 'gluteo', 'glute bridge', 'glute kick', 'leg kickback', 'hip extension', 'kickback', 'hip abduct'] },
 ];
 
 function getGroup(title) {
@@ -515,13 +515,11 @@ const HEVY_MUSCLE_MAP = {
   forearms:    'Brazos',
   quadriceps:  'Piernas',
   hamstrings:  'Piernas',
-  glutes:      'Piernas',
+  glutes:      'Glúteos',
   calves:      'Piernas',
-  abdominals:  'Core',
-  abs:         'Core',
 };
 // Orden fijo de ejes del radar (igual que Hevy)
-const RADAR_GROUPS = ['Pecho', 'Core', 'Hombros', 'Brazos', 'Piernas', 'Espalda'];
+const RADAR_GROUPS = ['Pecho', 'Glúteos', 'Hombros', 'Brazos', 'Piernas', 'Espalda'];
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 function getMonthKey(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
@@ -570,8 +568,8 @@ async function fetchJson(url) {
 const KEYWORD_TO_RADAR = {
   'Pecho':'Pecho', 'Espalda':'Espalda', 'Hombro':'Hombros',
   'Bíceps':'Brazos', 'Tríceps':'Brazos',
-  'Cuádriceps':'Piernas', 'Isquios/Glúteos':'Piernas', 'Gemelos':'Piernas',
-  'Core':'Core',
+  'Cuádriceps':'Piernas', 'Isquios':'Piernas', 'Gemelos':'Piernas',
+  'Glúteos':'Glúteos',
 };
 
 function parseWorkouts(rawWorkouts, src) {
@@ -705,7 +703,7 @@ function render(allSessions) {
   const fcWeekSesAdd   = (curWeekSes > 0 && wdElapsedWeek > 0) ? +(curWeekSes / wdElapsedWeek * wdLeftWeek).toFixed(2) : 0;
 
   // Muscle groups
-  const grupos = ['Pecho','Espalda','Hombro','Cuádriceps','Bíceps','Tríceps','Isquios/Glúteos','Core'];
+  const grupos = ['Pecho','Espalda','Hombro','Cuádriceps','Bíceps','Tríceps','Isquios','Glúteos'];
   const monday = new Date(now); monday.setHours(0,0,0,0); monday.setDate(now.getDate()-((now.getDay()+6)%7));
   const sunday = new Date(monday); sunday.setDate(monday.getDate()+6); sunday.setHours(23,59,59,999);
   const d30ago = new Date(now); d30ago.setDate(now.getDate()-30);
