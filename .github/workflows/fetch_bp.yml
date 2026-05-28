@@ -2,7 +2,7 @@ name: Fetch BP Data
 
 on:
   schedule:
-    - cron: '0 6 * * *'   # 06:00 UTC, después de Renpho (05:30) y Hevy (05:00)
+    - cron: '0 6 * * *'
   workflow_dispatch:
 
 permissions:
@@ -24,90 +24,109 @@ jobs:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
         run: |
           python3 - <<'PYEOF2'
-          import requests, json, os, re
+          import requests, json, os, sys
           from datetime import datetime, timezone
+          from collections import defaultdict
 
-          token = os.environ.get('NOTION_TOKEN','')
+          token = os.environ.get('NOTION_TOKEN', '').strip()
           if not token:
               print("NOTION_TOKEN not set — skipping")
-              exit(0)
+              sys.exit(0)
 
           PAGE_ID = '36333ce5-0e68-81a5-895c-f111d0ab45af'
           headers = {
               'Authorization': f'Bearer {token}',
               'Notion-Version': '2022-06-28',
-              'Content-Type': 'application/json',
           }
 
+          def get_blocks(block_id):
+              url = f'https://api.notion.com/v1/blocks/{block_id}/children?page_size=100'
+              r = requests.get(url, headers=headers, timeout=15)
+              print(f"  GET {url} → {r.status_code}")
+              if r.status_code != 200:
+                  print(f"  Response: {r.text[:300]}")
+                  return []
+              return r.json().get('results', [])
+
+          def cell_text(cell):
+              return ''.join(t.get('plain_text', '') for t in cell)
+
+          MONTH_MAP = {str(i): i for i in range(1, 13)}
+          MONTH_ES  = {1:'ene',2:'feb',3:'mar',4:'abr',5:'may',6:'jun',
+                       7:'jul',8:'ago',9:'sep',10:'oct',11:'nov',12:'dic'}
+
           # Fetch page blocks
-          resp = requests.get(
-              f'https://api.notion.com/v1/blocks/{PAGE_ID}/children?page_size=100',
-              headers=headers, timeout=15)
-          resp.raise_for_status()
-          blocks = resp.json().get('results', [])
+          print(f"Fetching page {PAGE_ID}...")
+          blocks = get_blocks(PAGE_ID)
+          print(f"Found {len(blocks)} top-level blocks")
 
-          # Find table block and parse rows
+          # Find all table blocks (may be nested inside section/toggle)
+          def find_tables(blocks, depth=0):
+              tables = []
+              for b in blocks:
+                  btype = b.get('type', '')
+                  print(f"{'  '*depth}Block type: {btype}")
+                  if btype == 'table':
+                      tables.append(b)
+                  elif b.get('has_children') and btype not in ('table', 'table_row'):
+                      children = get_blocks(b['id'])
+                      tables.extend(find_tables(children, depth+1))
+              return tables
+
+          tables = find_tables(blocks)
+          print(f"Found {len(tables)} table(s)")
+
           bp_readings = []
-          MONTH_MAP = {'1':1,'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'11':11,'12':12}
-          MONTH_ES   = {1:'ene',2:'feb',3:'mar',4:'abr',5:'may',6:'jun',7:'jul',8:'ago',9:'sep',10:'oct',11:'nov',12:'dic'}
-
-          for block in blocks:
-              if block.get('type') == 'table':
-                  table_id = block['id']
-                  rows_resp = requests.get(
-                      f'https://api.notion.com/v1/blocks/{table_id}/children?page_size=100',
-                      headers=headers, timeout=15)
-                  rows = rows_resp.json().get('results', [])
-                  for i, row in enumerate(rows):
-                      if i == 0: continue  # header
-                      cells = row.get('table_row', {}).get('cells', [])
-                      if len(cells) < 4: continue
-                      def cell_text(c): return ''.join(t.get('plain_text','') for t in c)
-                      fecha = cell_text(cells[0]).strip()
-                      sist  = cell_text(cells[1]).strip()
-                      diast = cell_text(cells[2]).strip()
-                      notas = cell_text(cells[4]).strip().lower() if len(cells) > 4 else ''
-                      if not sist.isdigit() or not diast.isdigit(): continue
-                      # Parse date "14/5" → "14 may"
-                      parts = fecha.split('/')
-                      if len(parts) == 2:
-                          d, m = parts[0].strip(), parts[1].strip()
-                          mo = MONTH_MAP.get(m)
-                          if mo:
-                              label = f"{d} {MONTH_ES[mo]}"
-                              tipo  = 'medico' if 'médico' in notas or 'medico' in notas or 'aspy' in notas or 'chequeo' in notas \
-                                      else 'cafe' if 'café' in notas or 'cafe' in notas \
-                                      else 'nocafe'
-                              bp_readings.append({'d': label, 'sist': int(sist), 'diast': int(diast), 'tipo': tipo})
-
-          # Deduplicate by date (keep last reading per day per tipo)
-          seen = {}
-          for r in bp_readings:
-              key = (r['d'], r['tipo'])
-              seen[key] = r
-          bp_final = list(seen.values())
+          for table in tables:
+              rows = get_blocks(table['id'])
+              print(f"Table has {len(rows)} rows")
+              for i, row in enumerate(rows):
+                  if i == 0:
+                      continue  # header
+                  cells = row.get('table_row', {}).get('cells', [])
+                  if len(cells) < 3:
+                      continue
+                  fecha = cell_text(cells[0]).strip()
+                  sist  = cell_text(cells[1]).strip()
+                  diast = cell_text(cells[2]).strip()
+                  notas = cell_text(cells[4]).strip().lower() if len(cells) > 4 else ''
+                  print(f"  Row {i}: fecha={fecha} sist={sist} diast={diast} notas={notas[:30]}")
+                  if not sist.isdigit() or not diast.isdigit():
+                      continue
+                  parts = fecha.replace(' ', '').split('/')
+                  if len(parts) == 2:
+                      d, m = parts[0], parts[1]
+                      mo = MONTH_MAP.get(m)
+                      if mo:
+                          label = f"{d} {MONTH_ES[mo]}"
+                          tipo  = ('medico'  if any(w in notas for w in ('médico','medico','aspy','chequeo')) else
+                                   'cafe'    if any(w in notas for w in ('café','cafe')) else
+                                   'nocafe')
+                          bp_readings.append({'d': label, 'sist': int(sist), 'diast': int(diast), 'tipo': tipo})
 
           # Average multiple readings same day+tipo
-          from collections import defaultdict
           grouped = defaultdict(list)
           for r in bp_readings:
               grouped[(r['d'], r['tipo'])].append(r)
-          bp_final = []
-          for (d, tipo), group in sorted(grouped.items()):
-              bp_final.append({
-                  'd':    d,
-                  'sist':  round(sum(r['sist']  for r in group) / len(group)),
-                  'diast': round(sum(r['diast'] for r in group) / len(group)),
-                  'tipo':  tipo,
-              })
 
-          output = {
-              'fetched_at': datetime.now(timezone.utc).isoformat(),
-              'readings':   bp_final,
-          }
+          bp_final = [
+              {'d': d, 'sist': round(sum(r['sist'] for r in g)/len(g)),
+               'diast': round(sum(r['diast'] for r in g)/len(g)), 'tipo': tipo}
+              for (d, tipo), g in grouped.items()
+          ]
+          bp_final.sort(key=lambda r: r['d'])
+
+          print(f"\nResult: {len(bp_final)} averaged readings")
+          for r in bp_final:
+              print(f"  {r}")
+
           with open('bp_data.json', 'w') as f:
-              json.dump(output, f, ensure_ascii=False, indent=2)
-          print(f"Done: {len(bp_final)} BP readings saved")
+              json.dump({
+                  'fetched_at': datetime.now(timezone.utc).isoformat(),
+                  'readings': bp_final,
+              }, f, ensure_ascii=False, indent=2)
+
+          print("Done — bp_data.json written")
           PYEOF2
 
       - name: Commit and push
