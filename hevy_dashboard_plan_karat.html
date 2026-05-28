@@ -566,6 +566,14 @@ async function fetchJson(url) {
   return res.json();
 }
 
+// Mapa de grupos keyword → 6 grupos del radar
+const KEYWORD_TO_RADAR = {
+  'Pecho':'Pecho', 'Espalda':'Espalda', 'Hombro':'Hombros',
+  'Bíceps':'Brazos', 'Tríceps':'Brazos',
+  'Cuádriceps':'Piernas', 'Isquios/Glúteos':'Piernas', 'Gemelos':'Piernas',
+  'Core':'Core',
+};
+
 function parseWorkouts(rawWorkouts, src) {
   return rawWorkouts
     .map(w => {
@@ -574,28 +582,33 @@ function parseWorkouts(rawWorkouts, src) {
       const durationMin = end ? Math.round((end - start) / 60000) : null;
       let volume = 0, totalSets = 0;
       const groupSets = {};
-      const musclePrimary   = {};  // grupo → sets (músculo primario nativo)
-      const muscleSecondary = {};  // grupo → sets equivalentes (0.5× secundario)
+      const musclePrimary   = {};
+      const muscleSecondary = {};
 
       (w.exercises || []).forEach(ex => {
-        const group = getGroup(ex.title);
+        const kwGroup = getGroup(ex.title);
         const workingSets = (ex.sets || []).filter(s => s.type !== 'warmup');
         workingSets.forEach(s => {
           volume += (s.weight_kg || 0) * (s.reps || 0);
           totalSets++;
-          groupSets[group] = (groupSets[group] || 0) + 1;
+          groupSets[kwGroup] = (groupSets[kwGroup] || 0) + 1;
         });
-        // Datos nativos Hevy: primary_muscle_group / secondary_muscle_groups
+
         const n = workingSets.length;
         if (n > 0) {
-          const pg = HEVY_MUSCLE_MAP[ex.primary_muscle_group];
+          // Primary: native Hevy si existe, sino keyword fallback
+          const nativePrim = HEVY_MUSCLE_MAP[ex.primary_muscle_group];
+          const pg = nativePrim || KEYWORD_TO_RADAR[kwGroup];
           if (pg) musclePrimary[pg] = (musclePrimary[pg] || 0) + n;
+
+          // Secondary: solo si hay datos nativos
           (ex.secondary_muscle_groups || []).forEach(sm => {
             const sg = HEVY_MUSCLE_MAP[sm];
             if (sg) muscleSecondary[sg] = (muscleSecondary[sg] || 0) + n * 0.5;
           });
         }
       });
+
       return {
         date: start,
         dateStr: start.toLocaleDateString('es-ES', { day:'2-digit', month:'short' }).replace('.',''),
@@ -968,8 +981,9 @@ function render(allSessions) {
   // "Actual" = últimos 30 días · "Anterior" = 30–60 días atrás (para comparación).
   const now30  = new Date(now); now30.setDate(now30.getDate() - 30);
   const now60  = new Date(now); now60.setDate(now60.getDate() - 60);
-  const hevyActual   = allCycleSessions.filter(s => s.src === 'Hevy' && s.hasNativeMuscle && s.date >= now30);
-  const hevyAnterior = allCycleSessions.filter(s => s.src === 'Hevy' && s.hasNativeMuscle && s.date >= now60 && s.date < now30);
+  // Radar: todos los workouts del ciclo (Jefit + Hevy), no solo los con datos nativos
+  const hevyActual   = allCycleSessions.filter(s => s.hasNativeMuscle && s.date >= now30);
+  const hevyAnterior = allCycleSessions.filter(s => s.hasNativeMuscle && s.date >= now60 && s.date < now30);
   const muscleCard   = document.getElementById('hevyMuscleCard');
 
   function aggRadar(sessions) {
@@ -1044,7 +1058,7 @@ function render(allSessions) {
     const sesLabel = hevyActual.length === 1 ? '1 sesión' : `${hevyActual.length} sesiones`;
     document.getElementById('hevyMuscleRange').textContent = `últimos 30d · ${sesLabel}`;
     document.getElementById('p-hevy-muscle').innerHTML =
-      `▸ Primario = 1× sets · Secundario = 0.5× sets. Top 30d: ${topActual.join(', ') || 'sin datos'}.` +
+      `▸ Top 30d: ${topActual.join(', ') || 'sin datos'}. Primario por keyword de ejercicio; secundario cuando Hevy lo provee.` +
       (hevyAnterior.length === 0 ? ' Sin período anterior para comparar aún.' : '');
   }
 
