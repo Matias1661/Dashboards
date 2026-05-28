@@ -45,34 +45,26 @@ jobs:
                   break
               page += 1
 
-          # 2. Collect unique exercise_template_ids
-          template_ids = set()
-          for w in all_workouts:
-              for ex in w.get('exercises', []):
-                  tid = ex.get('exercise_template_id')
-                  if tid:
-                      template_ids.add(tid)
-
-          # 3. Fetch exercise templates (paginated) and build lookup
+          # 2. Fetch exercise templates only for IDs present in workouts
+          template_ids = {
+              ex.get('exercise_template_id')
+              for w in all_workouts
+              for ex in w.get('exercises', [])
+              if ex.get('exercise_template_id')
+          }
           templates = {}
-          page = 1
-          while True:
+          for tid in template_ids:
               resp = requests.get(
-                  f'https://api.hevyapp.com/v1/exercise_templates?page={page}&pageSize=100',
+                  f'https://api.hevyapp.com/v1/exercise_templates/{tid}',
                   headers=headers, timeout=15)
-              if resp.status_code != 200:
-                  break
-              data = resp.json()
-              for t in data.get('exercise_templates', []):
-                  templates[t['id']] = {
-                      'primary_muscle_group':   t.get('primary_muscle_group'),
+              if resp.status_code == 200:
+                  t = resp.json()
+                  templates[tid] = {
+                      'primary_muscle_group':    t.get('primary_muscle_group'),
                       'secondary_muscle_groups': t.get('secondary_muscle_groups', []),
                   }
-              if page >= data.get('page_count', 1):
-                  break
-              page += 1
 
-          # 4. Merge muscle data into exercises
+          # 3. Merge muscle data into exercises
           for w in all_workouts:
               for ex in w.get('exercises', []):
                   tid = ex.get('exercise_template_id')
@@ -82,12 +74,12 @@ jobs:
 
           with open('hevy_data.json', 'w') as f:
               json.dump({
-                  'fetched_at': datetime.now(timezone.utc).isoformat(),
+                  'fetched_at':     datetime.now(timezone.utc).isoformat(),
                   'total_workouts': len(all_workouts),
-                  'workouts': all_workouts
+                  'workouts':       all_workouts,
               }, f)
 
-          print(f"Done: {len(all_workouts)} workouts, {len(templates)} templates")
+          print(f"Done: {len(all_workouts)} workouts, {len(templates)} templates merged")
           PYEOF2
 
       - name: Commit and push
