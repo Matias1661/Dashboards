@@ -19,7 +19,7 @@ jobs:
         with:
           token: ${{ secrets.GH_PAT }}
 
-      - name: Fetch BP readings from Notion
+      - name: Fetch BP from Notion database
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
         run: |
@@ -29,114 +29,72 @@ jobs:
           from collections import defaultdict
 
           token = os.environ.get('NOTION_TOKEN', '').strip()
-          log = []
-
           if not token:
-              log.append("ERROR: NOTION_TOKEN not set")
-              with open('bp_debug.json', 'w') as f: json.dump({'log': log}, f, indent=2)
+              print("NOTION_TOKEN not set — skipping")
               sys.exit(0)
 
-          log.append(f"Token starts with: {token[:12]}...")
-
-          PAGE_ID = '36333ce5-0e68-81a5-895c-f111d0ab45af'
-          headers = {
+          # Base de datos Tensión Arterial — ID: 4144082e-b207-406f-9b16-90cb20638235
+          DB_ID  = '4144082e-b207-406f-9b16-90cb20638235'
+          HEADERS = {
               'Authorization': f'Bearer {token}',
               'Notion-Version': '2022-06-28',
+              'Content-Type': 'application/json',
           }
+          TIPO_MAP = {'Sin café': 'nocafe', 'Con café': 'cafe', 'Chequeo médico': 'medico'}
+          MONTH_ES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']
 
-          # Fetch top-level blocks
-          url = f'https://api.notion.com/v1/blocks/{PAGE_ID}/children?page_size=100'
-          r = requests.get(url, headers=headers, timeout=15)
-          log.append(f"GET blocks/{PAGE_ID}/children → {r.status_code}")
-          if r.status_code != 200:
-              log.append(f"Error body: {r.text[:500]}")
-              with open('bp_debug.json', 'w') as f: json.dump({'log': log}, f, indent=2)
-              sys.exit(0)
+          def fmt_label(iso_date):
+              from datetime import date
+              d = date.fromisoformat(iso_date)
+              return f"{d.day} {MONTH_ES[d.month-1]}"
 
-          blocks = r.json().get('results', [])
-          log.append(f"Top-level blocks: {len(blocks)}")
-          for b in blocks:
-              log.append(f"  type={b.get('type')} id={b.get('id','?')[:8]} has_children={b.get('has_children')}")
+          # Query database sorted by Fecha ascending
+          resp = requests.post(
+              f'https://api.notion.com/v1/databases/{DB_ID}/query',
+              headers=HEADERS,
+              json={"sorts": [{"property": "Fecha", "direction": "ascending"}]},
+              timeout=15
+          )
+          resp.raise_for_status()
+          results = resp.json().get('results', [])
+          print(f"Rows fetched: {len(results)}")
 
-          # Find table blocks
-          def get_blocks(block_id):
-              resp = requests.get(
-                  f'https://api.notion.com/v1/blocks/{block_id}/children?page_size=100',
-                  headers=headers, timeout=15)
-              log.append(f"  get_blocks({block_id[:8]}) → {resp.status_code}")
-              if resp.status_code != 200:
-                  log.append(f"  body: {resp.text[:200]}")
-                  return []
-              return resp.json().get('results', [])
+          readings = []
+          for row in results:
+              props = row['properties']
+              fecha_val = props.get('Fecha', {}).get('date')
+              if not fecha_val or not fecha_val.get('start'): continue
+              sist  = props.get('Sistólica', {}).get('number')
+              diast = props.get('Diastólica', {}).get('number')
+              if sist is None or diast is None: continue
+              cond_val = props.get('Condición', {}).get('select')
+              cond  = cond_val['name'] if cond_val else 'Sin café'
+              tipo  = TIPO_MAP.get(cond, 'nocafe')
+              label = fmt_label(fecha_val['start'])
+              readings.append({'d': label, 'sist': int(sist), 'diast': int(diast), 'tipo': tipo})
 
-          def find_tables(blocks, depth=0):
-              tables = []
-              for b in blocks:
-                  btype = b.get('type', '')
-                  if btype == 'table':
-                      tables.append(b)
-                  elif b.get('has_children') and btype not in ('table', 'table_row'):
-                      children = get_blocks(b['id'])
-                      tables.extend(find_tables(children, depth+1))
-              return tables
-
-          tables = find_tables(blocks)
-          log.append(f"Tables found: {len(tables)}")
-
-          def cell_text(cell):
-              return ''.join(t.get('plain_text', '') for t in cell)
-
-          MONTH_MAP = {str(i): i for i in range(1, 13)}
-          MONTH_ES  = {1:'ene',2:'feb',3:'mar',4:'abr',5:'may',6:'jun',
-                       7:'jul',8:'ago',9:'sep',10:'oct',11:'nov',12:'dic'}
-
-          bp_readings = []
-          for table in tables:
-              rows = get_blocks(table['id'])
-              log.append(f"Table rows: {len(rows)}")
-              for i, row in enumerate(rows):
-                  if i == 0: continue
-                  cells = row.get('table_row', {}).get('cells', [])
-                  log.append(f"  row {i}: cells={len(cells)} raw={[cell_text(c) for c in cells[:3]]}")
-                  if len(cells) < 3: continue
-                  fecha = cell_text(cells[0]).strip()
-                  sist  = cell_text(cells[1]).strip()
-                  diast = cell_text(cells[2]).strip()
-                  notas = cell_text(cells[4]).strip().lower() if len(cells) > 4 else ''
-                  if not sist.isdigit() or not diast.isdigit(): continue
-                  parts = fecha.replace(' ', '').split('/')
-                  if len(parts) == 2:
-                      d, m = parts[0], parts[1]
-                      mo = MONTH_MAP.get(m)
-                      if mo:
-                          label = f"{d} {MONTH_ES[mo]}"
-                          tipo  = ('medico'  if any(w in notas for w in ('médico','medico','aspy','chequeo')) else
-                                   'nocafe'  if any(w in notas for w in ('sin café','sin cafe')) else
-                                   'cafe'    if any(w in notas for w in ('café','cafe')) else
-                                   'nocafe')
-                          bp_readings.append({'d': label, 'sist': int(sist), 'diast': int(diast), 'tipo': tipo})
-
+          # Average same-day + same-tipo readings
           grouped = defaultdict(list)
-          for r in bp_readings: grouped[(r['d'], r['tipo'])].append(r)
+          for r in readings:
+              grouped[(r['d'], r['tipo'])].append(r)
           bp_final = [
               {'d': d, 'sist': round(sum(r['sist'] for r in g)/len(g)),
                'diast': round(sum(r['diast'] for r in g)/len(g)), 'tipo': tipo}
               for (d, tipo), g in grouped.items()
           ]
-          bp_final.sort(key=lambda r: r['d'])
-
-          log.append(f"Final readings: {len(bp_final)}")
 
           with open('bp_data.json', 'w') as f:
-              json.dump({'fetched_at': datetime.now(timezone.utc).isoformat(), 'readings': bp_final}, f, ensure_ascii=False, indent=2)
-          with open('bp_debug.json', 'w') as f:
-              json.dump({'log': log}, f, ensure_ascii=False, indent=2)
+              json.dump({
+                  'fetched_at': datetime.now(timezone.utc).isoformat(),
+                  'readings': bp_final,
+              }, f, ensure_ascii=False, indent=2)
+          print(f"Done — {len(bp_final)} averaged readings saved")
           PYEOF2
 
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add bp_data.json bp_debug.json
-          git diff --staged --quiet || git commit -m "Update BP data [$(date -u '+%Y-%m-%d %H:%M UTC')]"
+          git add bp_data.json
+          git diff --staged --quiet || git commit -m "Update bp_data.json [$(date -u '+%Y-%m-%d %H:%M UTC')]"
           git push
