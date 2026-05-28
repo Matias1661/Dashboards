@@ -256,9 +256,9 @@
     <p>Tendencias 12 meses</p>
   </div>
   <div class="header-right">
-    <span class="pill pill-green">Plan Karat activo — Sem 10</span>
+    <span class="pill pill-green">Plan Karat activo — Sem …</span>
     <span class="pill pill-amber">Ciclo inicio: 23 mar 2026</span>
-    <span class="pill pill-dim">Datos: may 2025 → 27 may 2026</span>
+    <span class="pill pill-dim">Datos: cargando…</span>
     <div class="range-btns">
       <button class="range-btn" data-m="6" onclick="applyRange(6)">6m</button>
       <button class="range-btn active" data-m="12" onclick="applyRange(12)">12m</button>
@@ -269,28 +269,28 @@
 <div class="kpi-grid">
   <div class="kpi down">
     <p class="kpi-label">Peso</p>
-    <p class="kpi-val">89.60 <span class="kpi-unit">kg</span></p>
-    <p class="kpi-delta down">+5.60 vs mín 12m (84.00)</p>
+    <p class="kpi-val">— <span class="kpi-unit"></span></p>
+    <p class="kpi-delta">—</p>
   </div>
   <div class="kpi up">
     <p class="kpi-label">Masa muscular</p>
-    <p class="kpi-val">60.48 <span class="kpi-unit">kg</span></p>
-    <p class="kpi-delta up">+2.08 vs mín 12m (58.40)</p>
+    <p class="kpi-val">— <span class="kpi-unit"></span></p>
+    <p class="kpi-delta">—</p>
   </div>
   <div class="kpi down">
     <p class="kpi-label">Grasa corporal</p>
-    <p class="kpi-val">28.9 <span class="kpi-unit">%</span></p>
-    <p class="kpi-delta down">+2.0 pp vs mín 12m (26.9%)</p>
+    <p class="kpi-val">— <span class="kpi-unit"></span></p>
+    <p class="kpi-delta">—</p>
   </div>
   <div class="kpi neutral">
     <p class="kpi-label">Grasa visceral</p>
-    <p class="kpi-val">11 <span class="kpi-unit">índice</span></p>
-    <p class="kpi-delta down">+2 vs mín 12m (9)</p>
+    <p class="kpi-val">— <span class="kpi-unit"></span></p>
+    <p class="kpi-delta">—</p>
   </div>
   <div class="kpi down">
     <p class="kpi-label">Agua corporal</p>
-    <p class="kpi-val">51.3 <span class="kpi-unit">%</span></p>
-    <p class="kpi-delta down">−1.5 pp vs máx 12m (52.8%)</p>
+    <p class="kpi-val">— <span class="kpi-unit"></span></p>
+    <p class="kpi-delta">—</p>
   </div>
 </div>
 
@@ -440,113 +440,170 @@
 
 <script>
 // ═══════════════════════════════════════════════════════════════════════════════
-// DATOS BRUTOS — actualizar con cada nueva medición Renpho
-// ciclo:true desde el 23 mar 2026 (inicio Plan Karat)
-// Para añadir datos: agregar fila al array data[] con el mismo formato
+// CONFIGURACIÓN DEL CICLO — constantes del protocolo, actualizar si cambia
 // ═══════════════════════════════════════════════════════════════════════════════
-const data = [
-  { d: '08 May 25', peso: 85.05, musc: 58.80, grasa: 27.3, subcutanea: 24.1, agua: 52.5, visceral: 9,  prot: 16.6, ciclo: false },
-  { d: '13 May 25', peso: 84.55, musc: 58.60, grasa: 27.1, subcutanea: 24.1, agua: 52.7, visceral: 9,  prot: 16.6, ciclo: false },
-  { d: '26 May 25', peso: 85.60, musc: 59.00, grasa: 27.5, subcutanea: 24.5, agua: 52.4, visceral: 9,  prot: 16.5, ciclo: false },
-  { d: '04 Jun 25', peso: 84.90, musc: 58.70, grasa: 27.2, subcutanea: 24.3, agua: 52.5, visceral: 9,  prot: 16.6, ciclo: false },
-  { d: '16 Jun 25', peso: 85.70, musc: 59.00, grasa: 27.5, subcutanea: 24.6, agua: 52.3, visceral: 9,  prot: 16.5, ciclo: false },
-  { d: '02 Jul 25', peso: 85.60, musc: 59.00, grasa: 27.5, subcutanea: 24.6, agua: 52.3, visceral: 9,  prot: 16.5, ciclo: false },
-  { d: '18 Jul 25', peso: 84.55, musc: 58.60, grasa: 27.1, subcutanea: 24.2, agua: 52.6, visceral: 9,  prot: 16.6, ciclo: false },
-  { d: '25 Ago 25', peso: 85.50, musc: 58.90, grasa: 27.5, subcutanea: 24.5, agua: 52.4, visceral: 9,  prot: 16.5, ciclo: false },
-  { d: '03 Sep 25', peso: 84.00, musc: 58.40, grasa: 26.9, subcutanea: 23.9, agua: 52.8, visceral: 9,  prot: 16.7, ciclo: false },
-  { d: '29 Sep 25', peso: 86.30, musc: 59.20, grasa: 27.8, subcutanea: 24.8, agua: 52.2, visceral: 9,  prot: 16.5, ciclo: false },
-  { d: '20 Oct 25', peso: 83.50, musc: 58.20, grasa: 26.7, subcutanea: 24.0, agua: 53.0, visceral: 8,  prot: 16.7, ciclo: false },
-  { d: '27 Oct 25', peso: 84.30, musc: 58.50, grasa: 27.0, subcutanea: 24.1, agua: 52.7, visceral: 9,  prot: 16.6, ciclo: false },
-  { d: '02 Dic 25', peso: 84.30, musc: 58.50, grasa: 27.0, subcutanea: 24.1, agua: 52.7, visceral: 9,  prot: 16.6, ciclo: false },
-  { d: '04 Feb 26', peso: 85.75, musc: 59.00, grasa: 27.6, subcutanea: 24.6, agua: 52.3, visceral: 9,  prot: 16.5, ciclo: false },
-  { d: '14 Feb 26', peso: 85.55, musc: 59.03, grasa: 27.4, subcutanea: 24.4, agua: 52.4, visceral: 9,  prot: 16.6, ciclo: false },
-  { d: '19 Feb 26', peso: 86.40, musc: 59.36, grasa: 27.7, subcutanea: 24.6, agua: 52.2, visceral: 9,  prot: 16.5, ciclo: false },
-  { d: '04 Mar 26', peso: 85.30, musc: 58.94, grasa: 27.3, subcutanea: 24.3, agua: 52.5, visceral: 9,  prot: 16.6, ciclo: false },
-  { d: '11 Mar 26', peso: 86.20, musc: 59.22, grasa: 27.7, subcutanea: 24.6, agua: 52.2, visceral: 9,  prot: 16.5, ciclo: false },
-  { d: '30 Mar 26', peso: 87.40, musc: 59.69, grasa: 28.1, subcutanea: 25.0, agua: 51.9, visceral: 10, prot: 16.4, ciclo: true  },
-  { d: '02 Abr 26', peso: 88.10, musc: 60.00, grasa: 28.3, subcutanea: 25.1, agua: 51.8, visceral: 10, prot: 16.4, ciclo: true  },
-  { d: '06 Abr 26', peso: 87.60, musc: 59.74, grasa: 28.2, subcutanea: 25.0, agua: 51.8, visceral: 10, prot: 16.4, ciclo: true  },
-  { d: '08 Abr 26', peso: 87.95, musc: 59.89, grasa: 28.3, subcutanea: 25.1, agua: 51.8, visceral: 10, prot: 16.4, ciclo: true  },
-  { d: '10 Abr 26', peso: 87.55, musc: 59.80, grasa: 28.1, subcutanea: 25.0, agua: 51.9, visceral: 10, prot: 16.4, ciclo: true  },
-  { d: '22 Abr 26', peso: 88.80, musc: 60.12, grasa: 28.7, subcutanea: 25.5, agua: 51.5, visceral: 10, prot: 16.3, ciclo: true  },
-  { d: '23 Abr 26', peso: 90.40, musc: 60.84, grasa: 29.2, subcutanea: 25.8, agua: 51.1, visceral: 11, prot: 16.1, ciclo: true  },
-  { d: '30 Abr 26', peso: 89.65, musc: 60.51, grasa: 29.0, subcutanea: 25.7, agua: 51.3, visceral: 11, prot: 16.2, ciclo: true  },
-  { d: '07 May 26', peso: 90.10, musc: 60.73, grasa: 29.1, subcutanea: 25.8, agua: 51.2, visceral: 11, prot: 16.2, ciclo: true  },
-  { d: '13 May 26', peso: 88.95, musc: 60.22, grasa: 28.7, subcutanea: 25.5, agua: 51.5, visceral: 10, prot: 16.3, ciclo: true  },
-  { d: '19 May 26', peso: 89.65, musc: 60.51, grasa: 29.0, subcutanea: 25.7, agua: 51.3, visceral: 11, prot: 16.2, ciclo: true  },
-  { d: '20 May 26', peso: 89.15, musc: 60.27, grasa: 28.8, subcutanea: 25.5, agua: 51.4, visceral: 10, prot: 16.2, ciclo: true  },
-  { d: '21 May 26', peso: 89.85, musc: 60.65, grasa: 29.0, subcutanea: 25.7, agua: 51.3, visceral: 11, prot: 16.2, ciclo: true  },
-  { d: '25 May 26', peso: 89.75, musc: 60.58, grasa: 29.0, subcutanea: 25.7, agua: 51.3, visceral: 11, prot: 16.2, ciclo: true  },
-  { d: '26 May 26', peso: 89.40, musc: 60.35, grasa: 28.9, subcutanea: 25.6, agua: 51.3, visceral: 10, prot: 16.2, ciclo: true  },
-  { d: '27 May 26', peso: 89.60, musc: 60.48, grasa: 28.9, subcutanea: 25.6, agua: 51.3, visceral: 11, prot: 16.2, ciclo: true  },
-  { d: '27 May 26', peso: 89.60, musc: 60.48, grasa: 28.9, subcutanea: 25.6, agua: 51.3, visceral: 11, prot: 16.2, ciclo: true  },
-];
-
-// allData = todos los puntos reales (sin interpolar). El scatter usa este array directamente.
-const allData = [...data];
+const CYCLE_START  = new Date('2026-03-23');
+const TAMO_DATE    = new Date('2026-05-14');
+const BASELINE     = { peso: 86.20, musc: 59.22, grasa: 27.7 };
+const JSON_URL     = 'https://raw.githubusercontent.com/Matias1661/Dashboards/main/renpho_data.json';
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// HELPERS DE FECHA
+// HELPERS
 // ═══════════════════════════════════════════════════════════════════════════════
 const MESES_ES  = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-const MESES_MAP = {Ene:0,Feb:1,Mar:2,Abr:3,May:4,Jun:5,Jul:6,Ago:7,Sep:8,Oct:9,Nov:10,Dic:11};
+const MESES_CAP = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
-function parseDateStr(str) {
-  const [dd, mmm, yy] = str.trim().split(' ');
-  return new Date(2000 + parseInt(yy), MESES_MAP[mmm], parseInt(dd));
+function parseDateISO(s) {
+  const [y,m,d] = s.split('-'); return new Date(+y, +m-1, +d);
+}
+function fmtLabel(d) {
+  return d.getDate() + ' ' + MESES_CAP[d.getMonth()] + ' ' + String(d.getFullYear()).slice(2);
 }
 function getMonday(d) {
   const r = new Date(d); const day = r.getDay();
-  r.setDate(r.getDate() - (day === 0 ? 6 : day - 1));
+  r.setDate(r.getDate() - (day===0 ? 6 : day-1));
   r.setHours(0,0,0,0); return r;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// AGREGACIÓN — NÚCLEO DE LA LÓGICA DE VISUALIZACIÓN
-// ───────────────────────────────────────────────────────────────────────────────
-// Vista 6M  = 26 buckets semanales (lunes–domingo), etiqueta = fecha del lunes
-// Vista 12M = 12 buckets mensuales, etiqueta = "may 26"
-// En ambos casos: buckets con mediciones → promedio; sin mediciones → interpolación lineal
-// El scatter SIEMPRE usa allData completo (puntos individuales, sin agregar)
+// ESTADO GLOBAL — populado por loadRenphoData()
 // ═══════════════════════════════════════════════════════════════════════════════
-const CYCLE_START_DATE = new Date('2026-03-23');
-const TAMO_DATE_REF    = new Date('2026-05-14');
+let allData = [];
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CARGA DINÁMICA
+// ═══════════════════════════════════════════════════════════════════════════════
+async function loadRenphoData() {
+  try {
+    const resp = await fetch(JSON_URL + '?t=' + Date.now());
+    const json = await resp.json();
+    const raw  = json.measurements || json;
+
+    const cutoff = new Date();
+    cutoff.setMonth(cutoff.getMonth() - 13);
+
+    allData = raw
+      .map(r => ({
+        d:          fmtLabel(parseDateISO(r.date)),
+        _date:      parseDateISO(r.date),
+        peso:       +r.weight,
+        musc:       +(r.skeletal_muscle || 0),
+        grasa:      +r.body_fat,
+        subcutanea: +(r.subcutaneous_fat || 0),
+        agua:       +r.water,
+        visceral:   +r.visceral_fat,
+        prot:       +(r.protein || 0),
+        ciclo:      parseDateISO(r.date) >= CYCLE_START,
+        interp:     false,
+      }))
+      .filter(r => r._date >= cutoff)
+      .sort((a, b) => a._date - b._date);
+
+    // Scatter usa todos los puntos raw (sin agregar)
+    chartScatter.data.datasets[0].data = allData.filter(d => !d.ciclo).map(d => ({ x: d.peso, y: d.grasa, label: d.d }));
+    chartScatter.data.datasets[1].data = allData.filter(d => d.ciclo).map(d => ({ x: d.peso, y: d.grasa, label: d.d }));
+    chartScatter.update();
+
+    updateKPIs();
+    updatePills();
+    applyRange(12);
+  } catch (e) {
+    console.error('Error cargando renpho_data.json:', e);
+    document.querySelector('.section-title') && (document.querySelector('.section-title').textContent += ' ⚠ Error cargando datos');
+  }
+}
+
+// ── KPIs: auto-calculados desde la última medición ──────────────────────────
+function updateKPIs() {
+  if (!allData.length) return;
+  const latest = allData[allData.length - 1];
+  const d12    = new Date(); d12.setMonth(d12.getMonth() - 12);
+  const d12m   = allData.filter(r => r._date >= d12);
+  if (!d12m.length) return;
+
+  const minPeso  = Math.min(...d12m.map(r => r.peso));
+  const minMusc  = Math.min(...d12m.map(r => r.musc));
+  const minGrasa = Math.min(...d12m.map(r => r.grasa));
+  const minVisc  = Math.min(...d12m.map(r => r.visceral));
+  const maxAgua  = Math.max(...d12m.map(r => r.agua));
+
+  const kpis = document.querySelectorAll('.kpi');
+  if (kpis[0]) {
+    kpis[0].querySelector('.kpi-val').innerHTML = `${latest.peso.toFixed(2)} <span class="kpi-unit">kg</span>`;
+    kpis[0].querySelector('.kpi-delta').textContent = `+${(latest.peso - minPeso).toFixed(2)} vs mín 12m (${minPeso.toFixed(2)})`;
+  }
+  if (kpis[1]) {
+    kpis[1].querySelector('.kpi-val').innerHTML = `${latest.musc.toFixed(2)} <span class="kpi-unit">kg</span>`;
+    kpis[1].querySelector('.kpi-delta').textContent = `+${(latest.musc - minMusc).toFixed(2)} vs mín 12m (${minMusc.toFixed(2)})`;
+  }
+  if (kpis[2]) {
+    kpis[2].querySelector('.kpi-val').innerHTML = `${latest.grasa.toFixed(1)} <span class="kpi-unit">%</span>`;
+    kpis[2].querySelector('.kpi-delta').textContent = `+${(latest.grasa - minGrasa).toFixed(1)} pp vs mín 12m (${minGrasa.toFixed(1)}%)`;
+  }
+  if (kpis[3]) {
+    kpis[3].querySelector('.kpi-val').innerHTML = `${latest.visceral} <span class="kpi-unit">índice</span>`;
+    kpis[3].querySelector('.kpi-delta').textContent = `${latest.visceral > minVisc ? '+' : ''}${latest.visceral - minVisc} vs mín 12m (${minVisc})`;
+  }
+  if (kpis[4]) {
+    kpis[4].querySelector('.kpi-val').innerHTML = `${latest.agua.toFixed(1)} <span class="kpi-unit">%</span>`;
+    kpis[4].querySelector('.kpi-delta').textContent = `−${(maxAgua - latest.agua).toFixed(1)} pp vs máx 12m (${maxAgua.toFixed(1)}%)`;
+  }
+}
+
+// ── Pills y footer: semana del ciclo + fecha última medición ────────────────
+function updatePills() {
+  if (!allData.length) return;
+  const latest  = allData[allData.length - 1];
+  const weekNum = Math.max(1, Math.ceil((new Date() - CYCLE_START) / (7 * 24 * 3600 * 1000)));
+  const first   = allData[0];
+
+  const pillGreen = document.querySelector('.pill-green');
+  const pillDim   = document.querySelector('.pill-dim');
+  const footer    = document.querySelector('footer span');
+
+  if (pillGreen) pillGreen.textContent = `Plan Karat activo — Sem ${weekNum}`;
+  if (pillDim)   pillDim.textContent   = `Datos: ${MESES_ES[first._date.getMonth()]} ${first._date.getFullYear()} → ${latest.d.toLowerCase()}`;
+  if (footer)    footer.textContent    = `Actualizado: ${new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})} · Plan Karat Sem ${weekNum}`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// AGREGACIÓN — 6M = 26 buckets semanales · 12M = 12 buckets mensuales
+// Buckets vacíos → interpolación lineal. Scatter siempre usa allData raw.
+// NO eliminar esta lógica — es el núcleo del selector de rango.
+// ═══════════════════════════════════════════════════════════════════════════════
 const METRICS = ['peso','musc','grasa','subcutanea','agua','visceral','prot'];
 
 function aggregate(type) {
-  const now = new Date();
-  const n   = type === 'monthly' ? 12 : 26;
-  const parsed = allData.map(r => ({ ...r, _date: parseDateStr(r.d) }));
+  const now  = new Date();
+  const n    = type === 'monthly' ? 12 : 26;
   const buckets = [];
 
   for (let i = n - 1; i >= 0; i--) {
     let label, pts, refDate;
     if (type === 'monthly') {
       const d  = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const y  = d.getFullYear(), mo = d.getMonth();
-      pts      = parsed.filter(r => r._date.getFullYear() === y && r._date.getMonth() === mo);
-      label    = MESES_ES[mo] + ' ' + String(y).slice(2);
+      pts      = allData.filter(r => r._date.getFullYear() === d.getFullYear() && r._date.getMonth() === d.getMonth());
+      label    = MESES_ES[d.getMonth()] + ' ' + String(d.getFullYear()).slice(2);
       refDate  = new Date(d);
     } else {
       const monday = getMonday(new Date(now));
       monday.setDate(monday.getDate() - i * 7);
       const sunday = new Date(monday);
       sunday.setDate(sunday.getDate() + 6); sunday.setHours(23,59,59);
-      pts     = parsed.filter(r => r._date >= monday && r._date <= sunday);
+      pts     = allData.filter(r => r._date >= monday && r._date <= sunday);
       label   = monday.getDate() + ' ' + MESES_ES[monday.getMonth()];
       refDate = new Date(monday);
     }
-    const hasCiclo = pts.some(r => r._date >= CYCLE_START_DATE);
+    const hasCiclo = pts.some(r => r.ciclo);
     const b = { label, pts, ciclo: hasCiclo, interp: pts.length === 0, d: refDate };
     if (pts.length) {
       METRICS.forEach(k => {
-        b[k] = +(pts.reduce((s,r) => s + (r[k] || 0), 0) / pts.length).toFixed(2);
+        b[k] = +(pts.reduce((s, r) => s + (r[k] || 0), 0) / pts.length).toFixed(2);
       });
     }
     buckets.push(b);
   }
 
-  // Interpolación lineal para buckets sin mediciones
   METRICS.forEach(k => {
     for (let i = 0; i < buckets.length; i++) {
       if (buckets[i][k] == null) {
@@ -562,12 +619,11 @@ function aggregate(type) {
       }
     }
   });
-
   return buckets;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// PLUGIN: sombreado ciclo activo + línea vertical Tamoxifen
+// PLUGIN: sombreado ciclo activo + línea Tamoxifen
 // ═══════════════════════════════════════════════════════════════════════════════
 let activeCicloIdx = -1, activeTamoIdx = -1;
 
@@ -588,8 +644,8 @@ const annotPlugin = {
       ctx.restore();
     }
     if (activeTamoIdx >= 0 && activeTamoIdx + 1 <= xs.max) {
-      const step = xs.getPixelForValue(Math.min(activeTamoIdx + 1, xs.max)) - xs.getPixelForValue(activeTamoIdx);
-      const tx = xs.getPixelForValue(activeTamoIdx) + step * 0.5;
+      const step = xs.getPixelForValue(Math.min(activeTamoIdx+1, xs.max)) - xs.getPixelForValue(activeTamoIdx);
+      const tx   = xs.getPixelForValue(activeTamoIdx) + step * 0.5;
       ctx.save();
       ctx.strokeStyle = 'rgba(37,99,190,0.5)'; ctx.lineWidth = 1.5; ctx.setLineDash([3,3]);
       ctx.beginPath(); ctx.moveTo(tx, chartArea.top); ctx.lineTo(tx, chartArea.bottom); ctx.stroke();
@@ -602,12 +658,10 @@ const annotPlugin = {
 Chart.register(annotPlugin);
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// OPCIONES BASE DE GRÁFICOS
+// OPCIONES BASE
 // ═══════════════════════════════════════════════════════════════════════════════
 const baseOpts = (yMin, yMax) => ({
-  responsive: true,
-  maintainAspectRatio: false,
-  spanGaps: true,
+  responsive: true, maintainAspectRatio: false, spanGaps: true,
   plugins: {
     legend: { display: false },
     tooltip: {
@@ -617,36 +671,25 @@ const baseOpts = (yMin, yMax) => ({
     }
   },
   scales: {
-    x: {
-      ticks: { font: { size: 9, family: 'DM Mono' }, color: '#a8aab0', maxRotation: 45, autoSkip: true },
-      grid: { display: false }, border: { display: false }
-    },
-    y: {
-      min: yMin, max: yMax,
-      ticks: { font: { size: 9 }, color: '#a8aab0' },
-      grid: { color: 'rgba(0,0,0,0.05)' }, border: { display: false }
-    }
+    x: { ticks: { font: { size: 9, family: 'DM Mono' }, color: '#a8aab0', maxRotation: 45, autoSkip: true },
+         grid: { display: false }, border: { display: false } },
+    y: { min: yMin, max: yMax,
+         ticks: { font: { size: 9 }, color: '#a8aab0' },
+         grid: { color: 'rgba(0,0,0,0.05)' }, border: { display: false } }
   }
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// INICIALIZACIÓN DE GRÁFICOS (vacíos — applyRange() los rellena)
+// CHARTS — inicializados vacíos, llenados por applyRange() tras loadRenphoData()
 // ═══════════════════════════════════════════════════════════════════════════════
-const emptyLine = (color, fill=true) => ({
-  type: 'line',
-  data: { labels: [], datasets: [{ data: [], borderColor: color,
-    backgroundColor: fill ? color.replace(')',',0.07)').replace('rgb','rgba') : 'transparent',
-    borderWidth: 2, pointRadius: [], pointHoverRadius: 6, fill, tension: 0.35 }] }
-});
-
 const chartPeso = new Chart(document.getElementById('c-peso'), {
   type: 'line', data: { labels: [], datasets: [{ data: [], borderColor: '#2563be',
-    backgroundColor: 'rgba(37,99,190,0.07)', borderWidth: 2, pointRadius: [], pointHoverRadius: 6, fill: true, tension: 0.35 }] },
+    backgroundColor: 'rgba(37,99,190,0.07)', borderWidth: 2, pointRadius: [], fill: true, tension: 0.35 }] },
   options: { ...baseOpts(83, 92) }
 });
 const chartMusc = new Chart(document.getElementById('c-musc'), {
   type: 'line', data: { labels: [], datasets: [{ data: [], borderColor: '#0d8a52',
-    backgroundColor: 'rgba(13,138,82,0.07)', borderWidth: 2, pointRadius: [], pointHoverRadius: 6, fill: true, tension: 0.35 }] },
+    backgroundColor: 'rgba(13,138,82,0.07)', borderWidth: 2, pointRadius: [], fill: true, tension: 0.35 }] },
   options: { ...baseOpts(57.5, 62) }
 });
 const chartGrasa = new Chart(document.getElementById('c-grasa'), {
@@ -657,7 +700,7 @@ const chartGrasa = new Chart(document.getElementById('c-grasa'), {
 });
 const chartAgua = new Chart(document.getElementById('c-agua'), {
   type: 'line', data: { labels: [], datasets: [{ data: [], borderColor: '#6d4fc2',
-    backgroundColor: 'rgba(109,79,194,0.07)', borderWidth: 2, pointRadius: [], pointHoverRadius: 6, fill: true, tension: 0.35 }] },
+    backgroundColor: 'rgba(109,79,194,0.07)', borderWidth: 2, pointRadius: [], fill: true, tension: 0.35 }] },
   options: { ...baseOpts(50.5, 53.5) }
 });
 const chartVisceral = new Chart(document.getElementById('c-visceral'), {
@@ -676,27 +719,21 @@ const chartProt = new Chart(document.getElementById('c-prot'), {
     backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 2, tension: 0.35, borderDash: [3,2] }] },
   options: { ...baseOpts(16.0, 16.9) }
 });
-
-// SCATTER — siempre con todos los puntos reales de allData (sin agregar)
 const chartScatter = new Chart(document.getElementById('c-scatter'), {
   type: 'scatter',
   data: {
     datasets: [
-      { label: 'Pre-ciclo', data: allData.filter(d => !d.ciclo).map(d => ({ x: d.peso, y: d.grasa, label: d.d })),
-        backgroundColor: 'rgba(107,109,112,0.5)', pointRadius: 5, pointHoverRadius: 7 },
-      { label: 'Ciclo activo', data: allData.filter(d => d.ciclo).map(d => ({ x: d.peso, y: d.grasa, label: d.d })),
-        backgroundColor: 'rgba(13,138,82,0.75)', pointRadius: 6, pointHoverRadius: 8 }
+      { label: 'Pre-ciclo',    data: [], backgroundColor: 'rgba(107,109,112,0.5)', pointRadius: 5, pointHoverRadius: 7 },
+      { label: 'Ciclo activo', data: [], backgroundColor: 'rgba(13,138,82,0.75)',  pointRadius: 6, pointHoverRadius: 8 }
     ]
   },
   options: {
     responsive: true, maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
-      tooltip: {
-        backgroundColor: '#ffffff', titleColor: '#6b6d70', bodyColor: '#1a1a18',
+      tooltip: { backgroundColor: '#fff', titleColor: '#6b6d70', bodyColor: '#1a1a18',
         borderColor: 'rgba(0,0,0,0.12)', borderWidth: 1,
-        callbacks: { label: ctx => `${ctx.raw.label}: ${ctx.raw.x} kg — ${ctx.raw.y}% grasa` }
-      }
+        callbacks: { label: ctx => `${ctx.raw.label}: ${ctx.raw.x} kg — ${ctx.raw.y}% grasa` } }
     },
     scales: {
       x: { min: 83.5, max: 92, title: { display: true, text: 'Peso (kg)', color: '#a8aab0', font: { size: 10 } },
@@ -708,20 +745,17 @@ const chartScatter = new Chart(document.getElementById('c-scatter'), {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// APPLY RANGE — actualiza todos los gráficos según el rango seleccionado
-// IMPORTANTE: no eliminar la lógica de agregación. Ver comentario en aggregate()
+// APPLY RANGE — actualiza todos los gráficos según toggle 6m / 12m
 // ═══════════════════════════════════════════════════════════════════════════════
 function applyRange(months) {
   document.querySelectorAll('.range-btn').forEach(b => b.classList.toggle('active', +b.dataset.m === months));
-  const type    = months === 6 ? 'weekly' : 'monthly';
-  const buckets = aggregate(type);
+  const buckets = aggregate(months === 6 ? 'weekly' : 'monthly');
 
-  // Recalcular índices para el plugin de anotaciones
   activeCicloIdx = buckets.findIndex(b => b.ciclo);
   activeTamoIdx  = -1;
   for (let i = 0; i < buckets.length; i++) {
     const nextD = i + 1 < buckets.length ? buckets[i+1].d : new Date(9999,0,1);
-    if (buckets[i].d <= TAMO_DATE_REF && nextD > TAMO_DATE_REF) { activeTamoIdx = i; break; }
+    if (buckets[i].d <= TAMO_DATE && nextD > TAMO_DATE) { activeTamoIdx = i; break; }
   }
 
   const fl   = buckets.map(b => b.label);
@@ -768,9 +802,11 @@ function applyRange(months) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// TENSIÓN ARTERIAL — panel hardcodeado (fuente: Notion 36333ce5)
+// TENSIÓN ARTERIAL — carga bp_data.json si existe, sino usa fallback hardcodeado
+// Para activar: añadir NOTION_TOKEN a GitHub Secrets (ver fetch_bp.yml)
+// Fallback: actualizar bpFallback manualmente cuando no esté activo bp_data.json
 // ═══════════════════════════════════════════════════════════════════════════════
-const bpData = [
+const bpFallback = [
   { d: '14 may', sist: 124, diast: 90, tipo: 'medico' },
   { d: '18 may', sist: 129, diast: 90, tipo: 'cafe'   },
   { d: '19 may', sist: 104, diast: 71, tipo: 'nocafe' },
@@ -782,11 +818,27 @@ const bpData = [
   { d: '27 may', sist: 115, diast: 81, tipo: 'nocafe' },
 ];
 
-const bpPtColor  = { medico:'rgba(109,79,194,0.85)', cafe:'rgba(201,74,48,0.9)', nocafe:'rgba(13,138,82,0.9)' };
-const bpPtBorder = { medico:'#6d4fc2', cafe:'#c94a30', nocafe:'#0d8a52' };
-const bpTipoLabel= { medico:'chequeo médico', cafe:'con café', nocafe:'sin café' };
-const bpN = bpData.length;
+// Try to load bp_data.json (auto-generated by fetch_bp.yml); fall back to bpFallback
+async function loadBPData() {
+  try {
+    const resp = await fetch('https://raw.githubusercontent.com/Matias1661/Dashboards/main/bp_data.json?t=' + Date.now());
+    if (resp.ok) {
+      const json = await resp.json();
+      if (json.readings && json.readings.length) {
+        renderBP(json.readings);
+        return;
+      }
+    }
+  } catch (e) { /* fall through to fallback */ }
+  renderBP(bpFallback);
+}
 
+const bpPtColor   = { medico:'rgba(109,79,194,0.85)', cafe:'rgba(201,74,48,0.9)', nocafe:'rgba(13,138,82,0.9)' };
+const bpPtBorder  = { medico:'#6d4fc2', cafe:'#c94a30', nocafe:'#0d8a52' };
+const bpTipoLabel = { medico:'chequeo médico', cafe:'con café', nocafe:'sin café' };
+
+function renderBP(bpData) {
+const bpN = bpData.length;
 new Chart(document.getElementById('c-bp'), {
   type: 'line',
   data: {
@@ -795,15 +847,15 @@ new Chart(document.getElementById('c-bp'), {
       { label:'Sistólica', data: bpData.map(d => d.sist), borderColor:'#c94a30',
         backgroundColor:'rgba(201,74,48,0.07)', borderWidth:2,
         pointBackgroundColor: bpData.map(d => bpPtColor[d.tipo]),
-        pointBorderColor: bpData.map(d => bpPtBorder[d.tipo]),
+        pointBorderColor:     bpData.map(d => bpPtBorder[d.tipo]),
         pointRadius:5, fill:true, tension:0.3, order:1 },
       { label:'Diastólica', data: bpData.map(d => d.diast), borderColor:'#9a6200',
         backgroundColor:'transparent', borderWidth:1.5, pointRadius:4,
         fill:false, tension:0.3, borderDash:[4,3], order:2 },
       { label:'Límite sist. (140)', data: new Array(bpN).fill(140), borderColor:'rgba(201,74,48,0.55)',
-        backgroundColor:'transparent', borderWidth:1.5, borderDash:[6,4], pointRadius:0, fill:false, order:3 },
+        backgroundColor:'transparent', borderWidth:1.5, borderDash:[6,4], pointRadius:0, fill:false },
       { label:'Límite diast. (90)', data: new Array(bpN).fill(90), borderColor:'rgba(154,98,0,0.55)',
-        backgroundColor:'transparent', borderWidth:1.5, borderDash:[6,4], pointRadius:0, fill:false, order:4 }
+        backgroundColor:'transparent', borderWidth:1.5, borderDash:[6,4], pointRadius:0, fill:false }
     ]
   },
   options: {
@@ -814,7 +866,7 @@ new Chart(document.getElementById('c-bp'), {
       tooltip: { backgroundColor:'#fff', titleColor:'#6b6d70', bodyColor:'#1a1a18',
         borderColor:'rgba(0,0,0,0.12)', borderWidth:1,
         filter: item => item.datasetIndex < 2,
-        callbacks: { afterLabel: ctx => ctx.datasetIndex === 0 ? '(' + bpTipoLabel[bpData[ctx.dataIndex].tipo] + ')' : '' } }
+        callbacks: { afterLabel: ctx => ctx.datasetIndex===0 ? '('+bpTipoLabel[bpData[ctx.dataIndex].tipo]+')' : '' } }
     },
     scales: {
       x: { ticks:{font:{family:'DM Mono',size:9},color:'#a8aab0'}, grid:{display:false}, border:{display:false} },
@@ -827,9 +879,15 @@ new Chart(document.getElementById('c-bp'), {
   }
 });
 
-// Render inicial con vista 12M
-applyRange(12);
+}  // end renderBP
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// INICIO — carga todos los datos dinámicamente al abrir la página
+// ═══════════════════════════════════════════════════════════════════════════════
+loadRenphoData();
+loadBPData();
 </script>
+
 
 </body>
 </html>
