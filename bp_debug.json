@@ -1,0 +1,7 @@
+{
+  "log": [
+    "Token starts with: secret_ntn_1...",
+    "GET blocks/36333ce5-0e68-81a5-895c-f111d0ab45af/children \u2192 401",
+    "Error body: {\"object\":\"error\",\"status\":401,\"code\":\"unauthorized\",\"message\":\"API token is invalid.\",\"request_id\":\"8537e5cc-d6b5-454a-aabc-825c5e658df3\"}"
+  ]
+}
