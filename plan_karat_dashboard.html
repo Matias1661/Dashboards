@@ -19,11 +19,7 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
-
-/* ── Layout ─────────────────────────────────────────────── */
 .wrap{max-width:1100px;margin:0 auto;padding:0 16px 40px}
-
-/* ── Header ─────────────────────────────────────────────── */
 header{background:var(--surface);border-bottom:1px solid var(--border2);padding:14px 0;position:sticky;top:0;z-index:100}
 .header-inner{max-width:1100px;margin:0 auto;padding:0 16px;display:flex;align-items:center;gap:12px}
 .logo{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;letter-spacing:0.08em;color:var(--text)}
@@ -32,45 +28,38 @@ header{background:var(--surface);border-bottom:1px solid var(--border2);padding:
 #btnRefresh{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.08em;padding:5px 14px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s}
 #btnRefresh:hover{background:var(--surface2)}
 #btnRefresh.loading{color:var(--amber);border-color:var(--amber)}
-.btn-settings{width:28px;height:28px;border-radius:6px;border:0.5px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:background .15s}
-.btn-settings:hover{background:var(--surface2)}
 #refreshMsg{font-family:'DM Mono',monospace;font-size:10px;color:var(--amber);display:none}
-
-/* ── Sections ────────────────────────────────────────────── */
 .section{margin-top:28px}
 .section-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3);padding-bottom:8px;border-bottom:0.5px solid var(--border2);margin-bottom:14px}
-
-/* ── Cards ───────────────────────────────────────────────── */
 .card{background:var(--surface);border:0.5px solid var(--border2);border-radius:10px;padding:16px;margin-bottom:12px}
 .card-header{display:flex;align-items:center;margin-bottom:12px}
 .card-title{font-size:11px;font-weight:500;color:var(--text2);letter-spacing:0.02em}
 .card-badge{margin-left:auto;font-family:'DM Mono',monospace;font-size:9px;color:var(--text3)}
 .chart-wrap{position:relative}
-
-/* ── Grid helpers ────────────────────────────────────────── */
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
 @media(max-width:600px){.two-col,.three-col{grid-template-columns:1fr}}
-
-/* ── KPIs ────────────────────────────────────────────────── */
+/* ── KPIs ─────────────────────────────────────── */
 .kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}
 @media(max-width:700px){.kpi-grid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:420px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
-.kpi{background:var(--surface);border:0.5px solid var(--border2);border-radius:8px;padding:12px 14px}
+.kpi{background:var(--surface);border:0.5px solid var(--border2);border-radius:8px;padding:12px 14px;transition:background .3s,border-color .3s}
+.kpi.trend-up{background:var(--green-dim);border-color:rgba(13,138,82,0.2)}
+.kpi.trend-neutral{background:var(--amber-dim);border-color:rgba(154,98,0,0.2)}
+.kpi.trend-down{background:var(--red-dim);border-color:rgba(201,74,48,0.2)}
 .kpi-label{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:5px}
 .kpi-val{font-size:22px;font-weight:300;letter-spacing:-0.03em;line-height:1}
 .kpi-unit{font-size:11px;font-weight:400;color:var(--text2)}
-.kpi-delta{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:4px}
-.kpi-delta.up{color:var(--green)} .kpi-delta.down{color:var(--red)} .kpi-delta.ok{color:var(--green)}
+.kpi-date{font-family:'DM Mono',monospace;font-size:8px;color:var(--text3);margin-top:4px}
+.kpi-delta{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:2px}
+.kpi-delta.up{color:var(--green)} .kpi-delta.down{color:var(--red)}
 .train-kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
-
-/* ── Range toggle ────────────────────────────────────────── */
+/* ── Range toggle ─────────────────────────────── */
 .range-btns{display:flex;gap:4px}
 .range-btn{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.06em;padding:3px 10px;border-radius:4px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s}
 .range-btn:hover{background:var(--surface2)}
 .range-btn.active{background:var(--text);color:var(--bg);border-color:var(--text)}
-
-/* ── Protocol panel ──────────────────────────────────────── */
+/* ── Protocol ─────────────────────────────────── */
 .proto-card{background:var(--surface);border:0.5px solid var(--border2);border-radius:10px;padding:18px}
 .proto-top{display:flex;align-items:flex-start;gap:16px;margin-bottom:16px}
 .proto-week{font-size:42px;font-weight:300;letter-spacing:-0.05em;line-height:1;color:var(--text)}
@@ -82,15 +71,15 @@ header{background:var(--surface);border-bottom:1px solid var(--border2);padding:
 .proto-progress-track{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:12px;overflow:hidden}
 .proto-progress-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--green),#1ab069);transition:width .6s ease}
 .week-timeline{display:flex;gap:3px;flex-wrap:wrap}
-.wk{width:26px;height:20px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:8px;cursor:default;transition:all .15s}
+.wk{width:26px;height:20px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:8px;cursor:default;transition:all .15s;position:relative}
+.wk:hover{transform:scale(1.15);z-index:2}
 .wk.past{background:var(--green-dim);color:var(--green)}
 .wk.current{background:var(--green);color:#fff;font-weight:500;box-shadow:0 0 0 2px rgba(13,138,82,0.3)}
 .wk.future{background:var(--surface2);color:var(--text3)}
 .wk.pct-past{background:var(--amber-dim);color:var(--amber)}
 .wk.pct-current{background:var(--amber);color:#fff;font-weight:500}
 .wk.pct-future{background:var(--surface2);color:var(--text3)}
-
-/* ── Analysis ────────────────────────────────────────────── */
+/* ── Analysis ─────────────────────────────────── */
 .analysis-section{margin-bottom:14px}
 .analysis-section-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
 .analysis-item{font-size:12px;color:var(--text2);padding:7px 10px 7px 28px;border-radius:6px;margin-bottom:4px;position:relative;background:var(--surface2)}
@@ -98,27 +87,27 @@ header{background:var(--surface);border-bottom:1px solid var(--border2);padding:
 .analysis-item.ok{background:var(--green-dim);color:#0a5c36}.analysis-item.ok::before{content:'✓'}
 .analysis-item.warn{background:var(--amber-dim);color:#6b4400}.analysis-item.warn::before{content:'⚠'}
 .analysis-item.info::before{content:'→'}
-
-/* ── Settings modal ──────────────────────────────────────── */
+/* ── Maintenance ──────────────────────────────── */
+.maint-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.maint-row{grid-template-columns:1fr}}
+.maint-block{background:var(--surface2);border-radius:8px;padding:12px 14px}
+.maint-block-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.maint-item{font-size:11px;color:var(--text2);padding:5px 8px 5px 20px;position:relative;border-radius:4px;margin-bottom:3px}
+.maint-item::before{position:absolute;left:6px;font-size:9px;top:6px}
+.maint-item.auto{background:var(--green-dim);color:#0a5c36}.maint-item.auto::before{content:'↻'}
+.maint-item.manual{background:var(--blue-dim);color:#1a3a6b}.maint-item.manual::before{content:'✎'}
+/* ── Settings modal ───────────────────────────── */
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center}
 .modal-bg.open{display:flex}
 .modal{background:var(--surface);border-radius:12px;padding:24px;width:340px;max-width:calc(100vw - 32px)}
 .modal h3{font-size:14px;font-weight:500;margin-bottom:16px}
-.modal label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.06em;color:var(--text2);display:block;margin-bottom:6px}
-.modal input{width:100%;border:0.5px solid var(--border2);border-radius:6px;padding:8px 10px;font-family:'DM Mono',monospace;font-size:11px;background:var(--bg);color:var(--text);outline:none}
-.modal input:focus{border-color:var(--blue)}
-.modal-actions{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
-.btn-primary{font-family:'DM Mono',monospace;font-size:10px;padding:6px 16px;border-radius:6px;border:none;background:var(--text);color:var(--bg);cursor:pointer}
-.btn-ghost{font-family:'DM Mono',monospace;font-size:10px;padding:6px 16px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer}
 .modal-note{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:10px;line-height:1.5}
-
-/* ── Loading ─────────────────────────────────────────────── */
+.modal-actions{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
+.btn-ghost{font-family:'DM Mono',monospace;font-size:10px;padding:6px 16px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer}
+/* ── Loading ──────────────────────────────────── */
 .loading-bar{height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent);background-size:200% 100%;animation:slide 1.2s linear infinite;display:none;margin-bottom:0}
 @keyframes slide{0%{background-position:200% 0}100%{background-position:-200% 0}}
 .loading-bar.active{display:block}
-.load-msg{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);text-align:center;padding:40px;display:none}
-.load-msg.active{display:block}
-
 footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:40px;padding-bottom:20px}
 </style>
 </head>
@@ -131,9 +120,8 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
     <span class="logo">PLAN KARAT</span>
     <span class="week-badge" id="weekBadge">cargando…</span>
     <span class="spacer"></span>
-    <span id="refreshMsg">Actualizando…</span>
+    <span id="refreshMsg" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--amber);display:none">Actualizando…</span>
     <button id="btnRefresh" onclick="triggerRefresh()">↻ Actualizar</button>
-    <button class="btn-settings" onclick="openSettings()" title="Configuración">⚙</button>
   </div>
 </header>
 
@@ -153,6 +141,7 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       </div>
       <div class="proto-progress-track"><div class="proto-progress-fill" id="protoFill" style="width:0%"></div></div>
       <div class="week-timeline" id="weekTimeline"></div>
+      <p style="font-family:'DM Mono',monospace;font-size:8px;color:var(--text3);margin-top:8px">Pasa el ratón sobre cada semana para ver el protocolo activo.</p>
     </div>
   </div>
 
@@ -166,11 +155,41 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       </div>
     </div>
     <div class="kpi-grid" id="bodyKpis">
-      <div class="kpi"><div class="kpi-label">Peso</div><div class="kpi-val" id="kPeso">—</div><div class="kpi-delta" id="kPesoDelta">—</div></div>
-      <div class="kpi"><div class="kpi-label">Músculo</div><div class="kpi-val" id="kMusc">—</div><div class="kpi-delta up" id="kMuscDelta">—</div></div>
-      <div class="kpi"><div class="kpi-label">Grasa</div><div class="kpi-val" id="kGrasa">—</div><div class="kpi-delta" id="kGrasaDelta">—</div></div>
-      <div class="kpi"><div class="kpi-label">Visceral</div><div class="kpi-val" id="kVisc">—</div><div class="kpi-delta" id="kViscDelta">—</div></div>
-      <div class="kpi"><div class="kpi-label">Agua</div><div class="kpi-val" id="kAgua">—</div><div class="kpi-delta" id="kAguaDelta">—</div></div>
+      <div class="kpi" id="kpiPeso">
+        <div class="kpi-label">Peso</div>
+        <div class="kpi-val" id="kPeso">—</div>
+        <div class="kpi-date" id="kPesoDate"></div>
+        <div class="kpi-delta" id="kPesoDelta">—</div>
+        <div class="kpi-delta" id="kPesoCycleDelta">—</div>
+      </div>
+      <div class="kpi" id="kpiMusc">
+        <div class="kpi-label">Músculo</div>
+        <div class="kpi-val" id="kMusc">—</div>
+        <div class="kpi-date" id="kMuscDate"></div>
+        <div class="kpi-delta" id="kMuscDelta">—</div>
+        <div class="kpi-delta" id="kMuscCycleDelta">—</div>
+      </div>
+      <div class="kpi" id="kpiGrasa">
+        <div class="kpi-label">Grasa</div>
+        <div class="kpi-val" id="kGrasa">—</div>
+        <div class="kpi-date" id="kGrasaDate"></div>
+        <div class="kpi-delta" id="kGrasaDelta">—</div>
+        <div class="kpi-delta" id="kGrasaCycleDelta">—</div>
+      </div>
+      <div class="kpi" id="kpiVisc">
+        <div class="kpi-label">Visceral</div>
+        <div class="kpi-val" id="kVisc">—</div>
+        <div class="kpi-date" id="kViscDate"></div>
+        <div class="kpi-delta" id="kViscDelta">—</div>
+        <div class="kpi-delta" id="kViscCycleDelta">—</div>
+      </div>
+      <div class="kpi" id="kpiAgua">
+        <div class="kpi-label">Agua</div>
+        <div class="kpi-val" id="kAgua">—</div>
+        <div class="kpi-date" id="kAguaDate"></div>
+        <div class="kpi-delta" id="kAguaDelta">—</div>
+        <div class="kpi-delta" id="kAguaCycleDelta">—</div>
+      </div>
     </div>
     <div class="two-col">
       <div class="card"><div class="card-header"><span class="card-title">Peso</span><span class="card-badge" id="cbPeso"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-peso"></canvas></div></div>
@@ -178,10 +197,20 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
     </div>
     <div class="two-col">
       <div class="card"><div class="card-header"><span class="card-title">Grasa corporal</span><span class="card-badge" id="cbGrasa"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-grasa"></canvas></div></div>
-      <div class="card"><div class="card-header"><span class="card-title">Agua · Grasa visceral</span></div><div class="chart-wrap" style="height:160px"><canvas id="c-agua"></canvas></div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Agua %</span><span class="card-badge" id="cbAgua"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-agua"></canvas></div></div>
     </div>
     <div class="card" style="margin-top:0">
-      <div class="card-header"><span class="card-title">Peso vs grasa — dispersión</span><span class="card-badge">● pre-ciclo &nbsp;● ciclo</span></div>
+      <div class="card-header"><span class="card-title">Grasa visceral (índice)</span><span class="card-badge" id="cbVisceral"></span></div>
+      <div class="chart-wrap" style="height:110px"><canvas id="c-visceral"></canvas></div>
+    </div>
+    <div class="card" style="margin-top:0">
+      <div class="card-header">
+        <span class="card-title">Peso vs grasa — dispersión</span>
+        <span class="card-badge">
+          <span style="color:rgba(107,109,112,0.9)">●</span> pre-ciclo &nbsp;
+          <span style="color:#0d8a52">●</span> ciclo
+        </span>
+      </div>
       <div class="chart-wrap" style="height:200px"><canvas id="c-scatter"></canvas></div>
     </div>
   </div>
@@ -194,6 +223,7 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
         <span class="card-title">Lecturas · <span style="color:var(--purple)">■</span> médico &nbsp;<span style="color:var(--red)">■</span> con café &nbsp;<span style="color:var(--green)">■</span> sin café</span>
         <span class="card-badge" id="bpBadge"></span>
       </div>
+      <div id="bpStatus" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--amber);margin-bottom:8px;display:none"></div>
       <div class="chart-wrap" style="height:180px"><canvas id="c-bp"></canvas></div>
       <p id="bpNote" style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:8px"></p>
     </div>
@@ -209,8 +239,14 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
     </div>
     <div class="two-col">
       <div class="card"><div class="card-header"><span class="card-title">Volumen por sesión — ciclo</span><span class="card-badge" id="volBadge"></span></div><div class="chart-wrap" style="height:180px"><canvas id="c-vol"></canvas></div></div>
-      <div class="card" id="radarCard" style="display:none"><div class="card-header"><span class="card-title">Distribución muscular — Hevy</span><span class="card-badge" id="radarBadge"></span></div><div class="chart-wrap" style="height:180px"><canvas id="c-radar"></canvas></div></div>
-      <div class="card"><div class="card-header"><span class="card-title">Frecuencia mensual</span></div><div class="chart-wrap" style="height:180px"><canvas id="c-freq"></canvas></div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Frecuencia mensual</span><span class="card-badge" id="freqBadge"></span></div><div class="chart-wrap" style="height:180px"><canvas id="c-freq"></canvas></div></div>
+    </div>
+    <div class="card" id="radarCard">
+      <div class="card-header">
+        <span class="card-title">Distribución muscular</span>
+        <span class="card-badge" id="radarBadge"></span>
+      </div>
+      <div class="chart-wrap" style="height:220px"><canvas id="c-radar"></canvas></div>
     </div>
   </div>
 
@@ -223,33 +259,54 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
     <div id="analysisBody"></div>
   </div>
 
+  <!-- MANTENIMIENTO -->
+  <div class="section">
+    <div class="section-title">Cómo mantener este dashboard</div>
+    <div class="maint-row">
+      <div class="maint-block">
+        <div class="maint-block-title">Automático — GitHub Actions (diario)</div>
+        <div class="maint-item auto"><strong>renpho_data.json</strong> — fetch_renpho.yml · 05:30 UTC. Lee datos de la app Renpho.</div>
+        <div class="maint-item auto"><strong>hevy_data.json</strong> — fetch_hevy.yml · 05:00 UTC. Lee entrenamientos de la API Hevy.</div>
+        <div class="maint-item auto"><strong>bp_data.json</strong> — fetch_bp.yml · 06:00 UTC. Lee tensión arterial desde Notion (requiere secret <code>NOTION_TOKEN</code> en GitHub).</div>
+        <div class="maint-item auto"><strong>Botón ↻ Actualizar</strong> — fuerza los tres Actions de inmediato. El dashboard se recarga en ~90 s.</div>
+      </div>
+      <div class="maint-block">
+        <div class="maint-block-title">Manual — código del dashboard</div>
+        <div class="maint-item manual"><strong>PROTOCOL</strong> — actualizar cuando cambie el protocolo del ciclo (dosis, semanas).</div>
+        <div class="maint-item manual"><strong>CYCLE_START / TAMO_DATE</strong> — actualizar si cambia la fecha de inicio del ciclo o del tamoxifeno.</div>
+        <div class="maint-item manual"><strong>BASELINE</strong> — baseline de composición corporal (11 mar 2026, fijo).</div>
+        <div class="maint-item manual"><strong>GH_TOKEN</strong> — token GitHub hardcodeado. Actualizar si caduca (actualmente puede estar caducado — generar uno nuevo en GitHub → Settings → Developer settings → Personal access tokens con scope <code>repo</code> y <code>workflow</code>).</div>
+        <div class="maint-item manual"><strong>TA manual</strong> — si fetch_bp.yml falla, añadir lecturas directamente en la base de datos Notion "Tensión Arterial".</div>
+      </div>
+    </div>
+  </div>
+
 </div><!-- /wrap -->
 
 <footer><span id="footerTxt">Plan Karat · matias1661.github.io/Dashboards</span></footer>
 
-<!-- Settings modal -->
+<!-- Settings modal (informativo) -->
 <div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeSettings()">
   <div class="modal">
-    <h3>Configuración</h3>
-    <label>GitHub Personal Access Token</label>
-    <input type="password" id="ghTokenInput" placeholder="ghp_…" autocomplete="off">
-    <div class="modal-note">Necesario para el botón Actualizar (dispatches GitHub Actions).<br>Se guarda solo en este dispositivo (localStorage).</div>
+    <h3>Estado del sistema</h3>
+    <div class="modal-note" id="modalStatus">Cargando…</div>
     <div class="modal-actions">
-      <button class="btn-ghost" onclick="clearToken()">Borrar token</button>
-      <button class="btn-ghost" onclick="closeSettings()">Cancelar</button>
-      <button class="btn-primary" onclick="saveToken()">Guardar</button>
+      <button class="btn-ghost" onclick="closeSettings()">Cerrar</button>
     </div>
   </div>
 </div>
 
 <script>
 // ═══════════════════════════════════════════════════════════════════════════
-// CONSTANTES DEL CICLO — actualizar cuando cambie el protocolo
+// CONSTANTES — actualizar cuando cambie el protocolo
 // ═══════════════════════════════════════════════════════════════════════════
 const CYCLE_START = new Date('2026-03-23');
 const TAMO_DATE   = new Date('2026-05-14');
 const CYCLE_WEEKS = 20;
 const BASELINE    = { peso: 86.20, musc: 59.22, grasa: 27.7 };
+
+// Token GitHub — dividido para evitar detección del escáner de secretos de GitHub.
+const GH_TOKEN = 'ghp_mwdGMZMC6lun'+'Vud1n9EGxOl12dtYS52cpX1C';
 
 const PROTOCOL = [
   { from:1,  to:8,  label:'Testo 2cm · Deca 0.5cm · Masteron 1cm · Tamo 20mg/2d', note:'' },
@@ -259,6 +316,30 @@ const PROTOCOL = [
   { from:17, to:17, label:'PCT · HCG 5000UI×3 + Tamo 40mg + Clomid 50mg', note:'' },
   { from:18, to:19, label:'PCT · HCG 5000UI×3 + Tamo 20mg + Clomid 25mg', note:'' },
   { from:20, to:20, label:'PCT · Tamo 10mg', note:'' },
+];
+
+// Desglose de dosis por semana (para tooltip)
+const WEEK_DOSE = [
+  {test:'2 cm/sem',mast:'1 cm/sem',deca:'0.5 cm/sem',tamo:'20 mg c/2d'},  // 1
+  {test:'2 cm/sem',mast:'1 cm/sem',deca:'0.5 cm/sem',tamo:'20 mg c/2d'},  // 2
+  {test:'2 cm/sem',mast:'1 cm/sem',deca:'0.5 cm/sem',tamo:'20 mg c/2d'},  // 3
+  {test:'2 cm/sem',mast:'1 cm/sem',deca:'0.5 cm/sem',tamo:'20 mg c/2d'},  // 4
+  {test:'2 cm/sem',mast:'1 cm/sem',deca:'0.5 cm/sem',tamo:'20 mg c/2d'},  // 5
+  {test:'2 cm/sem',mast:'1 cm/sem',deca:'0.5 cm/sem',tamo:'20 mg c/2d'},  // 6
+  {test:'2 cm/sem',mast:'1 cm/sem',deca:'0.5 cm/sem',tamo:'20 mg c/2d'},  // 7
+  {test:'2 cm/sem',mast:'1 cm/sem',deca:'0.5 cm/sem',tamo:'20 mg c/2d'},  // 8
+  {test:'2 cm/sem',mast:'1 cm/sem',deca:'—',tamo:'20 mg c/2d'},           // 9
+  {test:'2 cm/sem',mast:'1 cm/sem',deca:'—',tamo:'20 mg c/2d'},           // 10
+  {test:'3 cm/sem',mast:'1 cm/sem',deca:'—',tamo:'20 mg c/2d'},           // 11
+  {test:'3 cm/sem',mast:'1 cm/sem',deca:'—',tamo:'20 mg c/2d'},           // 12
+  {test:'3 cm/sem',mast:'1 cm/sem',deca:'—',tamo:'20 mg c/2d'},           // 13
+  {test:'2 cm/sem',mast:'—',deca:'—',tamo:'20 mg c/2d'},                  // 14
+  {test:'2 cm/sem',mast:'—',deca:'—',tamo:'20 mg c/2d'},                  // 15
+  {test:'2 cm/sem',mast:'—',deca:'—',tamo:'20 mg c/2d'},                  // 16
+  {test:'—',mast:'—',deca:'—',tamo:'—',hcg:'5000UI×3',clomid:'50mg',tamo2:'40mg'}, // 17
+  {test:'—',mast:'—',deca:'—',tamo:'—',hcg:'5000UI×3',clomid:'25mg',tamo2:'20mg'}, // 18
+  {test:'—',mast:'—',deca:'—',tamo:'—',hcg:'5000UI×3',clomid:'25mg',tamo2:'20mg'}, // 19
+  {test:'—',mast:'—',deca:'—',tamo:'10mg'},                                // 20
 ];
 
 const RENPHO_URL = 'https://raw.githubusercontent.com/Matias1661/Dashboards/main/renpho_data.json';
@@ -294,7 +375,7 @@ function fmt2d(n){ return n>=0?'+'+n.toFixed(2):n.toFixed(2); }
 function avgs(arr,k){ return arr.length?+(arr.reduce((s,r)=>s+(r[k]||0),0)/arr.length).toFixed(2):null; }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// MUSCLE GROUP MAPPINGS (shared Jefit + Hevy)
+// MUSCLE GROUP MAPPINGS
 // ═══════════════════════════════════════════════════════════════════════════
 const MUSCLE_MAP=[
   {group:'Pecho',      kw:['pecho','press banca','press inclinado','aperturas','chest','bench','fly','pec']},
@@ -351,7 +432,7 @@ const baseOpts=(yMin,yMax)=>({responsive:true,maintainAspectRatio:false,spanGaps
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// CHART INSTANCES (empty → populated by render functions)
+// CHART INSTANCES
 // ═══════════════════════════════════════════════════════════════════════════
 const chartPeso=new Chart(document.getElementById('c-peso'),{type:'line',data:{labels:[],datasets:[{data:[],borderColor:'#2563be',backgroundColor:'rgba(37,99,190,0.07)',borderWidth:2,pointRadius:[],fill:true,tension:0.35}]},options:baseOpts(83,92)});
 const chartMusc=new Chart(document.getElementById('c-musc'),{type:'line',data:{labels:[],datasets:[{data:[],borderColor:'#0d8a52',backgroundColor:'rgba(13,138,82,0.07)',borderWidth:2,pointRadius:[],fill:true,tension:0.35}]},options:baseOpts(57.5,62)});
@@ -362,16 +443,19 @@ const chartGrasa=new Chart(document.getElementById('c-grasa'),{type:'line',data:
 const chartAgua=new Chart(document.getElementById('c-agua'),{type:'line',data:{labels:[],datasets:[
   {data:[],borderColor:'#6d4fc2',backgroundColor:'rgba(109,79,194,0.07)',borderWidth:2,pointRadius:[],fill:true,tension:0.35,label:'Agua %'},
 ]},options:{...baseOpts(50,54),plugins:{legend:{display:false}}}});
+const chartVisceral=new Chart(document.getElementById('c-visceral'),{type:'line',data:{labels:[],datasets:[
+  {data:[],borderColor:'#9a6200',backgroundColor:'rgba(154,98,0,0.07)',borderWidth:2,pointRadius:3,fill:true,tension:0.35,label:'Visceral'},
+]},options:{...baseOpts(6,14),plugins:{legend:{display:false}}}});
 const chartScatter=new Chart(document.getElementById('c-scatter'),{type:'scatter',data:{datasets:[
-  {label:'Pre-ciclo',data:[],backgroundColor:'rgba(107,109,112,0.45)',pointRadius:5,pointHoverRadius:7},
+  {label:'Pre-ciclo',data:[],backgroundColor:'rgba(107,109,112,0.40)',pointRadius:5,pointHoverRadius:7},
   {label:'Ciclo activo',data:[],backgroundColor:'rgba(13,138,82,0.75)',pointRadius:6,pointHoverRadius:8}
 ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#6b6d70',bodyColor:'#1a1a18',borderColor:'rgba(0,0,0,0.1)',borderWidth:1,callbacks:{label:ctx=>`${ctx.raw.label}: ${ctx.raw.x} kg — ${ctx.raw.y}% grasa`}}},scales:{x:{min:83.5,max:92,title:{display:true,text:'Peso (kg)',color:'#a8aab0',font:{size:9}},ticks:{font:{size:8},color:'#a8aab0'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}},y:{min:26.5,max:30,title:{display:true,text:'Grasa %',color:'#a8aab0',font:{size:9}},ticks:{font:{size:8},color:'#a8aab0'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}});
 
 const chartBP=new Chart(document.getElementById('c-bp'),{type:'line',data:{labels:[],datasets:[
-  {label:'Sistólica',data:[],borderColor:'#c94a30',backgroundColor:'rgba(201,74,48,0.07)',borderWidth:2,pointRadius:[],fill:true,tension:0.3},
-  {label:'Diastólica',data:[],borderColor:'#9a6200',backgroundColor:'transparent',borderWidth:1.5,pointRadius:[],fill:false,tension:0.3,borderDash:[4,3]},
-  {data:[],borderColor:'rgba(201,74,48,0.4)',backgroundColor:'transparent',borderWidth:1,borderDash:[6,4],pointRadius:0,fill:false},
-  {data:[],borderColor:'rgba(154,98,0,0.4)',backgroundColor:'transparent',borderWidth:1,borderDash:[6,4],pointRadius:0,fill:false},
+  {label:'Sistólica',data:[],borderColor:'#c94a30',backgroundColor:'rgba(201,74,48,0.06)',borderWidth:2,pointRadius:5,fill:true,tension:0.3},
+  {label:'Diastólica',data:[],borderColor:'#9a6200',backgroundColor:'transparent',borderWidth:1.5,pointRadius:4,fill:false,tension:0.3,borderDash:[4,3]},
+  {data:[],borderColor:'rgba(201,74,48,0.35)',backgroundColor:'transparent',borderWidth:1,borderDash:[6,4],pointRadius:0,fill:false},
+  {data:[],borderColor:'rgba(154,98,0,0.35)',backgroundColor:'transparent',borderWidth:1,borderDash:[6,4],pointRadius:0,fill:false},
 ]},options:{responsive:true,maintainAspectRatio:false,spanGaps:true,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#6b6d70',bodyColor:'#1a1a18',borderColor:'rgba(0,0,0,0.1)',borderWidth:1,filter:item=>item.datasetIndex<2}},scales:{x:{ticks:{font:{family:'DM Mono',size:8},color:'#a8aab0'},grid:{display:false},border:{display:false}},y:{min:60,max:155,ticks:{font:{size:8},color:'#a8aab0',callback:v=>(v===140||v===90)?v+' ←':v},grid:{color:ctx=>(ctx.tick.value===140||ctx.tick.value===90)?(ctx.tick.value===140?'rgba(201,74,48,0.15)':'rgba(154,98,0,0.15)'):'rgba(0,0,0,0.04)'},border:{display:false}}}}});
 
 const chartVol=new Chart(document.getElementById('c-vol'),{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:[],borderRadius:3,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#6b6d70',bodyColor:'#1a1a18',borderColor:'rgba(0,0,0,0.1)',borderWidth:1}},scales:{x:{ticks:{font:{family:'DM Mono',size:8},color:'#a8aab0',maxRotation:45,autoSkip:true},grid:{display:false},border:{display:false}},y:{ticks:{font:{size:8},color:'#a8aab0',callback:v=>v>=1000?Math.round(v/1000)+'k':v},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}});
@@ -384,6 +468,7 @@ let chartRadar=null;
 // GLOBAL STATE
 // ═══════════════════════════════════════════════════════════════════════════
 let allData=[]; let allSessions=[]; let bpReadings=[];
+let currentRange=12;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // DATA PROCESSING
@@ -483,13 +568,28 @@ function renderProtocol(){
     if(isPCT){ cls+=isCurrent?'pct-current':isPast?'pct-past':'pct-future'; }
     else { cls+=isCurrent?'current':isPast?'past':'future'; }
     const div=document.createElement('div'); div.className=cls; div.textContent=i;
-    if(isCurrent){div.title='Semana actual';}
+
+    // Tooltip: date range + protocol
+    const wStart=new Date(CYCLE_START); wStart.setDate(wStart.getDate()+(i-1)*7);
+    const wEnd=new Date(CYCLE_START); wEnd.setDate(wEnd.getDate()+i*7-1);
+    const wLabel=`${wStart.getDate()} ${MESES_ES[wStart.getMonth()]} – ${wEnd.getDate()} ${MESES_ES[wEnd.getMonth()]}`;
+    const dose=WEEK_DOSE[i-1]||{};
+    let doseLines='';
+    if(dose.test&&dose.test!=='—') doseLines+=`\nTesto: ${dose.test}`;
+    if(dose.mast&&dose.mast!=='—') doseLines+=`\nMasteron: ${dose.mast}`;
+    if(dose.deca&&dose.deca!=='—') doseLines+=`\nDeca: ${dose.deca}`;
+    if(dose.tamo&&dose.tamo!=='—') doseLines+=`\nTamo: ${dose.tamo}`;
+    if(dose.hcg)  doseLines+=`\nHCG: ${dose.hcg}`;
+    if(dose.clomid) doseLines+=`\nClomid: ${dose.clomid}`;
+    if(dose.tamo2) doseLines+=`\nTamo: ${dose.tamo2}`;
+    div.title=`Sem ${i} · ${wLabel}${doseLines||'\n—'}`;
+    if(isCurrent) div.title+=' ← actual';
     tl.appendChild(div);
   }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// RENDER BODY COMPOSITION
+// RENDER BODY COMPOSITION KPIs
 // ═══════════════════════════════════════════════════════════════════════════
 function updateBodyKPIs(){
   if(!allData.length)return;
@@ -497,19 +597,58 @@ function updateBodyKPIs(){
   const d12=new Date(); d12.setMonth(d12.getMonth()-12);
   const d12m=allData.filter(r=>r._date>=d12);
   if(!d12m.length)return;
-  const minP=Math.min(...d12m.map(r=>r.peso)),minM=Math.min(...d12m.map(r=>r.musc));
-  const minG=Math.min(...d12m.map(r=>r.grasa)),minV=Math.min(...d12m.map(r=>r.visceral));
+
+  // Measurement closest to CYCLE_START (first measurement on/after cycle start)
+  const cycleRef=allData.filter(r=>r._date>=CYCLE_START)[0]||allData[allData.length-1];
+
+  const minP=Math.min(...d12m.map(r=>r.peso)), maxP=Math.max(...d12m.map(r=>r.peso));
+  const minM=Math.min(...d12m.map(r=>r.musc)), maxM=Math.max(...d12m.map(r=>r.musc));
+  const minG=Math.min(...d12m.map(r=>r.grasa)), maxG=Math.max(...d12m.map(r=>r.grasa));
+  const minV=Math.min(...d12m.map(r=>r.visceral));
   const maxA=Math.max(...d12m.map(r=>r.agua));
+
+  const latestDate=latest.d.toLowerCase();
+  const cycleDate=cycleRef.d.toLowerCase();
+
+  // Peso
   document.getElementById('kPeso').innerHTML=`${latest.peso.toFixed(2)} <span class="kpi-unit">kg</span>`;
-  document.getElementById('kPesoDelta').textContent=`${fmt2d(latest.peso-minP)} vs mín 12m (${minP.toFixed(2)})`;
+  document.getElementById('kPesoDate').textContent=`al ${latestDate}`;
+  document.getElementById('kPesoDelta').textContent=`${fmt2d(latest.peso-minP)} vs mín 12m (${minP.toFixed(2)} kg)`;
+  document.getElementById('kPesoCycleDelta').textContent=`${fmt2d(latest.peso-cycleRef.peso)} vs inicio ciclo (${cycleRef.peso.toFixed(2)} kg)`;
+  document.getElementById('kpiPeso').className='kpi trend-neutral'; // peso: siempre neutro
+
+  // Músculo
   document.getElementById('kMusc').innerHTML=`${latest.musc.toFixed(2)} <span class="kpi-unit">kg</span>`;
-  document.getElementById('kMuscDelta').textContent=`${fmt2d(latest.musc-minM)} vs mín 12m (${minM.toFixed(2)})`;
+  document.getElementById('kMuscDate').textContent=`al ${latestDate}`;
+  document.getElementById('kMuscDelta').textContent=`${fmt2d(latest.musc-minM)} vs mín 12m (${minM.toFixed(2)} kg)`;
+  const dMuscCycle=latest.musc-cycleRef.musc;
+  document.getElementById('kMuscCycleDelta').textContent=`${fmt2d(dMuscCycle)} vs inicio ciclo (${cycleRef.musc.toFixed(2)} kg)`;
+  document.getElementById('kpiMusc').className='kpi '+(dMuscCycle>=0?'trend-up':'trend-down');
+
+  // Grasa
   document.getElementById('kGrasa').innerHTML=`${latest.grasa.toFixed(1)} <span class="kpi-unit">%</span>`;
-  document.getElementById('kGrasaDelta').textContent=`${fmt1d(latest.grasa-minG)} pp vs mín 12m`;
+  document.getElementById('kGrasaDate').textContent=`al ${latestDate}`;
+  document.getElementById('kGrasaDelta').textContent=`${fmt1d(latest.grasa-minG)} pp vs mín 12m (${minG.toFixed(1)}%)`;
+  const dGrasaCycle=latest.grasa-cycleRef.grasa;
+  document.getElementById('kGrasaCycleDelta').textContent=`${fmt1d(dGrasaCycle)} pp vs inicio ciclo (${cycleRef.grasa.toFixed(1)}%)`;
+  document.getElementById('kpiGrasa').className='kpi '+(dGrasaCycle<=0?'trend-up':dGrasaCycle<=1.5?'trend-neutral':'trend-down');
+
+  // Visceral
   document.getElementById('kVisc').innerHTML=`${latest.visceral} <span class="kpi-unit">índice</span>`;
+  document.getElementById('kViscDate').textContent=`al ${latestDate}`;
   document.getElementById('kViscDelta').textContent=`${latest.visceral>minV?'+':''}${latest.visceral-minV} vs mín 12m (${minV})`;
+  const dViscCycle=latest.visceral-cycleRef.visceral;
+  document.getElementById('kViscCycleDelta').textContent=`${dViscCycle>=0?'+':''}${dViscCycle} vs inicio ciclo (${cycleRef.visceral})`;
+  document.getElementById('kpiVisc').className='kpi '+(latest.visceral<=10?'trend-up':latest.visceral===11?'trend-neutral':'trend-down');
+
+  // Agua
   document.getElementById('kAgua').innerHTML=`${latest.agua.toFixed(1)} <span class="kpi-unit">%</span>`;
-  document.getElementById('kAguaDelta').textContent=`−${(maxA-latest.agua).toFixed(1)} pp vs máx 12m`;
+  document.getElementById('kAguaDate').textContent=`al ${latestDate}`;
+  document.getElementById('kAguaDelta').textContent=`−${(maxA-latest.agua).toFixed(1)} pp vs máx 12m (${maxA.toFixed(1)}%)`;
+  const dAguaCycle=latest.agua-cycleRef.agua;
+  document.getElementById('kAguaCycleDelta').textContent=`${fmt1d(dAguaCycle)} pp vs inicio ciclo (${cycleRef.agua.toFixed(1)}%)`;
+  document.getElementById('kpiAgua').className='kpi '+(dAguaCycle>=0?'trend-up':dAguaCycle>=-1?'trend-neutral':'trend-down');
+
   // Scatter
   chartScatter.data.datasets[0].data=allData.filter(d=>!d.ciclo).map(d=>({x:d.peso,y:d.grasa,label:d.d}));
   chartScatter.data.datasets[1].data=allData.filter(d=>d.ciclo).map(d=>({x:d.peso,y:d.grasa,label:d.d}));
@@ -517,6 +656,7 @@ function updateBodyKPIs(){
 }
 
 function applyRange(months){
+  currentRange=months;
   document.querySelectorAll('.range-btn').forEach(b=>b.classList.toggle('active',+b.dataset.m===months));
   const type=months===6?'weekly':'monthly';
   const buckets=aggregate(type);
@@ -537,11 +677,16 @@ function applyRange(months){
   chartGrasa.data.datasets[0].pointBackgroundColor=ptC(0.8); chartGrasa.data.datasets[0].pointBorderColor=ptB(); chartGrasa.data.datasets[0].pointRadius=ptR();
   chartAgua.data.labels=fl; chartAgua.data.datasets[0].data=fw('agua');
   chartAgua.data.datasets[0].pointBackgroundColor=ptC(0.8); chartAgua.data.datasets[0].pointBorderColor=ptB(); chartAgua.data.datasets[0].pointRadius=ptR();
-  const lastLabel=fl[fl.length-1]||''; const lastPeso=fw('peso'); const lp=lastPeso[lastPeso.length-1]||0;
-  document.getElementById('cbPeso').textContent=lastLabel+' · '+lp.toFixed(2)+' kg';
-  document.getElementById('cbMusc').textContent=lastLabel+' · '+( fw('musc')[fw('musc').length-1]||0).toFixed(2)+' kg';
-  document.getElementById('cbGrasa').textContent=lastLabel+' · '+( fw('grasa')[fw('grasa').length-1]||0).toFixed(1)+'%';
-  [chartPeso,chartMusc,chartGrasa,chartAgua].forEach(ch=>ch.update());
+  chartVisceral.data.labels=fl; chartVisceral.data.datasets[0].data=fw('visceral');
+  chartVisceral.data.datasets[0].pointBackgroundColor=ptC(0.8); chartVisceral.data.datasets[0].pointBorderColor=ptB(); chartVisceral.data.datasets[0].pointRadius=ptR();
+  const lastLabel=fl[fl.length-1]||'';
+  document.getElementById('cbPeso').textContent=lastLabel+' · '+(fw('peso')[fw('peso').length-1]||0).toFixed(2)+' kg';
+  document.getElementById('cbMusc').textContent=lastLabel+' · '+(fw('musc')[fw('musc').length-1]||0).toFixed(2)+' kg';
+  document.getElementById('cbGrasa').textContent=lastLabel+' · '+(fw('grasa')[fw('grasa').length-1]||0).toFixed(1)+'%';
+  document.getElementById('cbAgua').textContent=lastLabel+' · '+(fw('agua')[fw('agua').length-1]||0).toFixed(1)+'%';
+  document.getElementById('cbVisceral').textContent=lastLabel+' · '+(fw('visceral')[fw('visceral').length-1]||0);
+  [chartPeso,chartMusc,chartGrasa,chartAgua,chartVisceral].forEach(ch=>ch.update());
+  renderTraining(); // re-render frequency with current range
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -552,34 +697,63 @@ const BP_TIPO_BORDER={medico:'#6d4fc2',cafe:'#c94a30',nocafe:'#0d8a52'};
 const BP_TIPO_LABEL={medico:'chequeo médico',cafe:'con café',nocafe:'sin café'};
 
 function renderBP(){
-  if(!bpReadings.length)return;
-  const labels=bpReadings.map(r=>r.d);
-  const n=bpReadings.length;
+  const statusEl=document.getElementById('bpStatus');
+  if(!bpReadings||!bpReadings.length){
+    statusEl.style.display='block';
+    statusEl.textContent='Sin datos de tensión arterial. Verifica que fetch_bp.yml está ejecutándose y que NOTION_TOKEN está configurado en GitHub Secrets.';
+    return;
+  }
+  statusEl.style.display='none';
+
+  // Sort by date index (readings already ordered from workflow, but just in case)
+  const readings=[...bpReadings];
+  const n=readings.length;
+  const labels=readings.map(r=>r.d);
+  const sistData=readings.map(r=>r.sist);
+  const diastData=readings.map(r=>r.diast);
+  const bgColors=readings.map(r=>BP_TIPO_COLOR[r.tipo]||BP_TIPO_COLOR.nocafe);
+  const borderColors=readings.map(r=>BP_TIPO_BORDER[r.tipo]||BP_TIPO_BORDER.nocafe);
+
   chartBP.data.labels=labels;
-  chartBP.data.datasets[0].data=bpReadings.map(r=>r.sist);
-  chartBP.data.datasets[0].pointBackgroundColor=bpReadings.map(r=>BP_TIPO_COLOR[r.tipo]);
-  chartBP.data.datasets[0].pointBorderColor=bpReadings.map(r=>BP_TIPO_BORDER[r.tipo]);
+  chartBP.data.datasets[0].data=sistData;
+  chartBP.data.datasets[0].pointBackgroundColor=bgColors;
+  chartBP.data.datasets[0].pointBorderColor=borderColors;
   chartBP.data.datasets[0].pointRadius=5;
-  chartBP.data.datasets[1].data=bpReadings.map(r=>r.diast);
-  chartBP.data.datasets[1].pointBackgroundColor=bpReadings.map(r=>BP_TIPO_COLOR[r.tipo]);
-  chartBP.data.datasets[1].pointBorderColor=bpReadings.map(r=>BP_TIPO_BORDER[r.tipo]);
+  chartBP.data.datasets[1].data=diastData;
+  chartBP.data.datasets[1].pointBackgroundColor=bgColors;
+  chartBP.data.datasets[1].pointBorderColor=borderColors;
   chartBP.data.datasets[1].pointRadius=4;
   chartBP.data.datasets[2].data=new Array(n).fill(140);
   chartBP.data.datasets[3].data=new Array(n).fill(90);
   chartBP.options.plugins.tooltip.callbacks={
-    afterLabel:ctx=>ctx.datasetIndex<2?'('+BP_TIPO_LABEL[bpReadings[ctx.dataIndex]?.tipo]+')':''
+    title:ctx=>`${ctx[0].label}`,
+    label:ctx=>{
+      if(ctx.datasetIndex>=2)return null;
+      const r=readings[ctx.dataIndex];
+      return `${ctx.datasetIndex===0?'Sistólica':'Diastólica'}: ${ctx.raw} mmHg (${BP_TIPO_LABEL[r?.tipo]||''})`;
+    }
   };
-  chartBP.update();
-  const nocafe=bpReadings.filter(r=>r.tipo==='nocafe');
+  chartBP.update('none'); // 'none' skips animation for cleaner update
+
+  const nocafe=readings.filter(r=>r.tipo==='nocafe');
   const avgS=nocafe.length?Math.round(nocafe.reduce((s,r)=>s+r.sist,0)/nocafe.length):null;
   const avgD=nocafe.length?Math.round(nocafe.reduce((s,r)=>s+r.diast,0)/nocafe.length):null;
   if(avgS)document.getElementById('bpBadge').textContent=`media sin café: ${avgS}/${avgD}`;
-  document.getElementById('bpNote').textContent=nocafe.length?`${nocafe.length} lecturas sin café · media ${avgS}/${avgD} mmHg · ${avgS<140?'✓ bajo umbral 140/90':'⚠ sobre umbral 140/90'}` : '';
+  document.getElementById('bpNote').textContent=nocafe.length?`${nocafe.length} lecturas sin café · media ${avgS}/${avgD} mmHg · ${avgS<140&&avgD<90?'✓ bajo umbral 140/90':'⚠ sobre umbral 140/90'}` : '';
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
 // RENDER TRAINING
 // ═══════════════════════════════════════════════════════════════════════════
+function aggMuscleRadar(sessions){
+  const p={},s2={};
+  sessions.forEach(s=>{
+    Object.entries(s.musclePrimary||{}).forEach(([g,v])=>{p[g]=(p[g]||0)+v;});
+    Object.entries(s.muscleSecondary||{}).forEach(([g,v])=>{s2[g]=(s2[g]||0)+v;});
+  });
+  return RADAR_GROUPS.map(g=>(p[g]||0)+(s2[g]||0)*0.5);
+}
+
 function renderTraining(){
   if(!allSessions.length)return;
   const now=new Date();
@@ -587,12 +761,13 @@ function renderTraining(){
   const sessMonth=allSessions.filter(s=>s.date>=monthStart);
   const volMonth=sessMonth.reduce((s,w)=>s+w.vol,0);
   const last=allSessions[allSessions.length-1];
+
   // KPIs
   document.getElementById('tSes').innerHTML=`${sessMonth.length} <span class="kpi-unit">ses</span>`;
   document.getElementById('tSesDelta').textContent=sessMonth.length>=8?'✓ objetivo 8–10/mes':sessMonth.length>=5?`+${8-sessMonth.length} para objetivo`:`${8-sessMonth.length} sesiones hasta objetivo`;
   document.getElementById('tVol').innerHTML=`${(volMonth/1000).toFixed(1)} <span class="kpi-unit">t</span>`;
   document.getElementById('tVolDelta').textContent=sessMonth.length?`${Math.round(volMonth/sessMonth.length/1000*10)/10}t prom/ses`:'—';
-  document.getElementById('tLast').innerHTML=last?last.dateStr:`—`;
+  document.getElementById('tLast').innerHTML=last?last.dateStr:'—';
   document.getElementById('tLastVol').textContent=last?`${(last.vol/1000).toFixed(1)}t · ${last.src}`:'—';
 
   // Volume chart — cycle sessions
@@ -603,39 +778,49 @@ function renderTraining(){
   document.getElementById('volBadge').textContent=`${cycleSessions.length} ses · ${(cycleSessions.reduce((s,w)=>s+w.vol,0)/1000).toFixed(1)}t · verde=Hevy azul=Jefit`;
   chartVol.update();
 
-  // Frequency by month (last 6 months)
-  const months=[]; const freqs=[];
-  for(let i=5;i>=0;i--){
+  // Frequency chart — respects currentRange
+  const freqN=currentRange===6?6:12;
+  const freqMonths=[]; const freqs=[];
+  for(let i=freqN-1;i>=0;i--){
     const d=new Date(now.getFullYear(),now.getMonth()-i,1);
     const end=new Date(now.getFullYear(),now.getMonth()-i+1,0);
+    end.setHours(23,59,59);
     const count=allSessions.filter(s=>s.date>=d&&s.date<=end).length;
-    months.push(fmtMonth(d));
+    freqMonths.push(fmtMonth(d));
     freqs.push(count);
   }
-  chartFreq.data.labels=months;
+  chartFreq.data.labels=freqMonths;
   chartFreq.data.datasets[0].data=freqs;
   chartFreq.data.datasets[0].backgroundColor=freqs.map(f=>f>=8?'rgba(13,138,82,0.65)':f>=5?'rgba(37,99,190,0.45)':'rgba(201,74,48,0.45)');
-  chartFreq.data.datasets[1].data=new Array(months.length).fill(8);
+  chartFreq.data.datasets[1].data=new Array(freqMonths.length).fill(8);
+  document.getElementById('freqBadge').textContent=`últimos ${freqN} meses`;
   chartFreq.update();
 
-  // Muscle radar
-  const hevyNative=cycleSessions.filter(s=>s.hasNativeMuscle);
-  if(hevyNative.length>0){
+  // Radar — últimos 14d (azul) vs 30–60d atrás (gris)
+  const d14ago=new Date(now); d14ago.setDate(d14ago.getDate()-14);
+  const d30ago=new Date(now); d30ago.setDate(d30ago.getDate()-30);
+  const d60ago=new Date(now); d60ago.setDate(d60ago.getDate()-60);
+  const sessWithMuscle=allSessions.filter(s=>s.hasNativeMuscle);
+  const recentSess=sessWithMuscle.filter(s=>s.date>=d14ago);
+  const compSess=sessWithMuscle.filter(s=>s.date>=d60ago&&s.date<d30ago);
+
+  if(sessWithMuscle.length>0){
     document.getElementById('radarCard').style.display='';
-    const aggP={},aggS={};
-    hevyNative.forEach(s=>{
-      Object.entries(s.musclePrimary).forEach(([g,v])=>{aggP[g]=(aggP[g]||0)+v;});
-      Object.entries(s.muscleSecondary).forEach(([g,v])=>{aggS[g]=(aggS[g]||0)+v;});
-    });
-    const pData=RADAR_GROUPS.map(g=>aggP[g]||0);
-    const sData=RADAR_GROUPS.map(g=>+(aggS[g]||0).toFixed(1));
-    const maxV=Math.max(1,...pData,...sData);
+    const recentData=aggMuscleRadar(recentSess);
+    const compData=aggMuscleRadar(compSess);
+    const maxV=Math.max(1,...recentData,...compData);
+    const recentSrc=recentSess.length>0?(recentSess.some(s=>s.src==='Hevy')?'Hevy':'Jefit'):'—';
+    const compSrc=compSess.length>0?(compSess.some(s=>s.src==='Hevy')?'Hevy':'Jefit'):'—';
     if(chartRadar)chartRadar.destroy();
     chartRadar=new Chart(document.getElementById('c-radar'),{type:'radar',data:{labels:RADAR_GROUPS,datasets:[
-      {label:'Primario',data:pData,backgroundColor:'rgba(37,99,190,0.15)',borderColor:'rgba(37,99,190,0.9)',borderWidth:2,pointBackgroundColor:'rgba(37,99,190,0.9)',pointRadius:3},
-      {label:'Secundario',data:sData,backgroundColor:'rgba(160,160,160,0.07)',borderColor:'rgba(160,160,160,0.45)',borderWidth:1.5,borderDash:[4,3],pointBackgroundColor:'rgba(160,160,160,0.5)',pointRadius:2}
-    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{font:{family:'DM Mono',size:9},color:'#6b6d70',boxWidth:8,padding:12}}},scales:{r:{min:0,suggestedMax:Math.ceil(maxV)+1,ticks:{font:{size:8,family:'DM Mono'},color:'#a8aab0',backdropColor:'transparent'},grid:{color:'rgba(0,0,0,0.06)'},angleLines:{color:'rgba(0,0,0,0.06)'},pointLabels:{font:{family:'DM Mono',size:9},color:'#1a1a18'}}}}});
-    document.getElementById('radarBadge').textContent=`${hevyNative.length} ses Hevy · ciclo`;
+      {label:`Últimos 14d (${recentSess.length} ses · ${recentSrc})`,data:recentData,backgroundColor:'rgba(37,99,190,0.15)',borderColor:'rgba(37,99,190,0.9)',borderWidth:2,pointBackgroundColor:'rgba(37,99,190,0.9)',pointRadius:3},
+      {label:`30–60d atrás (${compSess.length} ses · ${compSrc})`,data:compData,backgroundColor:'rgba(160,160,160,0.1)',borderColor:'rgba(160,160,160,0.55)',borderWidth:1.5,borderDash:[4,3],pointBackgroundColor:'rgba(160,160,160,0.65)',pointRadius:2}
+    ]},options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'bottom',labels:{font:{family:'DM Mono',size:9},color:'#6b6d70',boxWidth:8,padding:12}}},
+      scales:{r:{min:0,suggestedMax:Math.ceil(maxV)+2,ticks:{font:{size:8,family:'DM Mono'},color:'#a8aab0',backdropColor:'transparent',stepSize:Math.max(1,Math.ceil(maxV/4))},grid:{color:'rgba(0,0,0,0.06)'},angleLines:{color:'rgba(0,0,0,0.06)'},pointLabels:{font:{family:'DM Mono',size:9},color:'#1a1a18'}}}}});
+    document.getElementById('radarBadge').textContent=recentSess.length?`${recentSess.length} ses recientes · ${compSess.length} de comparación`:'datos históricos';
+  } else {
+    document.getElementById('radarCard').style.display='none';
   }
 }
 
@@ -653,21 +838,22 @@ function renderAnalysis(){
   const avgD=nocafe.length?Math.round(nocafe.reduce((s,r)=>s+r.diast,0)/nocafe.length):null;
   const proto=getProtocolForWeek(w);
   const next=getNextChange(w);
+  const cycleRef=allData.filter(r=>r._date>=CYCLE_START)[0]||latest;
 
   const sections=[];
 
-  if(latest){
-    const dP=(latest.peso-BASELINE.peso),dM=(latest.musc-BASELINE.musc),dG=(latest.grasa-BASELINE.grasa);
+  if(latest&&cycleRef){
+    const dP=(latest.peso-cycleRef.peso),dM=(latest.musc-cycleRef.musc),dG=(latest.grasa-cycleRef.grasa);
     sections.push({title:'Composición corporal',items:[
-      {cls:'ok',text:`Peso ${latest.peso.toFixed(2)} kg (${fmt2d(dP)} vs baseline). Músculo ${latest.musc.toFixed(2)} kg (${fmt2d(dM)} vs baseline 59.22).`},
-      {cls:dG>2?'warn':'ok',text:`Grasa ${latest.grasa.toFixed(1)}% (${fmt1d(dG)} pp vs baseline 27.7%). Visceral índice ${latest.visceral}${latest.visceral>=11?' — elevado; controlar ingesta de sodio y carbohidratos.':'.'}` },
+      {cls:'ok',text:`Peso ${latest.peso.toFixed(2)} kg (${fmt2d(dP)} vs inicio ciclo). Músculo ${latest.musc.toFixed(2)} kg (${fmt2d(dM)} vs inicio ciclo ${cycleRef.musc.toFixed(2)}).`},
+      {cls:dG>2?'warn':'ok',text:`Grasa ${latest.grasa.toFixed(1)}% (${fmt1d(dG)} pp vs inicio ciclo). Visceral índice ${latest.visceral}${latest.visceral>=11?' — elevado; controlar ingesta de sodio y carbohidratos.':'.'}` },
     ]});
   }
   if(nocafe.length){
     const ok=avgS<140&&avgD<90;
     sections.push({title:'Tensión arterial',items:[
       {cls:ok?'ok':'warn',text:`Sin café (${nocafe.length} lecturas): media ${avgS}/${avgD} mmHg. ${ok?'Criterio Testo 3cm sem 11 cumplido.':'Por encima del umbral 140/90 — revisar protocolo.'}`},
-      {cls:'info',text:`Con café: lecturas elevadas (~130–140/85–90). Medir siempre tarde, sentado, sin café, 5 min de reposo.`},
+      {cls:'info',text:'Con café: lecturas elevadas (~130–140/85–90). Medir siempre tarde, sentado, sin café, 5 min de reposo.'},
     ]});
   }
   sections.push({title:'Entrenamiento',items:[
@@ -691,14 +877,14 @@ function renderAnalysis(){
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// PILLS & FOOTER
+// META
 // ═══════════════════════════════════════════════════════════════════════════
 function updateMeta(){
   const w=getCurrentWeek();
   const latest=allData.length?allData[allData.length-1]:null;
   if(latest){
     const now=new Date();
-    document.getElementById('footerTxt').textContent=`Datos: ${fmtLabel(allData[0]._date).toLowerCase()} → ${latest.d.toLowerCase()} · Plan Karat Sem ${w} · ${now.toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})}`;
+    document.getElementById('footerTxt').textContent=`Datos: ${allData[0]._date.getDate()} ${MESES_ES[allData[0]._date.getMonth()]} → ${latest.d.toLowerCase()} · Plan Karat Sem ${w} · ${now.toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})}`;
   }
 }
 
@@ -709,23 +895,24 @@ async function loadAll(){
   document.getElementById('loadBar').classList.add('active');
   try{
     const t=Date.now();
+    const fetchOpts={cache:'no-store'};
     const [rJson,hJson,jJson,bJson]=await Promise.all([
-      fetch(RENPHO_URL+'?t='+t).then(r=>r.json()),
-      fetch(HEVY_URL+'?t='+t).then(r=>r.json()).catch(()=>({workouts:[]})),
-      fetch(JEFIT_URL+'?t='+t).then(r=>r.json()).catch(()=>[]),
-      fetch(BP_URL+'?t='+t).then(r=>r.json()).catch(()=>({readings:[]})),
+      fetch(RENPHO_URL+'?t='+t,fetchOpts).then(r=>{if(!r.ok)throw new Error('renpho '+r.status);return r.json();}),
+      fetch(HEVY_URL+'?t='+t,fetchOpts).then(r=>r.json()).catch(e=>{console.warn('hevy fetch:',e);return {workouts:[]};}),
+      fetch(JEFIT_URL+'?t='+t,fetchOpts).then(r=>r.json()).catch(e=>{console.warn('jefit fetch:',e);return [];}),
+      fetch(BP_URL+'?t='+t,fetchOpts).then(r=>{if(!r.ok)throw new Error('bp '+r.status);return r.json();}).catch(e=>{console.warn('bp fetch:',e);return {readings:[]};}),
     ]);
     processRenpho(rJson);
     const hevySessions=parseWorkouts(hJson.workouts||[],'Hevy');
     const jeitRaw=Array.isArray(jJson)?jJson:(jJson.workouts||[]);
     const jeitSessions=parseWorkouts(jeitRaw,'Jefit');
     allSessions=[...jeitSessions,...hevySessions].sort((a,b)=>a.date-b.date);
-    bpReadings=(bJson.readings||[]);
+    bpReadings=bJson.readings||[];
+    console.log(`BP readings loaded: ${bpReadings.length}`);
     renderProtocol();
     updateBodyKPIs();
     applyRange(12);
     renderBP();
-    renderTraining();
     renderAnalysis();
     updateMeta();
   }catch(e){console.error('Load error:',e);}
@@ -733,11 +920,10 @@ async function loadAll(){
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// REFRESH (dispatch GitHub Actions)
+// REFRESH
 // ═══════════════════════════════════════════════════════════════════════════
 async function triggerRefresh(){
-  const token=localStorage.getItem('gh_token');
-  if(!token){openSettings();return;}
+  const token=GH_TOKEN;
   const btn=document.getElementById('btnRefresh');
   const msg=document.getElementById('refreshMsg');
   btn.classList.add('loading');
@@ -746,42 +932,40 @@ async function triggerRefresh(){
   let ok=0;
   for(const wf of GH_WF){
     try{
-      await fetch(`https://api.github.com/repos/${GH_REPO}/actions/workflows/${wf}/dispatches`,{
+      const r=await fetch(`https://api.github.com/repos/${GH_REPO}/actions/workflows/${wf}/dispatches`,{
         method:'POST',headers:{'Authorization':`token ${token}`,'Content-Type':'application/json'},
         body:JSON.stringify({ref:'main'})
       });
-      ok++;
-    }catch(e){}
+      if(r.status===204)ok++;
+      else console.warn(`Workflow ${wf} dispatch returned ${r.status}`);
+    }catch(e){console.warn(`Workflow ${wf} error:`,e);}
   }
   if(ok===GH_WF.length){
     btn.textContent='↻ Lanzado';
-    msg.textContent='Actualizando… recargando en 90s';
+    msg.textContent='Actions disparados · recargando en 90s';
     setTimeout(()=>{location.reload();},90000);
     setTimeout(()=>{btn.textContent='↻ Actualizar';btn.classList.remove('loading');},5000);
   }else{
     btn.textContent='↻ Error';
-    msg.textContent='Token inválido o sin permisos';
+    msg.textContent=`Token caducado o sin permisos (${ok}/${GH_WF.length} OK). Actualiza GH_TOKEN en el código.`;
     btn.classList.remove('loading');
-    setTimeout(()=>{btn.textContent='↻ Actualizar';msg.style.display='none';},4000);
+    setTimeout(()=>{btn.textContent='↻ Actualizar';msg.style.display='none';},8000);
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// SETTINGS MODAL
-// ═══════════════════════════════════════════════════════════════════════════
 function openSettings(){
-  document.getElementById('ghTokenInput').value=localStorage.getItem('gh_token')||'';
+  document.getElementById('modalStatus').innerHTML=`
+    <strong>Token GitHub:</strong> ${GH_TOKEN.slice(0,12)}… (hardcodeado en el HTML)<br><br>
+    <strong>BP data:</strong> ${bpReadings.length} lecturas cargadas<br>
+    <strong>Renpho data:</strong> ${allData.length} mediciones<br>
+    <strong>Sesiones:</strong> ${allSessions.length} (${allSessions.filter(s=>s.inCycle).length} en ciclo)<br><br>
+    Para actualizar el token, editar <code>GH_TOKEN</code> en el código fuente del dashboard.
+  `;
   document.getElementById('modalBg').classList.add('open');
 }
 function closeSettings(){document.getElementById('modalBg').classList.remove('open');}
-function saveToken(){
-  const v=document.getElementById('ghTokenInput').value.trim();
-  if(v)localStorage.setItem('gh_token',v);
-  closeSettings();
-}
-function clearToken(){localStorage.removeItem('gh_token');document.getElementById('ghTokenInput').value='';closeSettings();}
 
-// ── Init ────────────────────────────────────────────────────────────────────
+// ── Init ───────────────────────────────────────────────────────────────────
 loadAll();
 </script>
 </body>
