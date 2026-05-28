@@ -20,7 +20,7 @@ jobs:
         with:
           token: ${{ secrets.GH_PAT }}
 
-      - name: Fetch all Hevy workouts
+      - name: Fetch Hevy workouts + exercise templates
         env:
           HEVY_API_KEY: ${{ secrets.HEVY_API_KEY }}
         run: |
@@ -29,21 +29,56 @@ jobs:
           from datetime import datetime, timezone
 
           api_key = os.environ['HEVY_API_KEY']
+          headers = {'api-key': api_key}
+
+          # 1. Fetch all workouts (paginated)
           all_workouts = []
           page = 1
-
           while True:
               resp = requests.get(
                   f'https://api.hevyapp.com/v1/workouts?page={page}&pageSize=10',
-                  headers={'api-key': api_key},
-                  timeout=15
-              )
+                  headers=headers, timeout=15)
               resp.raise_for_status()
               data = resp.json()
               all_workouts.extend(data.get('workouts', []))
               if page >= data.get('page_count', 1):
                   break
               page += 1
+
+          # 2. Collect unique exercise_template_ids
+          template_ids = set()
+          for w in all_workouts:
+              for ex in w.get('exercises', []):
+                  tid = ex.get('exercise_template_id')
+                  if tid:
+                      template_ids.add(tid)
+
+          # 3. Fetch exercise templates (paginated) and build lookup
+          templates = {}
+          page = 1
+          while True:
+              resp = requests.get(
+                  f'https://api.hevyapp.com/v1/exercise_templates?page={page}&pageSize=100',
+                  headers=headers, timeout=15)
+              if resp.status_code != 200:
+                  break
+              data = resp.json()
+              for t in data.get('exercise_templates', []):
+                  templates[t['id']] = {
+                      'primary_muscle_group':   t.get('primary_muscle_group'),
+                      'secondary_muscle_groups': t.get('secondary_muscle_groups', []),
+                  }
+              if page >= data.get('page_count', 1):
+                  break
+              page += 1
+
+          # 4. Merge muscle data into exercises
+          for w in all_workouts:
+              for ex in w.get('exercises', []):
+                  tid = ex.get('exercise_template_id')
+                  if tid and tid in templates:
+                      ex['primary_muscle_group']    = templates[tid]['primary_muscle_group']
+                      ex['secondary_muscle_groups'] = templates[tid]['secondary_muscle_groups']
 
           with open('hevy_data.json', 'w') as f:
               json.dump({
@@ -52,7 +87,7 @@ jobs:
                   'workouts': all_workouts
               }, f)
 
-          print(f"Done: {len(all_workouts)} workouts")
+          print(f"Done: {len(all_workouts)} workouts, {len(templates)} templates")
           PYEOF2
 
       - name: Commit and push
