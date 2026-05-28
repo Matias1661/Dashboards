@@ -1,0 +1,6 @@
+[
+  "LIST status=200",
+  "{\"page\": 1, \"page_count\": 145, \"exercise_templates\": [{\"id\": \"3BC06AD3\", \"title\": \"21s Bicep Curl\", \"type\": \"weight_reps\", \"primary_muscle_group\": \"biceps\", \"secondary_muscle_groups\": [], \"equipment\": \"barbell\", \"is_custom\": false}, {\"id\": \"B4F2FF72\", \"title\": \"Ab Scissors\", \"type\": \"reps_only\", \"primary_muscle_group\": \"abdominals\", \"secondary_muscle_groups\": [], \"equipment\": \"none\", \"is_custom\": false}, {\"id\": \"99D5F10E\", \"title\": \"Ab Wheel\", \"type\": \"reps_only\", \"primary_muscle_group\": \"abdominals\", \"secondary_muscle_groups\": [], \"equipment\": \"other\", \"is_custom\": false}]}",
+  "GET 7EB3F7C3 status=200: {\"id\":\"7EB3F7C3\",\"title\":\"Chest Press (Machine)\",\"type\":\"weight_reps\",\"primary_muscle_group\":\"chest\",\"secondary_muscle_groups\":[\"shoulders\",\"triceps\"],\"equipment\":\"machine\",\"is_custom\":false}",
+  "GET 3601968B status=200: {\"id\":\"3601968B\",\"title\":\"Bench Press (Dumbbell)\",\"type\":\"weight_reps\",\"primary_muscle_group\":\"chest\",\"secondary_muscle_groups\":[\"triceps\",\"shoulders\"],\"equipment\":\"dumbbell\",\"is_custom\":false}"
+]
