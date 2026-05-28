@@ -111,6 +111,7 @@ jobs:
                       if mo:
                           label = f"{d} {MONTH_ES[mo]}"
                           tipo  = ('medico'  if any(w in notas for w in ('médico','medico','aspy','chequeo')) else
+                                   'nocafe'  if any(w in notas for w in ('sin café','sin cafe')) else
                                    'cafe'    if any(w in notas for w in ('café','cafe')) else
                                    'nocafe')
                           bp_readings.append({'d': label, 'sist': int(sist), 'diast': int(diast), 'tipo': tipo})
