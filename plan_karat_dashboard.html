@@ -536,7 +536,7 @@ function parseWorkouts(workouts,src){
         const np=HEVY_MUSCLE_MAP[ex.primary_muscle_group];
         const pg=np||KW_TO_RADAR[kwg];
         if(pg)musclePrimary[pg]=(musclePrimary[pg]||0)+n;
-        (ex.secondary_muscle_groups||[]).forEach(sm=>{const sg=HEVY_MUSCLE_MAP[sm];if(sg)muscleSecondary[sg]=(muscleSecondary[sg]||0)+n*0.5;});
+        (ex.secondary_muscle_groups||[]).forEach(sm=>{const sg=KW_TO_RADAR[HEVY_MUSCLE_MAP[sm]];if(sg)muscleSecondary[sg]=(muscleSecondary[sg]||0)+n*0.5;});
       }
     });
     return {date:start,dateStr:fmtLabel(start),vol:Math.round(vol),durationMin:end?Math.round((end-start)/60000):null,src,title:w.title||'—',exerciseCount:(w.exercises||[]).length,groupSets,musclePrimary,muscleSecondary,hasNativeMuscle:Object.keys(musclePrimary).length>0,inCycle:start>=CYCLE_START};
