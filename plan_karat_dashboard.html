@@ -942,7 +942,9 @@ async function triggerRefresh(){
   }
   if(ok===GH_WF.length){
     btn.textContent='↻ Lanzado';
-    msg.textContent='Actions disparados · recargando en 90s';
+    let _secs=90;
+    msg.textContent=`Actions disparados · recargando en ${_secs}s`;
+    const _cd=setInterval(()=>{_secs--;msg.textContent=`Actions disparados · recargando en ${_secs}s`;if(_secs<=0)clearInterval(_cd);},1000);
     setTimeout(()=>{location.reload();},90000);
     setTimeout(()=>{btn.textContent='↻ Actualizar';btn.classList.remove('loading');},5000);
   }else{
