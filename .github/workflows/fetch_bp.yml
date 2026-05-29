@@ -33,7 +33,6 @@ jobs:
               print("NOTION_TOKEN not set — skipping")
               sys.exit(0)
 
-          # Base de datos Tensión Arterial — ID: 4144082e-b207-406f-9b16-90cb20638235
           DB_ID  = '4144082e-b207-406f-9b16-90cb20638235'
           HEADERS = {
               'Authorization': f'Bearer {token}',
@@ -48,7 +47,6 @@ jobs:
               d = date.fromisoformat(iso_date)
               return f"{d.day} {MONTH_ES[d.month-1]}"
 
-          # Query database sorted by Fecha ascending
           resp = requests.post(
               f'https://api.notion.com/v1/databases/{DB_ID}/query',
               headers=HEADERS,
@@ -73,7 +71,6 @@ jobs:
               label = fmt_label(fecha_val['start'])
               readings.append({'d': label, 'sist': int(sist), 'diast': int(diast), 'tipo': tipo})
 
-          # Average same-day + same-tipo readings
           grouped = defaultdict(list)
           for r in readings:
               grouped[(r['d'], r['tipo'])].append(r)
@@ -93,9 +90,9 @@ jobs:
 
       - name: Push via GitHub API
         env:
-          GH_PAT: {{ secrets.GH_PAT }}
+          GH_PAT: ${{ secrets.GH_PAT }}
         run: |
-          python3 - <<'PYEOF_BP'
+          python3 - <<'PYEOF3'
           import base64, json, urllib.request, urllib.error, os, sys, time
           token = os.environ['GH_PAT']
           repo  = 'Matias1661/Dashboards'
@@ -127,4 +124,4 @@ jobs:
                       time.sleep(3 * (attempt + 1))
           print("All retries exhausted")
           sys.exit(1)
-          PYEOF_BP
+          PYEOF3
