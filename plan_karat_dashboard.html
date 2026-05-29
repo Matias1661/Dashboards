@@ -262,12 +262,21 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       <div class="card"><div class="card-header"><span class="card-title">Volumen por sesión — ciclo</span><span class="card-badge" id="volBadge"></span></div><div class="chart-wrap" style="height:180px"><canvas id="c-vol"></canvas></div></div>
       <div class="card"><div class="card-header"><span class="card-title">Frecuencia mensual</span><span class="card-badge" id="freqBadge"></span></div><div class="chart-wrap" style="height:180px"><canvas id="c-freq"></canvas></div></div>
     </div>
-    <div class="card" id="radarCard">
-      <div class="card-header">
-        <span class="card-title">Distribución muscular</span>
-        <span class="card-badge" id="radarBadge"></span>
+    <div class="two-col" id="radarCard">
+      <div class="card" style="margin-bottom:0">
+        <div class="card-header">
+          <span class="card-title">Distribución muscular — semana</span>
+          <span class="card-badge" id="radarWeekBadge"></span>
+        </div>
+        <div class="chart-wrap" style="height:220px"><canvas id="c-radar-week"></canvas></div>
       </div>
-      <div class="chart-wrap" style="height:220px"><canvas id="c-radar"></canvas></div>
+      <div class="card" style="margin-bottom:0">
+        <div class="card-header">
+          <span class="card-title">Distribución muscular — mes</span>
+          <span class="card-badge" id="radarMonthBadge"></span>
+        </div>
+        <div class="chart-wrap" style="height:220px"><canvas id="c-radar-month"></canvas></div>
+      </div>
     </div>
     <div class="card" style="margin-top:12px">
       <div class="card-header">
@@ -489,6 +498,7 @@ const chartVol=new Chart(document.getElementById('c-vol'),{type:'bar',data:{labe
 const chartFreq=new Chart(document.getElementById('c-freq'),{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:[],borderRadius:3,borderSkipped:false,label:'Sesiones'},{data:[],borderColor:'rgba(37,99,190,0.5)',backgroundColor:'transparent',type:'line',pointRadius:0,borderDash:[3,3],label:'Objetivo (8)'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{family:'DM Mono',size:8},color:'#a8aab0'},grid:{display:false},border:{display:false}},y:{min:0,ticks:{font:{size:8},color:'#a8aab0',stepSize:2},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}});
 
 let chartRadar=null;
+let chartRadarMonth=null;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // GLOBAL STATE
@@ -822,29 +832,57 @@ function renderTraining(){
   document.getElementById('freqBadge').textContent=`últimos ${freqN} meses`;
   chartFreq.update();
 
-  // Radar — últimos 14d (azul) vs 30–60d atrás (gris)
-  const d14ago=new Date(now); d14ago.setDate(d14ago.getDate()-14);
-  const d30ago=new Date(now); d30ago.setDate(d30ago.getDate()-30);
-  const d60ago=new Date(now); d60ago.setDate(d60ago.getDate()-60);
+  // Radars — semana actual vs anterior / mes actual vs anterior
   const sessWithMuscle=allSessions.filter(s=>s.hasNativeMuscle);
-  const recentSess=sessWithMuscle.filter(s=>s.date>=d14ago);
-  const compSess=sessWithMuscle.filter(s=>s.date>=d60ago&&s.date<d30ago);
+
+  // Week boundaries
+  const weekStart=getMonday(now);
+  const prevWeekStart=new Date(weekStart); prevWeekStart.setDate(prevWeekStart.getDate()-7);
+  const prevWeekEnd=new Date(weekStart); prevWeekEnd.setTime(prevWeekEnd.getTime()-1);
+  const weekSess=sessWithMuscle.filter(s=>s.date>=weekStart);
+  const prevWeekSess=sessWithMuscle.filter(s=>s.date>=prevWeekStart&&s.date<=prevWeekEnd);
+
+  // Month boundaries
+  const monthStartR=new Date(now.getFullYear(),now.getMonth(),1);
+  const prevMonthStart=new Date(now.getFullYear(),now.getMonth()-1,1);
+  const prevMonthEnd=new Date(now.getFullYear(),now.getMonth(),0); prevMonthEnd.setHours(23,59,59);
+  const monthSess=sessWithMuscle.filter(s=>s.date>=monthStartR);
+  const prevMonthSess=sessWithMuscle.filter(s=>s.date>=prevMonthStart&&s.date<=prevMonthEnd);
+
+  function makeRadarOpts(maxV){
+    return {responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'bottom',labels:{font:{family:'DM Mono',size:9},color:'#6b6d70',boxWidth:8,padding:10}}},
+      scales:{r:{min:0,suggestedMax:Math.ceil(maxV)+2,ticks:{font:{size:8,family:'DM Mono'},color:'#a8aab0',backdropColor:'transparent',stepSize:Math.max(1,Math.ceil(maxV/4))},grid:{color:'rgba(0,0,0,0.06)'},angleLines:{color:'rgba(0,0,0,0.06)'},pointLabels:{font:{family:'DM Mono',size:9},color:'#1a1a18'}}}};
+  }
 
   if(sessWithMuscle.length>0){
     document.getElementById('radarCard').style.display='';
-    const recentData=aggMuscleRadar(recentSess);
-    const compData=aggMuscleRadar(compSess);
-    const maxV=Math.max(1,...recentData,...compData);
-    const recentSrc=recentSess.length>0?(recentSess.some(s=>s.src==='Hevy')?'Hevy':'Jefit'):'—';
-    const compSrc=compSess.length>0?(compSess.some(s=>s.src==='Hevy')?'Hevy':'Jefit'):'—';
+
+    // Radar semana
+    const wCurData=aggMuscleRadar(weekSess);
+    const wPrevData=aggMuscleRadar(prevWeekSess);
+    const wMax=Math.max(1,...wCurData,...wPrevData);
+    const wCurSrc=weekSess.length?(weekSess.some(s=>s.src==='Hevy')?'Hevy':'Jefit'):'—';
+    const wPrevSrc=prevWeekSess.length?(prevWeekSess.some(s=>s.src==='Hevy')?'Hevy':'Jefit'):'—';
     if(chartRadar)chartRadar.destroy();
-    chartRadar=new Chart(document.getElementById('c-radar'),{type:'radar',data:{labels:RADAR_GROUPS,datasets:[
-      {label:`Últimos 14d (${recentSess.length} ses · ${recentSrc})`,data:recentData,backgroundColor:'rgba(37,99,190,0.15)',borderColor:'rgba(37,99,190,0.9)',borderWidth:2,pointBackgroundColor:'rgba(37,99,190,0.9)',pointRadius:3},
-      {label:`30–60d atrás (${compSess.length} ses · ${compSrc})`,data:compData,backgroundColor:'rgba(160,160,160,0.1)',borderColor:'rgba(160,160,160,0.55)',borderWidth:1.5,borderDash:[4,3],pointBackgroundColor:'rgba(160,160,160,0.65)',pointRadius:2}
-    ]},options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:true,position:'bottom',labels:{font:{family:'DM Mono',size:9},color:'#6b6d70',boxWidth:8,padding:12}}},
-      scales:{r:{min:0,suggestedMax:Math.ceil(maxV)+2,ticks:{font:{size:8,family:'DM Mono'},color:'#a8aab0',backdropColor:'transparent',stepSize:Math.max(1,Math.ceil(maxV/4))},grid:{color:'rgba(0,0,0,0.06)'},angleLines:{color:'rgba(0,0,0,0.06)'},pointLabels:{font:{family:'DM Mono',size:9},color:'#1a1a18'}}}}});
-    document.getElementById('radarBadge').textContent=recentSess.length?`${recentSess.length} ses recientes · ${compSess.length} de comparación`:'datos históricos';
+    chartRadar=new Chart(document.getElementById('c-radar-week'),{type:'radar',data:{labels:RADAR_GROUPS,datasets:[
+      {label:`Esta semana (${weekSess.length} ses · ${wCurSrc})`,data:wCurData,backgroundColor:'rgba(37,99,190,0.15)',borderColor:'rgba(37,99,190,0.9)',borderWidth:2,pointBackgroundColor:'rgba(37,99,190,0.9)',pointRadius:3},
+      {label:`Sem anterior (${prevWeekSess.length} ses · ${wPrevSrc})`,data:wPrevData,backgroundColor:'rgba(160,160,160,0.08)',borderColor:'rgba(160,160,160,0.5)',borderWidth:1.5,borderDash:[4,3],pointBackgroundColor:'rgba(160,160,160,0.6)',pointRadius:2}
+    ]},options:makeRadarOpts(wMax)});
+    document.getElementById('radarWeekBadge').textContent=`${weekSess.length} ses esta sem · ${prevWeekSess.length} sem anterior`;
+
+    // Radar mes
+    const mCurData=aggMuscleRadar(monthSess);
+    const mPrevData=aggMuscleRadar(prevMonthSess);
+    const mMax=Math.max(1,...mCurData,...mPrevData);
+    const mCurSrc=monthSess.length?(monthSess.some(s=>s.src==='Hevy')?'Hevy':'Jefit'):'—';
+    const mPrevSrc=prevMonthSess.length?(prevMonthSess.some(s=>s.src==='Hevy')?'Hevy':'Jefit'):'—';
+    if(chartRadarMonth)chartRadarMonth.destroy();
+    chartRadarMonth=new Chart(document.getElementById('c-radar-month'),{type:'radar',data:{labels:RADAR_GROUPS,datasets:[
+      {label:`Este mes (${monthSess.length} ses · ${mCurSrc})`,data:mCurData,backgroundColor:'rgba(13,138,82,0.12)',borderColor:'rgba(13,138,82,0.85)',borderWidth:2,pointBackgroundColor:'rgba(13,138,82,0.85)',pointRadius:3},
+      {label:`Mes anterior (${prevMonthSess.length} ses · ${mPrevSrc})`,data:mPrevData,backgroundColor:'rgba(160,160,160,0.08)',borderColor:'rgba(160,160,160,0.5)',borderWidth:1.5,borderDash:[4,3],pointBackgroundColor:'rgba(160,160,160,0.6)',pointRadius:2}
+    ]},options:makeRadarOpts(mMax)});
+    document.getElementById('radarMonthBadge').textContent=`${monthSess.length} ses este mes · ${prevMonthSess.length} mes anterior`;
   } else {
     document.getElementById('radarCard').style.display='none';
   }
