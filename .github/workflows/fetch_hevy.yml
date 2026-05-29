@@ -31,7 +31,6 @@ jobs:
           api_key = os.environ['HEVY_API_KEY']
           headers = {'api-key': api_key}
 
-          # 1. Fetch all workouts (paginated)
           all_workouts = []
           page = 1
           while True:
@@ -45,7 +44,6 @@ jobs:
                   break
               page += 1
 
-          # 2. Fetch exercise templates only for IDs present in workouts
           template_ids = {
               ex.get('exercise_template_id')
               for w in all_workouts
@@ -64,7 +62,6 @@ jobs:
                       'secondary_muscle_groups': t.get('secondary_muscle_groups', []),
                   }
 
-          # 3. Merge muscle data into exercises
           for w in all_workouts:
               for ex in w.get('exercises', []):
                   tid = ex.get('exercise_template_id')
@@ -84,9 +81,9 @@ jobs:
 
       - name: Push via GitHub API
         env:
-          GH_PAT: {{ secrets.GH_PAT }}
+          GH_PAT: ${{ secrets.GH_PAT }}
         run: |
-          python3 - <<'PYEOF_HV'
+          python3 - <<'PYEOF3'
           import base64, json, urllib.request, urllib.error, os, sys, time
           token = os.environ['GH_PAT']
           repo  = 'Matias1661/Dashboards'
@@ -118,4 +115,4 @@ jobs:
                       time.sleep(3 * (attempt + 1))
           print("All retries exhausted")
           sys.exit(1)
-          PYEOF_HV
+          PYEOF3
