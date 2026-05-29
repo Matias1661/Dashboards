@@ -68,7 +68,6 @@ jobs:
                   raise RuntimeError(f"API error [{path}]: code={resp.get('code')} msg={resp.get('msg')}")
               return json.loads(decrypt(resp['data']))
 
-          # --- Authenticate ---
           login_data = api_post('renpho-aggregation/user/login', data={
               'questionnaire': {},
               'login': {
@@ -83,7 +82,6 @@ jobs:
           session = {'token': login['token'], 'userId': str(login['id'])}
           print(f"Login OK: {login.get('email')}")
 
-          # --- Get scale info ---
           device_data = api_post('renpho-aggregation/device/count', session=session, empty=True)
           scales = device_data.get('scale', [])
           if not scales:
@@ -92,7 +90,6 @@ jobs:
           user_ids = [str(uid) for uid in scales[0].get('userIds', [])]
           print(f"Scale: {table_name} | userIds: {user_ids}")
 
-          # --- Fetch measurements (paginated, up to 600 entries) ---
           all_raw = []
           PAGE_SIZE = 200
           for page_num in range(1, 4):
@@ -109,7 +106,6 @@ jobs:
               if len(entries) < PAGE_SIZE:
                   break
 
-          # --- Deduplicate by date, keep most recent measurement per day ---
           by_date = {}
           for m in all_raw:
               ts = int(m.get('timeStamp', 0))
@@ -149,9 +145,9 @@ jobs:
 
       - name: Push via GitHub API
         env:
-          GH_PAT: {{ secrets.GH_PAT }}
+          GH_PAT: ${{ secrets.GH_PAT }}
         run: |
-          python3 - <<'PYEOF_RP'
+          python3 - <<'PYEOF3'
           import base64, json, urllib.request, urllib.error, os, sys, time
           token = os.environ['GH_PAT']
           repo  = 'Matias1661/Dashboards'
@@ -183,4 +179,4 @@ jobs:
                       time.sleep(3 * (attempt + 1))
           print("All retries exhausted")
           sys.exit(1)
-          PYEOF_RP
+          PYEOF3
