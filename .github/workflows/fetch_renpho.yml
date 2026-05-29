@@ -151,7 +151,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git rebase origin/main
           git add renpho_data.json
           git diff --staged --quiet || git commit -m "Update renpho_data.json [$(date -u '+%Y-%m-%d %H:%M UTC')]"
-          git pull --rebase origin main
           git push
