@@ -104,6 +104,19 @@ header{background:var(--surface);border-bottom:1px solid var(--border2);padding:
 .modal-note{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:10px;line-height:1.5}
 .modal-actions{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
 .btn-ghost{font-family:'DM Mono',monospace;font-size:10px;padding:6px 16px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer}
+/* ── Chart inline analysis ────────────────────── */
+.chart-insight{margin-top:8px;padding:8px 10px;border-radius:6px;background:var(--surface2);font-size:11px;color:var(--text2);line-height:1.55}
+.chart-insight .ins-trend{font-weight:500;color:var(--text);display:block;margin-bottom:2px}
+.chart-insight .ins-advice{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:4px;display:block}
+.chart-insight.ok{background:var(--green-dim)}.chart-insight.ok .ins-trend{color:#0a5c36}.chart-insight.ok .ins-advice{color:#0d6040}
+.chart-insight.warn{background:var(--amber-dim)}.chart-insight.warn .ins-trend{color:#6b4400}.chart-insight.warn .ins-advice{color:#7a5200}
+.chart-insight.info{background:var(--blue-dim)}.chart-insight.info .ins-trend{color:#1a3a6b}.chart-insight.info .ins-advice{color:#1e4080}
+/* ── Top summary (3 key insights) ─────────────── */
+.key-insights{background:var(--surface);border:0.5px solid var(--border2);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.key-insights-title{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.key-insight-row{display:flex;align-items:flex-start;gap:10px;padding:5px 0;border-bottom:0.5px solid var(--border);font-size:12px;color:var(--text2)}
+.key-insight-row:last-child{border-bottom:none;padding-bottom:0}
+.key-insight-num{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);min-width:14px;padding-top:1px}
 /* ── Loading ──────────────────────────────────── */
 .loading-bar{height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent);background-size:200% 100%;animation:slide 1.2s linear infinite;display:none;margin-bottom:0}
 @keyframes slide{0%{background-position:200% 0}100%{background-position:-200% 0}}
@@ -191,17 +204,24 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
         <div class="kpi-delta" id="kAguaCycleDelta">—</div>
       </div>
     </div>
-    <div class="two-col">
-      <div class="card"><div class="card-header"><span class="card-title">Peso</span><span class="card-badge" id="cbPeso"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-peso"></canvas></div></div>
-      <div class="card"><div class="card-header"><span class="card-title">Masa muscular</span><span class="card-badge" id="cbMusc"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-musc"></canvas></div></div>
+    <div class="key-insights" id="keyInsightsBox">
+      <div class="key-insights-title">Resumen — 3 puntos clave</div>
+      <div id="keyInsightsBody">
+        <div class="key-insight-row"><span class="key-insight-num">—</span><span>Cargando datos…</span></div>
+      </div>
     </div>
     <div class="two-col">
-      <div class="card"><div class="card-header"><span class="card-title">Grasa corporal</span><span class="card-badge" id="cbGrasa"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-grasa"></canvas></div></div>
-      <div class="card"><div class="card-header"><span class="card-title">Agua %</span><span class="card-badge" id="cbAgua"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-agua"></canvas></div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Peso</span><span class="card-badge" id="cbPeso"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-peso"></canvas></div><div class="chart-insight" id="ins-peso"></div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Masa muscular</span><span class="card-badge" id="cbMusc"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-musc"></canvas></div><div class="chart-insight" id="ins-musc"></div></div>
+    </div>
+    <div class="two-col">
+      <div class="card"><div class="card-header"><span class="card-title">Grasa corporal</span><span class="card-badge" id="cbGrasa"></span></div><div class="card-header" style="margin-top:-6px;margin-bottom:0"><span style="font-size:10px;color:var(--text3)"><span style="color:#c94a30">—</span> total &nbsp;<span style="color:rgba(154,98,0,0.8)">- -</span> subcutánea</span></div><div class="chart-wrap" style="height:160px"><canvas id="c-grasa"></canvas></div><div class="chart-insight" id="ins-grasa"></div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Agua %</span><span class="card-badge" id="cbAgua"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-agua"></canvas></div><div class="chart-insight" id="ins-agua"></div></div>
     </div>
     <div class="card" style="margin-top:0">
       <div class="card-header"><span class="card-title">Grasa visceral (índice)</span><span class="card-badge" id="cbVisceral"></span></div>
       <div class="chart-wrap" style="height:110px"><canvas id="c-visceral"></canvas></div>
+      <div class="chart-insight" id="ins-visceral"></div>
     </div>
     <div class="card" style="margin-top:0">
       <div class="card-header">
@@ -212,6 +232,7 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
         </span>
       </div>
       <div class="chart-wrap" style="height:200px"><canvas id="c-scatter"></canvas></div>
+      <div class="chart-insight" id="ins-scatter"></div>
     </div>
   </div>
 
@@ -248,15 +269,6 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       </div>
       <div class="chart-wrap" style="height:220px"><canvas id="c-radar"></canvas></div>
     </div>
-  </div>
-
-  <!-- ANÁLISIS -->
-  <div class="section">
-    <div class="section-title" style="display:flex;align-items:center">
-      <span style="flex:1">Análisis automático</span>
-      <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3)" id="analysisDate"></span>
-    </div>
-    <div id="analysisBody"></div>
   </div>
 
   <!-- MANTENIMIENTO -->
@@ -825,8 +837,15 @@ function renderTraining(){
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// AUTO-ANALYSIS
+// CHART INSIGHTS + KEY SUMMARY
 // ═══════════════════════════════════════════════════════════════════════════
+function setInsight(id, cls, trend, advice){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.className='chart-insight '+cls;
+  el.innerHTML=`<span class="ins-trend">${trend}</span><span class="ins-advice">→ ${advice}</span>`;
+}
+
 function renderAnalysis(){
   const w=getCurrentWeek();
   const latest=allData.length?allData[allData.length-1]:null;
@@ -836,44 +855,142 @@ function renderAnalysis(){
   const nocafe=bpReadings.filter(r=>r.tipo==='nocafe');
   const avgS=nocafe.length?Math.round(nocafe.reduce((s,r)=>s+r.sist,0)/nocafe.length):null;
   const avgD=nocafe.length?Math.round(nocafe.reduce((s,r)=>s+r.diast,0)/nocafe.length):null;
-  const proto=getProtocolForWeek(w);
-  const next=getNextChange(w);
   const cycleRef=allData.filter(r=>r._date>=CYCLE_START)[0]||latest;
 
-  const sections=[];
+  if(!latest||!cycleRef) return;
 
-  if(latest&&cycleRef){
-    const dP=(latest.peso-cycleRef.peso),dM=(latest.musc-cycleRef.musc),dG=(latest.grasa-cycleRef.grasa);
-    sections.push({title:'Composición corporal',items:[
-      {cls:'ok',text:`Peso ${latest.peso.toFixed(2)} kg (${fmt2d(dP)} vs inicio ciclo). Músculo ${latest.musc.toFixed(2)} kg (${fmt2d(dM)} vs inicio ciclo ${cycleRef.musc.toFixed(2)}).`},
-      {cls:dG>2?'warn':'ok',text:`Grasa ${latest.grasa.toFixed(1)}% (${fmt1d(dG)} pp vs inicio ciclo). Visceral índice ${latest.visceral}${latest.visceral>=11?' — elevado; controlar ingesta de sodio y carbohidratos.':'.'}` },
-    ]});
+  const dP=+(latest.peso-cycleRef.peso).toFixed(2);
+  const dM=+(latest.musc-cycleRef.musc).toFixed(2);
+  const dG=+(latest.grasa-cycleRef.grasa).toFixed(1);
+  const dV=latest.visceral-cycleRef.visceral;
+  const dA=+(latest.agua-cycleRef.agua).toFixed(1);
+
+  // --- Peso ---
+  const ganSemanal = dP / Math.max(1,w);
+  const pesoOk = ganSemanal>=0.2&&ganSemanal<=0.6;
+  const pesoExc = ganSemanal>0.6;
+  setInsight('ins-peso',
+    pesoOk?'ok':pesoExc?'warn':'info',
+    `+${dP} kg desde inicio del ciclo (sem ${w}). Ritmo: ~${(ganSemanal).toFixed(2)} kg/sem.`,
+    pesoOk
+      ? 'Ritmo de superávit bien calibrado. Mantener ingesta actual.'
+      : pesoExc
+        ? 'Ritmo elevado — riesgo de acumular más grasa de la necesaria. Reducir ~200 kcal/día.'
+        : 'Ganancia lenta. Si músculo no sube, aumentar ~200 kcal/día priorizando proteína.'
+  );
+
+  // --- Músculo ---
+  const muscOk = dM>0;
+  const muscRate = dM / Math.max(1,w);
+  setInsight('ins-musc',
+    muscOk?'ok':'warn',
+    `+${dM} kg músculo desde inicio del ciclo. Media: +${muscRate.toFixed(2)} kg/sem.`,
+    muscOk
+      ? (sessMonth.length>=6
+          ? 'Buen progreso. Seguir con frecuencia actual y superávit controlado.'
+          : 'Tendencia positiva pero la frecuencia de entrenamiento este mes es baja — más sesiones mejorarían la síntesis proteica.')
+      : 'Sin ganancia muscular neta. Revisar ingesta proteica (≥2 g/kg) y aumentar frecuencia de entrenamiento.'
+  );
+
+  // --- Grasa ---
+  const grasaAceptable = dG<=1.5;
+  const subcLast=latest.subcutanea||0;
+  const subcRef=cycleRef.subcutanea||0;
+  const dSub=+(subcLast-subcRef).toFixed(1);
+  setInsight('ins-grasa',
+    grasaAceptable?'ok':'warn',
+    `${fmt1d(dG)} pp grasa total desde inicio del ciclo (${latest.grasa.toFixed(1)}%). Subcutánea: ${dSub>=0?'+':''}${dSub} pp.`,
+    grasaAceptable
+      ? 'Acumulación de grasa dentro del rango esperado para un ciclo de volumen. Controlar sodio.'
+      : 'Acumulación de grasa por encima de lo óptimo. Reducir carbohidratos refinados y sodio; revisar superávit calórico.'
+  );
+
+  // --- Agua ---
+  const aguaOk = latest.agua>=52;
+  setInsight('ins-agua',
+    aguaOk?'ok':latest.agua>=51?'info':'warn',
+    `Agua corporal: ${latest.agua.toFixed(1)}% (${dA>=0?'+':''}${dA} pp vs inicio ciclo).`,
+    aguaOk
+      ? 'Hidratación adecuada. Los ésteres largos generan retención; el nivel actual es esperable en fase de carga.'
+      : 'Porcentaje de agua bajo para la fase del ciclo. Asegurar ≥2.5 L/día de agua; reducir sodio si hay retención visible.'
+  );
+
+  // --- Visceral ---
+  setInsight('ins-visceral',
+    latest.visceral<=10?'ok':latest.visceral===11?'info':'warn',
+    `Grasa visceral: índice ${latest.visceral} (${dV>=0?'+':''}${dV} vs inicio ciclo). Rango saludable: ≤12.`,
+    latest.visceral<=10
+      ? 'Nivel óptimo. Mantener con dieta controlada en carbohidratos refinados y alcohol.'
+      : latest.visceral===11
+        ? 'Nivel aceptable pero elevado para el inicio del ciclo. Controlar sodio y reducir azúcar añadida.'
+        : 'Nivel elevado. Reducir hidratos refinados, alcohol y sodio; incrementar cardio de baja intensidad.'
+  );
+
+  // --- Scatter ---
+  const cycleData=allData.filter(d=>d.ciclo);
+  let scatterTrend='', scatterAdv='', scatterCls='info';
+  if(cycleData.length>=3){
+    const first=cycleData[0], last2=cycleData[cycleData.length-1];
+    const dPeso=+(last2.peso-first.peso).toFixed(2);
+    const dGr=+(last2.grasa-first.grasa).toFixed(1);
+    const muscEff= dM>0 && dG<1.5;
+    scatterCls = muscEff?'ok':dGr>2?'warn':'info';
+    scatterTrend=`Ciclo: +${dPeso} kg peso / ${dGr>=0?'+':''}${dGr} pp grasa. Ratio músculo:grasa = ${dM>0?(dM/Math.max(0.1,dG)).toFixed(1):'—'}.`;
+    scatterAdv = muscEff
+      ? 'La composición corporal avanza bien: más músculo que grasa. Mantener el enfoque actual.'
+      : dGr>2
+        ? 'La proporción de grasa ganada es alta. Ajustar superávit y revisar calidad de la dieta.'
+        : 'Composición en seguimiento. Continuar midiendo para confirmar tendencia.';
+  } else {
+    scatterTrend='Insuficientes mediciones en ciclo para calcular tendencia.';
+    scatterAdv='Más mediciones en la báscula inteligente mejorarán la precisión del análisis.';
   }
-  if(nocafe.length){
-    const ok=avgS<140&&avgD<90;
-    sections.push({title:'Tensión arterial',items:[
-      {cls:ok?'ok':'warn',text:`Sin café (${nocafe.length} lecturas): media ${avgS}/${avgD} mmHg. ${ok?'Criterio Testo 3cm sem 11 cumplido.':'Por encima del umbral 140/90 — revisar protocolo.'}`},
-      {cls:'info',text:'Con café: lecturas elevadas (~130–140/85–90). Medir siempre tarde, sentado, sin café, 5 min de reposo.'},
-    ]});
-  }
-  sections.push({title:'Entrenamiento',items:[
-    {cls:sessMonth.length>=8?'ok':sessMonth.length>=5?'info':'warn',
-     text:`${now.toLocaleDateString('es-ES',{month:'long'})}: ${sessMonth.length} sesión${sessMonth.length!==1?'es':''}. Objetivo sem 11–13 (dosis máxima): 8–10 ses/mes para maximizar el ciclo.`},
-    {cls:'info',text:`Ciclo total (sem 1–${w}): ${allSessions.filter(s=>s.inCycle).length} sesiones. Histórico Jefit pre-ciclo disponible en gráficos.`},
-  ]});
-  if(proto){
-    const prItems=[{cls:'ok',text:`Sem ${w} — ${proto.label}.${proto.note?' ('+proto.note+')':''}`}];
-    if(next)prItems.push({cls:next.daysUntil<=7?'warn':'info',text:`Próximo cambio: sem ${next.from} (${next.dateStr}) — ${next.label.split('·')[0].trim()}. ${next.daysUntil} día${next.daysUntil!==1?'s':''}.`});
-    sections.push({title:'Protocolo',items:prItems});
+  setInsight('ins-scatter', scatterCls, scatterTrend, scatterAdv);
+
+  // --- 3 key insights summary ---
+  // Build ranked list: pick the 3 most actionable based on severity
+  const candidates=[];
+
+  // Training frequency — often the highest-impact lever
+  const freqCls = sessMonth.length>=8?'ok':sessMonth.length>=5?'info':'warn';
+  const freqTxt = sessMonth.length>=8
+    ? `Frecuencia este mes: ${sessMonth.length} ses — objetivo cumplido. El entrenamiento está maximizando el ciclo.`
+    : `Frecuencia este mes: ${sessMonth.length} ses (objetivo 8–10). Cada sesión adicional amplifica el efecto anabólico.`;
+  candidates.push({priority: sessMonth.length<6?0:sessMonth.length<8?1:3, cls:freqCls, text:freqTxt});
+
+  // Body fat accumulation
+  if(dG>2) candidates.push({priority:0, cls:'warn', text:`Grasa acumulada: +${dG} pp desde el inicio. Revisar superávit calórico y calidad de la dieta antes de seguir aumentando dosis.`});
+  else candidates.push({priority:2, cls:'ok', text:`Grasa bajo control (+${dG} pp en ${w} semanas). Ratio músculo:grasa favorable.`});
+
+  // Muscle gain
+  if(dM<0.5&&w>=6) candidates.push({priority:0, cls:'warn', text:`Ganancia muscular insuficiente (+${dM} kg en sem ${w}). Priorizar proteína ≥2 g/kg y aumentar frecuencia de entrenamiento.`});
+  else candidates.push({priority:2, cls:'ok', text:`Músculo: +${dM} kg desde el inicio del ciclo. Tendencia positiva, consistente con el protocolo activo.`});
+
+  // BP — escalation criterion
+  if(avgS!==null){
+    const bpOk=avgS<140&&avgD<90;
+    candidates.push({priority:bpOk?3:0, cls:bpOk?'ok':'warn',
+      text:bpOk
+        ? `TA sin café: ${avgS}/${avgD} mmHg — criterio para Testo 3cm sem 11 cumplido.`
+        : `TA sin café: ${avgS}/${avgD} mmHg — sobre umbral 140/90. No escalar Testo hasta normalizarla.`
+    });
   }
 
-  const body=document.getElementById('analysisBody');
-  body.innerHTML=sections.map(sec=>`
-    <div class="analysis-section">
-      <div class="analysis-section-title">${sec.title}</div>
-      ${sec.items.map(it=>`<div class="analysis-item ${it.cls||''}">${it.text}</div>`).join('')}
+  // Sort by priority ascending (0 = most urgent), take top 3
+  candidates.sort((a,b)=>a.priority-b.priority);
+  const top3=candidates.slice(0,3);
+
+  const clsToSymbol={ok:'✓',warn:'⚠',info:'→'};
+  const clsToColor={ok:'var(--green)',warn:'var(--amber)',info:'var(--blue)'};
+  document.getElementById('keyInsightsBody').innerHTML=top3.map((c,i)=>`
+    <div class="key-insight-row">
+      <span class="key-insight-num" style="color:${clsToColor[c.cls]}">${clsToSymbol[c.cls]}</span>
+      <span>${c.text}</span>
     </div>`).join('');
-  document.getElementById('analysisDate').textContent=`${now.toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})}`;
+
+  // Keep analysisDate if element still exists (won't, but harmless)
+  const ad=document.getElementById('analysisDate');
+  if(ad) ad.textContent=now.toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'});
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
