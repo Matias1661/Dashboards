@@ -271,24 +271,21 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
     </div>
   </div>
 
-  <!-- MANTENIMIENTO -->
+  <!-- RUTINA DIARIA -->
   <div class="section">
-    <div class="section-title">Cómo mantener este dashboard</div>
+    <div class="section-title">Rutina diaria</div>
     <div class="maint-row">
       <div class="maint-block">
-        <div class="maint-block-title">Automático — GitHub Actions (diario)</div>
-        <div class="maint-item auto"><strong>renpho_data.json</strong> — fetch_renpho.yml · 05:30 UTC. Lee datos de la app Renpho.</div>
-        <div class="maint-item auto"><strong>hevy_data.json</strong> — fetch_hevy.yml · 05:00 UTC. Lee entrenamientos de la API Hevy.</div>
-        <div class="maint-item auto"><strong>bp_data.json</strong> — fetch_bp.yml · 06:00 UTC. Lee tensión arterial desde Notion (requiere secret <code>NOTION_TOKEN</code> en GitHub).</div>
-        <div class="maint-item auto"><strong>Botón ↻ Actualizar</strong> — fuerza los tres Actions de inmediato. El dashboard se recarga en ~90 s.</div>
+        <div class="maint-block-title">Qué hacer tú</div>
+        <div class="maint-item auto"><strong>Pesarse en la báscula Renpho</strong> — una vez al día, idealmente por la mañana en ayunas. Los datos llegan solos al dashboard antes de las 08:00h.</div>
+        <div class="maint-item auto"><strong>Registrar el entrenamiento en Hevy</strong> — los workouts aparecen en el dashboard al día siguiente antes de las 07:00h, o de inmediato si pulsas ↻ Actualizar.</div>
+        <div class="maint-item auto"><strong>Medir la tensión arterial</strong> — tarde, sentado, sin café, 5 min de reposo. Añadir la lectura en la base de datos Notion "Tensión Arterial" (Salud y entrenamiento → Mediciones). Aparece en el dashboard al día siguiente antes de las 08:00h.</div>
       </div>
       <div class="maint-block">
-        <div class="maint-block-title">Manual — código del dashboard</div>
-        <div class="maint-item manual"><strong>PROTOCOL</strong> — actualizar cuando cambie el protocolo del ciclo (dosis, semanas).</div>
-        <div class="maint-item manual"><strong>CYCLE_START / TAMO_DATE</strong> — actualizar si cambia la fecha de inicio del ciclo o del tamoxifeno.</div>
-        <div class="maint-item manual"><strong>BASELINE</strong> — baseline de composición corporal (11 mar 2026, fijo).</div>
-        <div class="maint-item manual"><strong>GH_TOKEN</strong> — token GitHub hardcodeado. Actualizar si caduca (actualmente puede estar caducado — generar uno nuevo en GitHub → Settings → Developer settings → Personal access tokens con scope <code>repo</code> y <code>workflow</code>).</div>
-        <div class="maint-item manual"><strong>TA manual</strong> — si fetch_bp.yml falla, añadir lecturas directamente en la base de datos Notion "Tensión Arterial".</div>
+        <div class="maint-block-title">Cuándo pulsar ↻ Actualizar</div>
+        <div class="maint-item manual"><strong>Después de entrenar</strong> — si quieres ver el workout reflejado al momento sin esperar al día siguiente.</div>
+        <div class="maint-item manual"><strong>Después de pesarte</strong> — si quieres ver la medición nueva antes de las 08:00h.</div>
+        <div class="maint-item manual"><strong>Si algo no cuadra</strong> — el botón fuerza la recarga de todos los datos. El dashboard se recarga en ~90 s.</div>
       </div>
     </div>
   </div>
