@@ -288,7 +288,7 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
 <p style="margin-bottom:10px"><span style="font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px">Composición corporal</span><br>+2.65 kg peso / +0.93 kg músculo / +1.0 pp grasa desde baseline. Ratio músculo:grasa funcional (~0.35 kg músculo por kg ganado). Última medición 28 may: 88.85 kg, punto más bajo de las últimas 3 semanas — vigilar tendencia esta semana para confirmar que es oscilación normal y no caída real. Grasa visceral estable en 10–11, sin tendencia al alza.</p>
 <p style="margin-bottom:10px"><span style="font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px">Entrenamiento</span><br>5 sesiones en mayo (3 Jefit 19–21 + 2 Hevy 27–28). Volumen por sesión correcto (3,020–4,440 kg), pero frecuencia por debajo del objetivo de 8–10. Las semanas 11–13 son el pico anabólico del ciclo — la frecuencia de entrenamiento en este periodo determina en gran medida el resultado final.</p>
 <p style="margin-bottom:10px"><span style="font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px">Tensión arterial</span><br>Todas las lecturas sin café bajo 140/90 (media ~115/80). Criterio para Testo 3 cm sem 11 cumplido. El café sigue elevando significativamente las lecturas — medir siempre sin café para comparabilidad.</p>
-<p style="margin-bottom:10px"><span style="font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px">Protocolo</span><br>Sem 11 arranca el 2 jun. Testo sube a 3 cm (lunes), Masteron continúa 1 cm (viernes). Efectos en composición visibles a partir de sem 13–14.</p>
+<p style="margin-bottom:10px"><span style="font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px">Protocolo</span><br>Sem 11 arranca el 1 jun. Testo sube a 3 cm (lunes), Masteron continúa 1 cm (viernes). Efectos en composición visibles a partir de sem 13–14.</p>
 <p style="margin-bottom:6px"><span style="font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:6px">Acciones inmediatas</span></p>
 <p style="margin-bottom:4px">1. Mínimo 3 sesiones esta semana — las sem 11–13 son el pico del ciclo, no llegar a 8 ses/mes en junio sería infraaprovechar el momento de mayor anabolismo.</p>
 <p style="margin-bottom:4px">2. Pésate lun/mié/vie — la última medición es la más baja de las 3 semanas anteriores; si la tendencia continúa, subir ~200 kcal/día antes de entrar en dosis máxima.</p>
@@ -431,7 +431,7 @@ function getGroup(t){const tl=t.toLowerCase();for(const{group,kw}of MUSCLE_MAP){
 // ═══════════════════════════════════════════════════════════════════════════
 // CHART PLUGIN: ciclo shading + Tamoxifen line
 // ═══════════════════════════════════════════════════════════════════════════
-let activeCicloIdx=-1, activeTamoIdx=-1;
+let activeCicloIdx=-1, activeTamoIdx=-1, activeBPShadeIdx=-1;
 Chart.register({
   id:'annotPlugin',
   beforeDraw(chart){
@@ -439,8 +439,10 @@ Chart.register({
     const{ctx,chartArea,scales}=chart;
     if(!chartArea||!scales.x)return;
     const xs=scales.x;
-    if(activeCicloIdx>=0){
-      const cx=xs.getPixelForValue(activeCicloIdx);
+    const isBPChart=chart.canvas&&chart.canvas.id==='c-bp';
+    const shadeIdx=isBPChart?activeBPShadeIdx:activeCicloIdx;
+    if(shadeIdx>=0){
+      const cx=xs.getPixelForValue(shadeIdx);
       ctx.save();ctx.fillStyle='rgba(13,138,82,0.05)';
       ctx.fillRect(cx,chartArea.top,chartArea.right-cx,chartArea.bottom-chartArea.top);
       ctx.strokeStyle='rgba(13,138,82,0.25)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
@@ -770,6 +772,15 @@ function renderBP(){
       return `${ctx.datasetIndex===0?'Sistólica':'Diastólica'}: ${ctx.raw} mmHg (${BP_TIPO_LABEL[r?.tipo]||''})`;
     }
   };
+  // Sombreado sem 11: a partir del lunes 1 jun 2026
+  const SEM11_DATE = new Date('2026-06-01');
+  activeBPShadeIdx = readings.findIndex(r => {
+    const parts = r.d.match(/(\d+)\s+(\w+)/);
+    if(!parts) return false;
+    const months = {ene:0,feb:1,mar:2,abr:3,may:4,jun:5,jul:6,ago:7,sep:8,oct:9,nov:10,dic:11};
+    const d = new Date(2026, months[parts[2]], parseInt(parts[1]));
+    return d >= SEM11_DATE;
+  });
   chartBP.update('none'); // 'none' skips animation for cleaner update
 
   const nocafe=readings.filter(r=>r.tipo==='nocafe');
