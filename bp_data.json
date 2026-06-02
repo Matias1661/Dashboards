@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-06-02T09:56:31.421945+00:00",
+  "fetched_at": "2026-06-02T16:24:48.874842+00:00",
   "readings": [
     {
       "d": "14 may",
@@ -71,6 +71,12 @@
       "d": "1 jun",
       "sist": 133,
       "diast": 85,
+      "tipo": "nocafe"
+    },
+    {
+      "d": "2 jun",
+      "sist": 129,
+      "diast": 81,
       "tipo": "nocafe"
     }
   ]
