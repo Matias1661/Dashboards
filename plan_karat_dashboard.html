@@ -432,7 +432,7 @@ function getGroup(t){const tl=t.toLowerCase();for(const{group,kw}of MUSCLE_MAP){
 // ═══════════════════════════════════════════════════════════════════════════
 // CHART PLUGIN: ciclo shading + Tamoxifen line
 // ═══════════════════════════════════════════════════════════════════════════
-let activeCicloIdx=-1, activeTamoIdx=-1, activeTamoFrac=0.5, activeBPShadeIdx=-1;
+let activeCicloIdx=-1, activeTamoIdx=-1, activeTamoFrac=0.5, activeBPShadeIdx=-1, activeBPTamoIdx=-1, activeBPTamoFrac=0;
 Chart.register({
   id:'annotPlugin',
   beforeDraw(chart){
@@ -450,9 +450,11 @@ Chart.register({
       ctx.beginPath();ctx.moveTo(cx,chartArea.top);ctx.lineTo(cx,chartArea.bottom);ctx.stroke();
       ctx.restore();
     }
-    if(activeTamoIdx>=0&&activeTamoIdx+1<=xs.max){
-      const step=xs.getPixelForValue(Math.min(activeTamoIdx+1,xs.max))-xs.getPixelForValue(activeTamoIdx);
-      const tx=xs.getPixelForValue(activeTamoIdx)+step*activeTamoFrac;
+    const tamoI  = isBPChart ? activeBPTamoIdx  : activeTamoIdx;
+    const tamoFr = isBPChart ? activeBPTamoFrac : activeTamoFrac;
+    if(tamoI>=0&&tamoI+1<=xs.max){
+      const step=xs.getPixelForValue(Math.min(tamoI+1,xs.max))-xs.getPixelForValue(tamoI);
+      const tx=xs.getPixelForValue(tamoI)+step*tamoFr;
       ctx.save();ctx.strokeStyle='rgba(37,99,190,0.45)';ctx.lineWidth=1.5;ctx.setLineDash([3,3]);
       ctx.beginPath();ctx.moveTo(tx,chartArea.top);ctx.lineTo(tx,chartArea.bottom);ctx.stroke();
       ctx.fillStyle='rgba(37,99,190,0.6)';ctx.font='8px DM Mono,monospace';
@@ -779,13 +781,16 @@ function renderBP(){
   };
   // Sombreado sem 11: a partir del lunes 1 jun 2026
   const SEM11_DATE = new Date('2026-06-01');
-  activeBPShadeIdx = readings.findIndex(r => {
-    const parts = r.d.match(/(\d+)\s+(\w+)/);
-    if(!parts) return false;
-    const months = {ene:0,feb:1,mar:2,abr:3,may:4,jun:5,jul:6,ago:7,sep:8,oct:9,nov:10,dic:11};
-    const d = new Date(2026, months[parts[2]], parseInt(parts[1]));
-    return d >= SEM11_DATE;
-  });
+  const parseBPDate = s => { const p=s.match(/(\d+)\s+(\w+)/); if(!p)return null; const m={ene:0,feb:1,mar:2,abr:3,may:4,jun:5,jul:6,ago:7,sep:8,oct:9,nov:10,dic:11}; return new Date(2026,m[p[2]],parseInt(p[1])); };
+  activeBPShadeIdx = readings.findIndex(r => { const d=parseBPDate(r.d); return d&&d>=SEM11_DATE; });
+  // Tamoxifeno line: find reading index nearest to TAMO_DATE
+  activeBPTamoIdx=-1; activeBPTamoFrac=0;
+  for(let i=0;i<readings.length;i++){
+    const d=parseBPDate(readings[i].d); if(!d)continue;
+    const nd=i+1<readings.length?parseBPDate(readings[i+1].d):new Date(9999,0,1);
+    if(d<=TAMO_DATE&&nd&&nd>TAMO_DATE){activeBPTamoIdx=i;activeBPTamoFrac=nd-d>0?(TAMO_DATE-d)/(nd-d):0;break;}
+    if(d.getTime()===TAMO_DATE.getTime()){activeBPTamoIdx=i;activeBPTamoFrac=0;break;}
+  }
   chartBP.update('none'); // 'none' skips animation for cleaner update
 
   const nocafe=readings.filter(r=>r.tipo==='nocafe');
