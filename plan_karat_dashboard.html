@@ -643,7 +643,7 @@ function updateBodyKPIs(){
   if(!d12m.length)return;
 
   // Measurement closest to CYCLE_START (first measurement on/after cycle start)
-  const cycleRef=allData.filter(r=>r._date>=CYCLE_START)[0]||allData[allData.length-1];
+  const cycleRef=allData.filter(r=>r._date<CYCLE_START).slice(-1)[0]||allData[0];
 
   const minP=Math.min(...d12m.map(r=>r.peso)), maxP=Math.max(...d12m.map(r=>r.peso));
   const minM=Math.min(...d12m.map(r=>r.musc)), maxM=Math.max(...d12m.map(r=>r.musc));
@@ -931,7 +931,7 @@ function renderAnalysis(){
   const nocafe=bpReadings.filter(r=>r.tipo==='nocafe');
   const avgS=nocafe.length?Math.round(nocafe.reduce((s,r)=>s+r.sist,0)/nocafe.length):null;
   const avgD=nocafe.length?Math.round(nocafe.reduce((s,r)=>s+r.diast,0)/nocafe.length):null;
-  const cycleRef=allData.filter(r=>r._date>=CYCLE_START)[0]||latest;
+  const cycleRef=allData.filter(r=>r._date<CYCLE_START).slice(-1)[0]||allData[0];
 
   if(!latest||!cycleRef) return;
 
