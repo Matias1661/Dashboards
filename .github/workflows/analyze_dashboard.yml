@@ -2,7 +2,7 @@ name: Analyze Dashboard
 
 on:
   schedule:
-    - cron: '30 6 * * *'   # 06:30 UTC, after fetch_bp (06:00)
+    - cron: '30 6 * * *'  # 06:30 UTC daily
   workflow_dispatch:
 
 jobs:
