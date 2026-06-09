@@ -118,8 +118,13 @@ api_req = urllib.request.Request(
         "content-type": "application/json; charset=utf-8"
     }
 )
-with urllib.request.urlopen(api_req) as r:
-    api_resp = json.loads(r.read())
+try:
+    with urllib.request.urlopen(api_req) as r:
+        api_resp = json.loads(r.read())
+except urllib.error.HTTPError as e:
+    body = e.read().decode("utf-8", errors="replace")
+    print("Anthropic API error", e.code, ":", body[:500])
+    raise
 
 analysis_html = api_resp["content"][0]["text"].strip()
 
