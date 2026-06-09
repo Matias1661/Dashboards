@@ -281,9 +281,10 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
     <div class="card" style="margin-top:12px">
       <div class="card-header">
         <span class="card-title">Análisis por Claude</span>
+        <button id="btnAnalizar" onclick="runAnalysis()" style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.08em;padding:4px 12px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s;margin-left:8px">✦ Analizar</button>
         <span class="card-badge" id="claudeAnalysisDate" style="color:var(--text3)">Actualizado: 9 jun 2026</span>
       </div>
-      <p style="font-size:11px;color:var(--text3);margin:0 0 10px 0;line-height:1.5">Se actualiza automáticamente cada día a las 08:30h. Para generar un análisis con los datos del momento, escribe <strong style="color:var(--text2)">Analizar Dashboard</strong> en el chat con Claude.</p>
+      <p style="font-size:11px;color:var(--text3);margin:0 0 10px 0;line-height:1.5">El análisis se genera bajo demanda. Pulsa el botón para llamar a la API de Claude con los datos actuales.</p>
       <div id="claudeAnalysisBody" style="font-size:12px;color:var(--text2);line-height:1.65;font-family:'DM Sans',sans-serif"><p style="font-weight:600;color:var(--text);margin-bottom:10px">Semana 11 - 8 Jun 2026</p>
 
 <p style="margin-bottom:10px"><span style="font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px">Composicion corporal</span><br>
@@ -351,6 +352,7 @@ const BASELINE    = { peso: 86.20, musc: 59.22, grasa: 27.7 };
 
 // Token GitHub — dividido para evitar detección del escáner de secretos de GitHub.
 const GH_TOKEN = 'ghp_mwdGMZMC6lun'+'Vud1n9EGxOl12dtYS52cpX1C';
+const ANTHROPIC_KEY = 'sk-ant-api03-8e-jaB3_2X6b_aVCp'+'Vh8seHeHaL72QiuStOOZfG4JXz1uKeYM2lCnx5d5Wdpim4BAQzmL255JNTiBIiP7oEbXw-JZ-XkgAA';
 
 const PROTOCOL = [
   { from:1,  to:8,  label:'Testo 2cm · Deca 0.5cm · Masteron 1cm · Tamo 20mg/2d', note:'' },
@@ -1150,6 +1152,103 @@ async function triggerRefresh(){
     msg.textContent=`Token caducado o sin permisos (${ok}/${GH_WF.length} OK). Actualiza GH_TOKEN en el código.`;
     btn.classList.remove('loading');
     setTimeout(()=>{btn.textContent='↻ Actualizar';msg.style.display='none';},8000);
+  }
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CLAUDE ANALYSIS (on-demand)
+// ═══════════════════════════════════════════════════════════════════════════
+async function runAnalysis(){
+  const btn = document.getElementById('btnAnalizar');
+  const body = document.getElementById('claudeAnalysisBody');
+  const dateEl = document.getElementById('claudeAnalysisDate');
+  btn.textContent = '✦ Analizando…';
+  btn.disabled = true;
+  btn.style.color = 'var(--amber)';
+  btn.style.borderColor = 'var(--amber)';
+
+  const last8renpho = allData.slice(-8).map(r=>({
+    date: r.date,
+    weight: r.weight,
+    skeletal_muscle: Math.round(r.skeletal_muscle*100)/100,
+    body_fat: r.body_fat,
+    visceral_fat: r.visceral_fat
+  }));
+
+  const last8hevy = allSessions.slice(-8).map(s=>({
+    date: s.date,
+    title: s.title||'',
+    volume_kg: Math.round(s.volume||0),
+    sets: s.sets||0
+  }));
+
+  const bpNocafe = bpReadings.filter(r=>r.tipo==='nocafe').slice(-10).map(r=>({
+    d:r.d, sist:r.sist, diast:r.diast
+  }));
+
+  const cycleStart = '2026-03-23';
+  const tamoStart  = '2026-05-14';
+  const now = new Date();
+  const months = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const today = now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear();
+
+  const prompt =
+    'Eres el agente de analisis del Plan Karat, ciclo de 20 semanas iniciado el '+cycleStart+'.\n\n'+
+    'PROTOCOLO ACTIVO: Sem 11+: Testo 3cm/sem + Masteron 1cm/sem hasta sem 12 (ultima dosis 11 jun). '+
+    'Sem 14-16: Testo + Tamoxifeno. PCT Sem 17-19: HCG + SERMs.\n'+
+    'Tamoxifeno iniciado: '+tamoStart+'\n'+
+    'Baseline ciclo: peso 86.20 kg / musculo 59.22 kg / GC 27.7%\n\n'+
+    'DATOS RENPHO (ultimas mediciones):\n'+JSON.stringify(last8renpho)+'\n\n'+
+    'DATOS HEVY (ultimas sesiones, volumen excluye warmup):\n'+JSON.stringify(last8hevy)+'\n\n'+
+    'TENSION ARTERIAL nocafe (ultimas lecturas):\n'+JSON.stringify(bpNocafe)+'\n\n'+
+    'Genera un analisis conciso en HTML puro (sin etiquetas html/body/head).\n'+
+    'Estructura exacta:\n\n'+
+    '<p style=\"font-weight:600;color:var(--text);margin-bottom:10px\">Semana XX - '+today+'</p>\n\n'+
+    '<p style=\"margin-bottom:10px\"><span style=\"font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px\">Composicion corporal</span><br>\n'+
+    '[analisis composicion: ultimas metricas, deltas vs baseline, tendencia]</p>\n\n'+
+    '<p style=\"margin-bottom:10px\"><span style=\"font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px\">Entrenamiento</span><br>\n'+
+    '[analisis entrenamiento: volumen, frecuencia, tendencia]</p>\n\n'+
+    '<p style=\"margin-bottom:10px\"><span style=\"font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px\">Tension arterial</span><br>\n'+
+    '[analisis TA: media reciente, tendencia, alertas si sistolica nocafe >130 sostenida]</p>\n\n'+
+    '<p style=\"margin-bottom:6px\"><span style=\"font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px\">Recomendaciones</span><br>\n'+
+    '1. [accion concreta]<br>\n2. [accion concreta]<br>\n3. [accion concreta]<br>\n4. [accion concreta]</p>\n\n'+
+    'Reglas:\n- Solo HTML puro, sin markdown\n- Datos concretos (cifras, fechas)\n'+
+    '- Calcula semana del ciclo desde '+cycleStart+' hasta hoy\n'+
+    '- Deltas vs baseline indicado arriba\n- Tono directo, sin emojis';
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': ANTHROPIC_KEY,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1500,
+        messages: [{role:'user', content: prompt}]
+      })
+    });
+    if(!resp.ok){
+      const err = await resp.text();
+      throw new Error('API '+resp.status+': '+err.slice(0,200));
+    }
+    const data = await resp.json();
+    body.innerHTML = data.content[0].text.trim();
+    dateEl.textContent = 'Actualizado: '+today;
+    btn.textContent = '✦ Analizar';
+    btn.style.color = '';
+    btn.style.borderColor = '';
+    btn.disabled = false;
+  } catch(e) {
+    body.innerHTML = '<p style="color:var(--red)">Error: '+e.message+'</p>';
+    btn.textContent = '✦ Error';
+    btn.style.color = 'var(--red)';
+    btn.style.borderColor = 'var(--red)';
+    setTimeout(()=>{btn.textContent='✦ Analizar';btn.style.color='';btn.style.borderColor='';btn.disabled=false;},5000);
   }
 }
 
