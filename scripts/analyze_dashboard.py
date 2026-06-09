@@ -118,12 +118,24 @@ api_req = urllib.request.Request(
         "content-type": "application/json; charset=utf-8"
     }
 )
+def push_debug(msg):
+    url = "https://api.github.com/repos/" + REPO + "/contents/debug_output.txt"
+    req_d = urllib.request.Request(url, headers={"Authorization": "token " + GH_TOKEN})
+    try:
+        with urllib.request.urlopen(req_d) as r2: sha_d = json.loads(r2.read())["sha"]
+    except: sha_d = None
+    p = {"message": "debug", "content": base64.b64encode(msg.encode()).decode()}
+    if sha_d: p["sha"] = sha_d
+    req_d2 = urllib.request.Request(url, data=json.dumps(p).encode(), method="PUT",
+        headers={"Authorization": "token " + GH_TOKEN, "Content-Type": "application/json"})
+    with urllib.request.urlopen(req_d2): pass
+
 try:
     with urllib.request.urlopen(api_req) as r:
         api_resp = json.loads(r.read())
 except urllib.error.HTTPError as e:
     body = e.read().decode("utf-8", errors="replace")
-    print("Anthropic API error", e.code, ":", body[:500])
+    push_debug("HTTP " + str(e.code) + ":\n" + body)
     raise
 
 analysis_html = api_resp["content"][0]["text"].strip()
