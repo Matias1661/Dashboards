@@ -2,7 +2,8 @@ name: Fetch Hevy Data
 
 on:
   schedule:
-    - cron: '0 5 * * *'
+    - cron: '0 5 * * *'   # 05:00 UTC morning
+    - cron: '0 21 * * *'  # 21:00 UTC = 23:00h Madrid (CEST)
   workflow_dispatch:
 
 permissions:
