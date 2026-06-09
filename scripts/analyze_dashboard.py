@@ -1,4 +1,27 @@
-import traceback, sys
+import traceback, sys, json, os, urllib.request, base64
+
+GH_TOKEN = os.environ.get('GH_TOKEN', '')
+REPO = "Matias1661/Dashboards"
+
+def push_debug(content):
+    try:
+        url = f"https://api.github.com/repos/{REPO}/contents/debug_output.txt"
+        req = urllib.request.Request(url, headers={"Authorization": f"token {GH_TOKEN}"})
+        try:
+            with urllib.request.urlopen(req) as r:
+                sha = json.loads(r.read())["sha"]
+        except:
+            sha = None
+        payload = {"message": "debug output", "content": base64.b64encode(content.encode()).decode()}
+        if sha:
+            payload["sha"] = sha
+        req2 = urllib.request.Request(url, data=json.dumps(payload).encode(), method="PUT",
+            headers={"Authorization": f"token {GH_TOKEN}", "Content-Type": "application/json"})
+        with urllib.request.urlopen(req2) as r:
+            print("Debug pushed to repo")
+    except Exception as e2:
+        print("Failed to push debug:", e2)
+
 try:
     import json, urllib.request, urllib.error, base64, re, time
     from datetime import datetime, timezone
@@ -178,7 +201,9 @@ try:
         f"Auto-análisis dashboard {date_label} [skip ci]"
     )
     print(f"Done. Injected analysis dated: {date_label}")
+    push_debug("SUCCESS")
 except Exception as e:
-    print("FATAL ERROR:", file=sys.stderr)
-    traceback.print_exc()
+    tb = traceback.format_exc()
+    print("ERROR:", tb, file=sys.stderr)
+    push_debug(f"ERROR:\n{tb}")
     sys.exit(1)
