@@ -1,8 +1,6 @@
 name: Analyze Dashboard
 
 on:
-  schedule:
-    - cron: '30 6 * * *'  # 06:30 UTC daily
   workflow_dispatch:
 
 permissions:
@@ -24,12 +22,4 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GH_TOKEN: ${{ secrets.GH_PAT }}
-        run: |
-          python3 scripts/analyze_dashboard.py > /tmp/out.txt 2>&1
-          EXIT=$?
-          cat /tmp/out.txt
-          exit $EXIT
-
-      - name: Show output on failure
-        if: failure()
-        run: cat /tmp/out.txt || echo "No output file"
+        run: python3 scripts/analyze_dashboard.py
