@@ -1,17 +1,31 @@
-import os, json, urllib.request, base64
+import os, json, urllib.request, urllib.error
 
-print("Python OK")
-print("GH_TOKEN set:", bool(os.environ.get("GH_TOKEN")))
-print("ANTHROPIC_API_KEY set:", bool(os.environ.get("ANTHROPIC_API_KEY")))
+print("Testing Anthropic API connectivity...")
+api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+print("Key length:", len(api_key))
 
-token = os.environ["GH_TOKEN"]
+payload = json.dumps({
+    "model": "claude-haiku-20240307",
+    "max_tokens": 10,
+    "messages": [{"role": "user", "content": "Say hi"}]
+}).encode()
+
 req = urllib.request.Request(
-    "https://api.github.com/repos/Matias1661/Dashboards/contents/hevy_data.json",
-    headers={"Authorization": f"token {token}"}
+    "https://api.anthropic.com/v1/messages",
+    data=payload, method="POST",
+    headers={
+        "x-api-key": api_key,
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json"
+    }
 )
-with urllib.request.urlopen(req) as r:
-    data = json.loads(r.read())
-    content = json.loads(base64.b64decode(data["content"]))
-    print("hevy_data.json OK, workouts:", len(content.get("workouts", [])))
-
-print("All checks passed")
+try:
+    with urllib.request.urlopen(req, timeout=15) as r:
+        data = json.loads(r.read())
+        print("API response:", data["content"][0]["text"])
+        print("Anthropic API: REACHABLE")
+except urllib.error.HTTPError as e:
+    body = e.read().decode()
+    print(f"HTTP {e.code}: {body[:300]}")
+except Exception as e:
+    print(f"Connection error: {type(e).__name__}: {e}")
