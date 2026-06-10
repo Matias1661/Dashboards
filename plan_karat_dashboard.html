@@ -1180,11 +1180,11 @@ async function runAnalysis(){
   btn.style.borderColor = 'var(--amber)';
 
   const last8renpho = allData.slice(-8).map(r=>({
-    date: r.date,
-    weight: r.weight,
-    skeletal_muscle: Math.round(r.skeletal_muscle*100)/100,
-    body_fat: r.body_fat,
-    visceral_fat: r.visceral_fat
+    date: r.d,
+    weight: r.peso,
+    skeletal_muscle: Math.round(r.musc*100)/100,
+    body_fat: r.grasa,
+    visceral_fat: r.visceral
   }));
 
   const last8hevy = allSessions.slice(-8).map(s=>({
