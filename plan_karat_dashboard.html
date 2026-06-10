@@ -418,6 +418,8 @@ function getNextChange(w){
 }
 function fmt1d(n){ return n>=0?'+'+n.toFixed(1):n.toFixed(1); }
 function fmt2d(n){ return n>=0?'+'+n.toFixed(2):n.toFixed(2); }
+function countWeekdays(start,end){let c=0,d=new Date(start);d.setHours(0,0,0,0);const e=new Date(end);e.setHours(23,59,59,999);while(d<=e){const w=d.getDay();if(w!==0&&w!==6)c++;d.setDate(d.getDate()+1);}return c;}
+function projectedMonthSessions(sessCount,monthStart,now){const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());const monthEnd=new Date(now.getFullYear(),now.getMonth()+1,0);const wdEl=countWeekdays(monthStart,today);const wdRem=countWeekdays(new Date(today.getTime()+864e5),monthEnd);const rate=wdEl>0?sessCount/wdEl:0;return{additional:Math.round(rate*wdRem),total:sessCount+Math.round(rate*wdRem)};}
 function avgs(arr,k){ return arr.length?+(arr.reduce((s,r)=>s+(r[k]||0),0)/arr.length).toFixed(2):null; }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -510,7 +512,7 @@ const chartBP=new Chart(document.getElementById('c-bp'),{type:'line',data:{label
 
 const chartVol=new Chart(document.getElementById('c-vol'),{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:[],borderRadius:3,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#6b6d70',bodyColor:'#1a1a18',borderColor:'rgba(0,0,0,0.1)',borderWidth:1}},scales:{x:{ticks:{font:{family:'DM Mono',size:8},color:'#a8aab0',maxRotation:45,autoSkip:true},grid:{display:false},border:{display:false}},y:{ticks:{font:{size:8},color:'#a8aab0',callback:v=>v>=1000?Math.round(v/1000)+'k':v},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}});
 
-const chartFreq=new Chart(document.getElementById('c-freq'),{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:[],borderRadius:3,borderSkipped:false,label:'Sesiones'},{data:[],borderColor:'rgba(37,99,190,0.5)',backgroundColor:'transparent',type:'line',pointRadius:0,borderDash:[3,3],label:'Objetivo (8)'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{family:'DM Mono',size:8},color:'#a8aab0'},grid:{display:false},border:{display:false}},y:{min:0,ticks:{font:{size:8},color:'#a8aab0',stepSize:2},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}});
+const chartFreq=new Chart(document.getElementById('c-freq'),{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:[],borderRadius:0,borderSkipped:false,label:'Sesiones',stack:'sess'},{data:[],borderColor:'rgba(37,99,190,0.5)',backgroundColor:'transparent',type:'line',pointRadius:0,borderDash:[3,3],label:'Objetivo (8)'},{data:[],backgroundColor:'rgba(150,160,170,0.35)',borderColor:'rgba(150,160,170,0.6)',borderWidth:1,borderRadius:{topLeft:3,topRight:3,bottomLeft:0,bottomRight:0},borderSkipped:false,label:'Proyectado',stack:'sess'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{if(ctx.datasetIndex===2)return`  +${ctx.raw} proyectado`;if(ctx.datasetIndex===0)return`  ${ctx.raw} sesiones`;return null;}}}},scales:{x:{stacked:true,ticks:{font:{family:'DM Mono',size:8},color:'#a8aab0'},grid:{display:false},border:{display:false}},y:{stacked:true,min:0,ticks:{font:{size:8},color:'#a8aab0',stepSize:2},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}});
 
 let chartRadar=null;
 let chartRadarMonth=null;
@@ -856,10 +858,18 @@ function renderTraining(){
     freqMonths.push(fmtMonth(d));
     freqs.push(count);
   }
+  // Weekday-based projection for current month
+  const proj=projectedMonthSessions(sessMonth.length,monthStart,now);
+  const projData=new Array(freqMonths.length).fill(0);
+  if(proj.additional>0) projData[projData.length-1]=proj.additional;
   chartFreq.data.labels=freqMonths;
   chartFreq.data.datasets[0].data=freqs;
-  chartFreq.data.datasets[0].backgroundColor=freqs.map(f=>f>=8?'rgba(13,138,82,0.65)':f>=5?'rgba(37,99,190,0.45)':'rgba(201,74,48,0.45)');
+  chartFreq.data.datasets[0].backgroundColor=freqs.map((f,i)=>{
+    const total=(i===freqMonths.length-1)?proj.total:f;
+    return total>=8?'rgba(13,138,82,0.65)':total>=5?'rgba(37,99,190,0.45)':'rgba(201,74,48,0.45)';
+  });
   chartFreq.data.datasets[1].data=new Array(freqMonths.length).fill(8);
+  chartFreq.data.datasets[2].data=projData;
   document.getElementById('freqBadge').textContent=`últimos ${freqN} meses`;
   chartFreq.update();
 
@@ -965,13 +975,14 @@ function renderAnalysis(){
   // --- Músculo ---
   const muscOk = dM>0;
   const muscRate = dM / Math.max(1,w);
+  const muscProj=projectedMonthSessions(sessMonth.length,monthStart,now);
   setInsight('ins-musc',
     muscOk?'ok':'warn',
     `+${dM} kg músculo desde inicio del ciclo. Media: +${muscRate.toFixed(2)} kg/sem.`,
     muscOk
-      ? (sessMonth.length>=6
+      ? (muscProj.total>=6
           ? 'Buen progreso. Seguir con frecuencia actual y superávit controlado.'
-          : 'Tendencia positiva pero la frecuencia de entrenamiento este mes es baja — más sesiones mejorarían la síntesis proteica.')
+          : `Tendencia positiva pero la frecuencia proyectada es baja (${muscProj.total} ses/mes) — más sesiones en días laborables mejorarían la síntesis proteica.`)
       : 'Sin ganancia muscular neta. Revisar ingesta proteica (≥2 g/kg) y aumentar frecuencia de entrenamiento.'
   );
 
