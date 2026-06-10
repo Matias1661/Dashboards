@@ -1224,7 +1224,7 @@ async function runAnalysis(){
     '[analisis TA: media reciente, tendencia, alertas si sistolica nocafe >130 sostenida]</p>\n\n'+
     '<p style=\"margin-bottom:6px\"><span style=\"font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px\">Recomendaciones</span><br>\n'+
     '1. [accion concreta]<br>\n2. [accion concreta]<br>\n3. [accion concreta]<br>\n4. [accion concreta]</p>\n\n'+
-    'Reglas:\n- Solo HTML puro, sin markdown\n- Datos concretos (cifras, fechas)\n'+
+    'Reglas:\n- SOLO HTML PURO. Tu respuesta debe empezar directamente con "<p". Prohibido usar backticks o bloques markdown.\n- Datos concretos (cifras, fechas)\n'+
     '- Calcula semana del ciclo desde '+cycleStart+' hasta hoy\n'+
     '- Deltas vs baseline indicado arriba\n- Tono directo, sin emojis';
 
@@ -1248,7 +1248,7 @@ async function runAnalysis(){
       throw new Error('API '+resp.status+': '+err.slice(0,200));
     }
     const data = await resp.json();
-    body.innerHTML = data.content[0].text.trim();
+    const raw=data.content[0].text.trim(); body.innerHTML=raw.replace(/^```[a-z]*\s*/i,"").replace(/```\s*$/,"");
     dateEl.textContent = 'Actualizado: '+today;
     btn.textContent = '✦ Analizar';
     btn.style.color = '';
