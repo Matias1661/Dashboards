@@ -357,7 +357,7 @@ const ANTHROPIC_KEY = 'sk-ant-api03-8e-jaB3_2X6b_aVCp'+'Vh8seHeHaL72QiuStOOZfG4J
 const PROTOCOL = [
   { from:1,  to:8,  label:'Testo 2cm · Deca 0.5cm · Masteron 1cm · Tamo 20mg/2d', note:'' },
   { from:9,  to:10, label:'Testo 2cm · Masteron 1cm · Tamo 20mg/2d', note:'Deca eliminado sem 9' },
-  { from:11, to:13, label:'Testo 3cm · Masteron 1cm · Tamo 20mg/2d', note:'Subida Testo condicionada a TA <140/90' },
+  { from:11, to:11, label:'Testo 3cm · Masteron 1cm · Tamo 20mg/2d', note:'Ultima dosis Masteron 10 jun' }, { from:12, to:13, label:'Testo 3cm · Tamo 20mg/2d', note:'Masteron finalizado 10 jun' },
   { from:14, to:16, label:'Testo 2cm · Tamo 20mg/2d', note:'Masteron finalizado' },
   { from:17, to:17, label:'PCT · HCG 5000UI×3 + Tamo 40mg + Clomid 50mg', note:'' },
   { from:18, to:19, label:'PCT · Tamo 20mg + Clomid 25mg', note:'Sin HCG (stock agotado en sem 17)' },
@@ -1223,7 +1223,7 @@ async function runAnalysis(){
 
   const prompt =
     'Eres el agente de analisis del Plan Karat, ciclo de 20 semanas iniciado el '+cycleStart+'.\n\n'+
-    'PROTOCOLO ACTIVO: Sem 11+: Testo 3cm/sem + Masteron 1cm/sem hasta sem 12 (ultima dosis 11 jun). '+
+    'PROTOCOLO ACTIVO: Sem 11+: Testo 3cm/sem + Masteron finalizado sem 11 (ultima dosis 10 jun). '+
     'Sem 14-16: Testo + Tamoxifeno. PCT Sem 17-19: HCG + SERMs.\n'+
     'Tamoxifeno iniciado: '+tamoStart+'\n'+
     'Baseline ciclo: peso 86.20 kg / musculo 59.22 kg / GC 27.7%\n\n'+
