@@ -354,39 +354,28 @@ const BASELINE    = { peso: 86.20, musc: 59.22, grasa: 27.7 };
 const GH_TOKEN = 'ghp_mwdGMZMC6lun'+'Vud1n9EGxOl12dtYS52cpX1C';
 const ANTHROPIC_KEY = 'sk-ant-api03-8e-jaB3_2X6b_aVCp'+'Vh8seHeHaL72QiuStOOZfG4JXz1uKeYM2lCnx5d5Wdpim4BAQzmL255JNTiBIiP7oEbXw-JZ-XkgAA';
 
+// FUENTE ÚNICA DE PROTOCOLO — editar solo aquí.
+// label: texto del badge. note: nota del tooltip. dose: desglose para tooltip.
 const PROTOCOL = [
-  { from:1,  to:8,  label:'Testo 2cm · Deca 0.5cm · Masteron 1cm · Tamo 20mg/2d', note:'' },
-  { from:9,  to:10, label:'Testo 2cm · Masteron 1cm · Tamo 20mg/2d', note:'Deca eliminado sem 9' },
-  { from:11, to:11, label:'Testo 3cm · Masteron 1cm · Tamo 20mg/2d', note:'Ultima dosis Masteron 10 jun' }, { from:12, to:13, label:'Testo 3cm · Tamo 20mg/2d', note:'Masteron finalizado 10 jun' },
-  { from:14, to:16, label:'Testo 2cm · Tamo 20mg/2d', note:'Masteron finalizado' },
-  { from:17, to:17, label:'PCT · HCG 5000UI×3 + Tamo 40mg + Clomid 50mg', note:'' },
-  { from:18, to:19, label:'PCT · Tamo 20mg + Clomid 25mg', note:'Sin HCG (stock agotado en sem 17)' },
-  { from:20, to:20, label:'PCT · Tamo 10mg', note:'' },
+  { from:1,  to:8,  label:'Testo 2cm · Deca 0.5cm · Masteron 1cm · Tamo 20mg/2d', note:'',
+    dose:{test:'2 cm/sem',mast:'1 cm/sem',deca:'0.5 cm/sem',tamo:'20 mg c/2d'} },
+  { from:9,  to:10, label:'Testo 2cm · Masteron 1cm · Tamo 20mg/2d', note:'Deca eliminado sem 9',
+    dose:{test:'2 cm/sem',mast:'1 cm/sem',deca:'—',tamo:'20 mg c/2d'} },
+  { from:11, to:11, label:'Testo 3cm · Masteron 1cm · Tamo 20mg/2d', note:'Ultima dosis Masteron 10 jun',
+    dose:{test:'3 cm/sem',mast:'1 cm/sem',deca:'—',tamo:'20 mg c/2d'} },
+  { from:12, to:13, label:'Testo 3cm · Tamo 20mg/2d', note:'Masteron finalizado 10 jun',
+    dose:{test:'3 cm/sem',mast:'—',deca:'—',tamo:'20 mg c/2d'} },
+  { from:14, to:16, label:'Testo 2cm · Tamo 20mg/2d', note:'Masteron finalizado',
+    dose:{test:'2 cm/sem',mast:'—',deca:'—',tamo:'20 mg c/2d'} },
+  { from:17, to:17, label:'PCT · HCG 5000UI×3 + Tamo 40mg + Clomid 50mg', note:'',
+    dose:{test:'—',mast:'—',deca:'—',tamo:'—',hcg:'5000UI×3',clomid:'50mg',tamo2:'40mg'} },
+  { from:18, to:19, label:'PCT · Tamo 20mg + Clomid 25mg', note:'Sin HCG (stock agotado en sem 17)',
+    dose:{test:'—',mast:'—',deca:'—',tamo:'—',hcg:'—',clomid:'25mg',tamo2:'20mg'} },
+  { from:20, to:20, label:'PCT · Tamo 10mg', note:'',
+    dose:{test:'—',mast:'—',deca:'—',tamo:'10mg'} },
 ];
-
-// Desglose de dosis por semana (para tooltip)
-const WEEK_DOSE = [
-  {test:'2 cm/sem',mast:'1 cm/sem',deca:'0.5 cm/sem',tamo:'20 mg c/2d'},  // 1
-  {test:'2 cm/sem',mast:'1 cm/sem',deca:'0.5 cm/sem',tamo:'20 mg c/2d'},  // 2
-  {test:'2 cm/sem',mast:'1 cm/sem',deca:'0.5 cm/sem',tamo:'20 mg c/2d'},  // 3
-  {test:'2 cm/sem',mast:'1 cm/sem',deca:'0.5 cm/sem',tamo:'20 mg c/2d'},  // 4
-  {test:'2 cm/sem',mast:'1 cm/sem',deca:'0.5 cm/sem',tamo:'20 mg c/2d'},  // 5
-  {test:'2 cm/sem',mast:'1 cm/sem',deca:'0.5 cm/sem',tamo:'20 mg c/2d'},  // 6
-  {test:'2 cm/sem',mast:'1 cm/sem',deca:'0.5 cm/sem',tamo:'20 mg c/2d'},  // 7
-  {test:'2 cm/sem',mast:'1 cm/sem',deca:'0.5 cm/sem',tamo:'20 mg c/2d'},  // 8
-  {test:'2 cm/sem',mast:'1 cm/sem',deca:'—',tamo:'20 mg c/2d'},           // 9
-  {test:'2 cm/sem',mast:'1 cm/sem',deca:'—',tamo:'20 mg c/2d'},           // 10
-  {test:'3 cm/sem',mast:'1 cm/sem',deca:'—',tamo:'20 mg c/2d'},           // 11
-  {test:'3 cm/sem',mast:'—',deca:'—',tamo:'20 mg c/2d'},                  // 12
-  {test:'3 cm/sem',mast:'—',deca:'—',tamo:'20 mg c/2d'},                  // 13
-  {test:'2 cm/sem',mast:'—',deca:'—',tamo:'20 mg c/2d'},                  // 14
-  {test:'2 cm/sem',mast:'—',deca:'—',tamo:'20 mg c/2d'},                  // 15
-  {test:'2 cm/sem',mast:'—',deca:'—',tamo:'20 mg c/2d'},                  // 16
-  {test:'—',mast:'—',deca:'—',tamo:'—',hcg:'5000UI×3',clomid:'50mg',tamo2:'40mg'}, // 17
-  {test:'—',mast:'—',deca:'—',tamo:'—',hcg:'—',clomid:'25mg',tamo2:'20mg'}, // 18
-  {test:'—',mast:'—',deca:'—',tamo:'—',hcg:'—',clomid:'25mg',tamo2:'20mg'}, // 19
-  {test:'—',mast:'—',deca:'—',tamo:'10mg'},                                // 20
-];
+// Derivado automáticamente de PROTOCOL — no editar manualmente.
+function getWeekDose(w){ const p=PROTOCOL.find(p=>w>=p.from&&w<=p.to); return p?p.dose:{}; }
 
 const RENPHO_URL = 'https://raw.githubusercontent.com/Matias1661/Dashboards/main/renpho_data.json';
 const HEVY_URL   = 'https://raw.githubusercontent.com/Matias1661/Dashboards/main/hevy_data.json';
@@ -626,7 +615,7 @@ function renderProtocol(){
     const wStart=new Date(CYCLE_START); wStart.setDate(wStart.getDate()+(i-1)*7);
     const wEnd=new Date(CYCLE_START); wEnd.setDate(wEnd.getDate()+i*7-1);
     const wLabel=`${wStart.getDate()} ${MESES_ES[wStart.getMonth()]} – ${wEnd.getDate()} ${MESES_ES[wEnd.getMonth()]}`;
-    const dose=WEEK_DOSE[i-1]||{};
+    const dose=getWeekDose(i);
     let doseLines='';
     if(dose.test&&dose.test!=='—') doseLines+=`\nTesto: ${dose.test}`;
     if(dose.mast&&dose.mast!=='—') doseLines+=`\nMasteron: ${dose.mast}`;
