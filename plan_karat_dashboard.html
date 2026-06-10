@@ -1179,15 +1179,29 @@ async function runAnalysis(){
   btn.style.color = 'var(--amber)';
   btn.style.borderColor = 'var(--amber)';
 
-  const last8renpho = allData.slice(-8).map(r=>({
-    date: r.d,
-    weight: r.peso,
-    skeletal_muscle: Math.round(r.musc*100)/100,
-    body_fat: r.grasa,
-    visceral_fat: r.visceral
+  // Re-fetch fresh data at analysis time (bypasses stale in-memory arrays)
+  const t = Date.now();
+  const fetchOpts = {cache:'no-store'};
+  const [freshRenpho, freshHevy, freshBP] = await Promise.all([
+    fetch(RENPHO_URL+'?t='+t, fetchOpts).then(r=>r.json()).catch(()=>null),
+    fetch(HEVY_URL+'?t='+t, fetchOpts).then(r=>r.json()).catch(()=>null),
+    fetch(BP_URL+'?t='+t, fetchOpts).then(r=>r.json()).catch(()=>null),
+  ]);
+
+  const renphoRows = freshRenpho
+    ? (Array.isArray(freshRenpho)?freshRenpho:(freshRenpho.measurements||[]))
+        .sort((a,b)=>a.date>b.date?1:-1)
+    : [];
+  const last8renpho = renphoRows.slice(-8).map(r=>({
+    date: r.date,
+    weight: +r.weight,
+    skeletal_muscle: Math.round(+(r.skeletal_muscle||0)*100)/100,
+    body_fat: +r.body_fat,
+    visceral_fat: +r.visceral_fat
   }));
 
-  const last8hevy = allSessions.slice(-8).map(s=>({
+  const hevyWorkouts = freshHevy ? parseWorkouts(freshHevy.workouts||[], 'Hevy') : allSessions;
+  const last8hevy = hevyWorkouts.slice(-8).map(s=>({
     date: s.dateStr,
     title: s.title||'',
     volume_kg: s.vol,
@@ -1196,7 +1210,8 @@ async function runAnalysis(){
     muscle_groups: Object.keys(s.groupSets||{})
   }));
 
-  const bpNocafe = bpReadings.filter(r=>r.tipo==='nocafe').slice(-10).map(r=>({
+  const freshBPReadings = freshBP ? (freshBP.readings||[]) : bpReadings;
+  const bpNocafe = freshBPReadings.filter(r=>r.tipo==='nocafe').slice(-10).map(r=>({
     d:r.d, sist:r.sist, diast:r.diast
   }));
 
