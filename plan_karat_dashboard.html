@@ -1188,10 +1188,12 @@ async function runAnalysis(){
   }));
 
   const last8hevy = allSessions.slice(-8).map(s=>({
-    date: s.date,
+    date: s.dateStr,
     title: s.title||'',
-    volume_kg: Math.round(s.volume||0),
-    sets: s.sets||0
+    volume_kg: s.vol,
+    exercises: s.exerciseCount,
+    duration_min: s.durationMin,
+    muscle_groups: Object.keys(s.groupSets||{})
   }));
 
   const bpNocafe = bpReadings.filter(r=>r.tipo==='nocafe').slice(-10).map(r=>({
