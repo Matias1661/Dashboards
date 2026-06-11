@@ -282,27 +282,30 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       <div class="card-header">
         <span class="card-title">Análisis por Claude</span>
         <button id="btnAnalizar" onclick="runAnalysis()" style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.08em;padding:4px 12px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s;margin-left:8px">✦ Analizar</button>
-        <span class="card-badge" id="claudeAnalysisDate" style="color:var(--text3)">Actualizado: 9 jun 2026</span>
+        <span class="card-badge" id="claudeAnalysisDate" style="color:var(--text3)">Actualizado: 11 jun 2026</span>
       </div>
       <p style="font-size:11px;color:var(--text3);margin:0 0 10px 0;line-height:1.5">El análisis se genera bajo demanda. Pulsa el botón para llamar a la API de Claude con los datos actuales.</p>
-      <div id="claudeAnalysisBody" style="font-size:12px;color:var(--text2);line-height:1.65;font-family:'DM Sans',sans-serif"><p style="font-weight:600;color:var(--text);margin-bottom:10px">Semana 11 - 8 Jun 2026</p>
+      <div id="claudeAnalysisBody" style="font-size:12px;color:var(--text2);line-height:1.65;font-family:'DM Sans',sans-serif"><p style="font-weight:600;color:var(--text);margin-bottom:10px">Semana 11 — 11 Jun 2026</p>
 
-<p style="margin-bottom:10px"><span style="font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px">Composicion corporal</span><br>
-Ultima medicion (8 jun): 89.75 kg / musculo 60.58 kg / GC 29.0%. Delta vs baseline: +3.55 kg peso, +1.36 kg musculo, +1.3% GC. Ganancia muscular presente pero acompañada de incremento de grasa corporal. Peso oscila entre 87.65-89.75 kg en los ultimos 12 dias (variabilidad 2.1 kg). Grasa visceral estable en 10-11%. Tendencia: acumulacion progresiva de ambos compartimentos, sugiere superávit calorico elevado o retención hidrica amplificada por Testo + Tamoxifeno.</p>
+<p style="margin-bottom:10px"><span style="font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px">Composición corporal</span><br>
+Última medición (10 jun): 90.15 kg / músculo 60.76 kg / GC 29.1%. Delta vs baseline (11 mar): +3.95 kg peso, +1.54 kg músculo, +1.4 pp grasa — nueva marca del ciclo. Grasa visceral en 11 tres días consecutivos (8–10 jun): frontera, no alarma, pero a vigilar. La subida de ~1 kg en la última semana es probable retención hídrica por volumen de entrenamiento y Deca residual.</p>
 
 <p style="margin-bottom:10px"><span style="font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px">Entrenamiento</span><br>
-Ultimas 5 sesiones (27 may - 8 jun) muestran recuperacion post-pausa. Sesion 8 jun (Con Joha): 8974 kg, 17 series. Sesion 3 jun (Push): 8248 kg, 19 series. Sesion 2 jun (Leg): 7223 kg, 16 series. Volumen en ultimas 3 sesiones (42-48h) promedia 8148 kg/sesion. Sesiones anteriores (28 may, 27 may) con volumen bajo (4440, 3020 kg) indican arranque post-recuperacion. Frecuencia actual: 3-4 sesiones/semana. Tendencia: escalada acelerada de volumen compatible con respuesta esteroidea.</p>
+7 sesiones en Hevy desde 25 may. Sem 11 (8–10 jun): 3 sesiones en 3 días consecutivos — mejor frecuencia del ciclo. Progresión de volumen confirmada: Push +9.2% (8,248 → 9,008 kg), Pull +14% (4,440 → 5,058 kg) vs sesiones previas del mismo tipo. Patrón Push/Pull/Legs consolidado.</p>
 
-<p style="margin-bottom:10px"><span style="font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px">Tension arterial</span><br>
-Media ultimas 10 lecturas (25 may - 8 jun): 126.2 sistolica / 79.7 diastolica. Picos sistolicos: 133 mmHg (1 jun), 132 mmHg (4 jun), 129 mmHg (2 jun, 8 jun). Tendencia reciente (ultimos 4 dias): 132→125→129 mmHg, variabilidad 7 mmHg. Alerta moderada: 4 de 10 lecturas ≥129 sistolica nocafe, sugiere respuesta hipertensiva a Testo + Masteron en semana 11. Diastolica en descenso (ultimas 3 lecturas: 75, 71 mmHg), compatible con mejora cardiovascular vs sistolica elevada.</p>
+<p style="margin-bottom:10px"><span style="font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px">Tensión arterial</span><br>
+Mayo sin café (media ≈111) vs junio sin café (media ≈127): subida clara. Causa más probable: Deca residual o retención hídrica — no atribuible a Testo aumentado (demasiado reciente). Criterio &lt;140/90 sin café sigue cumpliéndose (máximo registrado: 133/85).</p>
+
+<p style="margin-bottom:10px"><span style="font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px">Protocolo</span><br>
+Deca: eliminada desde sem 9. Masteron: última dosis 4 jun (sem 10), ya eliminado. Testo: 3 cm/sem desde sem 11. Sem 14–16: Testo + Tamoxifen solo. Próxima analítica: octubre 2026.</p>
 
 <p style="margin-bottom:6px"><span style="font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px">Recomendaciones</span><br>
-1. Reducir superávit calorico: peso +3.55 kg con GC +1.3% indica exceso. Recalibrar macros para fase de definicion o mantener Testo pero reducir volumen de calorias un 10-15%.<br>
-2. Monitorear tension arterial diaria antes de café: 4 picos ≥129 sistolica en 14 dias. Si persiste ≥130 sostenido en proximos 7 dias, considerar IECA (enalapril 5mg) o reducir Masteron a 0.5 cm/sem.<br>
-3. Validar retencion hidrica vs grasa: oscilacion peso 2.1 kg en 12 dias es elevada para linearity. Aumentar electrolitos basales (Na, K) y revisar frecuencia cardiaca basal para descartar descompensacion.<br>
-4. Mantener volumen de entrenamiento pero optimizar densidad: ultimas 3 sesiones a 8000+ kg/ses es sostenible. Priorizar RPE 6-8 vs fatiga acumulada en semana 11+12 (pico de supresion endocrina).</p>
+1. Vigilar TA sin café diariamente sem 11–12. Si sistólica &gt;135 consistente → reducir sodio antes de actuar sobre dosis.<br>
+2. Mantener 3 sesiones/sem — el volumen progresa bien, no añadir días todavía.<br>
+3. Visceral en 11 tres días seguidos: evitar sodio alto y ultraprocesados para no alcanzar 12.<br>
+4. Próxima pesada (lunes/martes): confirmar si subida reciente es agua o tejido real.</p>
 
-<p style="margin-bottom:0;padding-top:8px;border-top:1px solid var(--border2);color:var(--text3);font-size:11px">Para actualizar este analisis, escribe <strong style="color:var(--text2)">Analizar Dashboard</strong> en el chat con Claude.</p></div>
+<p style="margin-bottom:0;padding-top:8px;border-top:1px solid var(--border2);color:var(--text3);font-size:11px">Para actualizar este análisis, escribe <strong style="color:var(--text2)">Analizar Dashboard</strong> en el chat con Claude.</p></div>
     </div>
   </div>
 
