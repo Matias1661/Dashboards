@@ -1,6 +1,6 @@
 {
-  "fetched_at": "2026-06-12T23:58:50.564739+00:00",
-  "total_measurements": 126,
+  "fetched_at": "2026-06-13T08:16:38.889305+00:00",
+  "total_measurements": 127,
   "measurements": [
     {
       "date": "2024-01-16",
@@ -2017,6 +2017,22 @@
       "body_age": 49,
       "subcutaneous_fat": 25.8,
       "skeletal_muscle": 60.7918
+    },
+    {
+      "date": "2026-06-13",
+      "time_stamp": 1781338464,
+      "weight": 89.35,
+      "bmi": 27.6,
+      "body_fat": 28.9,
+      "muscle": 45.8,
+      "water": 51.3,
+      "bone": 3.22,
+      "bmr": 1760,
+      "visceral_fat": 10.0,
+      "protein": 16.2,
+      "body_age": 48,
+      "subcutaneous_fat": 25.6,
+      "skeletal_muscle": 60.3078
     }
   ]
 }
