@@ -480,50 +480,58 @@ Chart.register({
     } // end else (non c-hist charts)
     // Sombreado ciclos en gráfico histórico (c-hist)
     if(chart.canvas&&chart.canvas.id==='c-hist'&&chart._cyclePlugin){
-      const{cycleStats}=chart._cyclePlugin;
-      cycleStats.forEach(cy=>{
-        const{si,ei}=cy;
-        if(si<0||ei<0||si>ei) return;
-        const x1=xs.getPixelForValue(si);
-        const x2=xs.getPixelForValue(ei);
-        if(x2<=x1) return;
-        ctx.save();
-        // Fondo sombreado
-        ctx.fillStyle='rgba(13,138,82,0.08)';
-        ctx.fillRect(x1,chartArea.top,x2-x1,chartArea.bottom-chartArea.top);
-        // Bordes verticales
-        ctx.strokeStyle='rgba(13,138,82,0.3)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
-        ctx.beginPath();ctx.moveTo(x1,chartArea.top);ctx.lineTo(x1,chartArea.bottom);ctx.stroke();
-        ctx.beginPath();ctx.moveTo(x2,chartArea.top);ctx.lineTo(x2,chartArea.bottom);ctx.stroke();
-        ctx.setLineDash([]);
-        // Etiquetas de delta debajo del eje X
-        const midX=x1+(x2-x1)*0.5;
-        const fmt=v=>v===null?'—':(v>0?'+':'')+v;
-        const lines=[
-          cy.label,
-          `Peso: ${fmt(cy.dPeso)} kg`,
-          `Grasa: ${fmt(cy.dGrasa)} pp`,
-          `Músculo: ${fmt(cy.dMusc)} kg`,
-        ];
-        const lineH=11, totalH=lines.length*lineH+6;
-        const boxW=82, boxX=midX-boxW/2;
-        // Posición debajo del área del gráfico (debajo del eje X)
-        const boxY=chartArea.bottom+36;
-        ctx.fillStyle='rgba(240,245,240,0.92)';
-        ctx.beginPath();
-        if(ctx.roundRect) ctx.roundRect(boxX,boxY,boxW,totalH,4);
-        else ctx.rect(boxX,boxY,boxW,totalH);
-        ctx.fill();
-        ctx.strokeStyle='rgba(13,138,82,0.25)';ctx.lineWidth=0.5;ctx.setLineDash([]);
-        ctx.stroke();
-        lines.forEach((line,i)=>{
-          ctx.font=i===0?'bold 8px DM Mono,monospace':'8px DM Mono,monospace';
-          ctx.fillStyle=i===0?'rgba(13,138,82,0.85)':'rgba(50,50,50,0.8)';
-          ctx.textAlign='center';
-          ctx.fillText(line,midX,boxY+lineH*(i+1));
+      const{cycleStats,offStats,fmt1,fmtR}=chart._cyclePlugin;
+
+      function drawLabel(blocks, isOff){
+        blocks.forEach(cy=>{
+          const{si,ei}=cy;
+          if(si<0||ei<si) return;
+          const x1=xs.getPixelForValue(si);
+          const x2=xs.getPixelForValue(Math.min(ei,xs.max));
+          if(x2<=x1) return;
+          ctx.save();
+          // Fondo sombreado
+          const shade=isOff?'rgba(107,109,112,0.06)':'rgba(13,138,82,0.08)';
+          ctx.fillStyle=shade;
+          ctx.fillRect(x1,chartArea.top,x2-x1,chartArea.bottom-chartArea.top);
+          // Bordes verticales
+          const borderCol=isOff?'rgba(107,109,112,0.3)':'rgba(13,138,82,0.3)';
+          ctx.strokeStyle=borderCol;ctx.lineWidth=1;ctx.setLineDash([3,3]);
+          ctx.beginPath();ctx.moveTo(x1,chartArea.top);ctx.lineTo(x1,chartArea.bottom);ctx.stroke();
+          ctx.beginPath();ctx.moveTo(x2,chartArea.top);ctx.lineTo(x2,chartArea.bottom);ctx.stroke();
+          ctx.setLineDash([]);
+          // Caja debajo del eje X
+          const midX=Math.max(x1+42,Math.min(x1+(x2-x1)*0.5, x2-42));
+          const lines=[
+            cy.label,
+            `Peso:    ${fmt1(cy.dPeso)} kg  (${fmtR(cy.rPeso)})`,
+            `Grasa:   ${fmt1(cy.dGrasa)} pp  (${fmtR(cy.rGrasa)})`,
+            `Músculo: ${fmt1(cy.dMusc)} kg  (${fmtR(cy.rMusc)})`,
+          ];
+          const lineH=11, totalH=lines.length*lineH+8;
+          const boxW=148, boxX=midX-boxW/2;
+          const boxY=chartArea.bottom+36;
+          const bgCol=isOff?'rgba(245,245,245,0.92)':'rgba(240,245,240,0.92)';
+          const bdCol=isOff?'rgba(107,109,112,0.25)':'rgba(13,138,82,0.25)';
+          ctx.fillStyle=bgCol;
+          ctx.beginPath();
+          if(ctx.roundRect) ctx.roundRect(boxX,boxY,boxW,totalH,4);
+          else ctx.rect(boxX,boxY,boxW,totalH);
+          ctx.fill();
+          ctx.strokeStyle=bdCol;ctx.lineWidth=0.5;ctx.stroke();
+          lines.forEach((line,i)=>{
+            const headCol=isOff?'rgba(90,90,90,0.85)':'rgba(13,138,82,0.85)';
+            ctx.font=i===0?'bold 8px DM Mono,monospace':'8px DM Mono,monospace';
+            ctx.fillStyle=i===0?headCol:'rgba(50,50,50,0.8)';
+            ctx.textAlign='center';
+            ctx.fillText(line,midX,boxY+lineH*(i+1)+1);
+          });
+          ctx.restore();
         });
-        ctx.restore();
-      });
+      }
+
+      drawLabel(offStats, true);
+      drawLabel(cycleStats, false);
     }
   }
 });
@@ -871,7 +879,11 @@ function renderHist(){
   chartHist.data.datasets[1].data=grasaDat;
   chartHist.data.datasets[2].data=muscDat;
 
-  // Calcular deltas por ciclo para las etiquetas dentro del sombreado
+  // Calcular deltas + tasa mensual para ciclos y periodos off
+  const rate=(delta,months)=>months>0?+(delta/months).toFixed(2):null;
+  const fmt1=v=>v===null?'—':(v>0?'+':'')+v.toFixed(1);
+  const fmtR=v=>v===null?'—':(v>0?'+':'')+v.toFixed(2)+'/mes';
+
   const cycleStats=CYCLES.map(cy=>{
     const startStr=cy.start.getFullYear()+'-'+String(cy.start.getMonth()+1).padStart(2,'0');
     const endStr  =cy.end.getFullYear()  +'-'+String(cy.end.getMonth()+1).padStart(2,'0');
@@ -879,13 +891,44 @@ function renderHist(){
     if(si<0) si=fixedMonths.findIndex(m=>m>=startStr);
     let ei=fixedMonths.indexOf(endStr);
     if(ei<0){ ei=fixedMonths.findIndex(m=>m>endStr); if(ei<0)ei=fixedMonths.length-1; else ei--; }
-    const dPeso=si>=0&&ei>=0&&pesoDat[ei]!=null&&pesoDat[si]!=null?+(pesoDat[ei]-pesoDat[si]).toFixed(1):null;
+    const mo=ei-si;
+    const dPeso =si>=0&&ei>=0&&pesoDat[ei]!=null&&pesoDat[si]!=null ?+(pesoDat[ei] -pesoDat[si] ).toFixed(1):null;
     const dGrasa=si>=0&&ei>=0&&grasaDat[ei]!=null&&grasaDat[si]!=null?+(grasaDat[ei]-grasaDat[si]).toFixed(1):null;
-    const dMusc =si>=0&&ei>=0&&muscDat[ei]!=null&&muscDat[si]!=null?+(muscDat[ei]-muscDat[si]).toFixed(1):null;
-    return {...cy, si, ei, dPeso, dGrasa, dMusc};
+    const dMusc =si>=0&&ei>=0&&muscDat[ei]!=null&&muscDat[si]!=null ?+(muscDat[ei] -muscDat[si] ).toFixed(1):null;
+    return {
+      ...cy, si, ei, mo, isOff:false,
+      dPeso, dGrasa, dMusc,
+      rPeso:rate(dPeso,mo), rGrasa:rate(dGrasa,mo), rMusc:rate(dMusc,mo)
+    };
   });
 
-  chartHist._cyclePlugin={cycles:CYCLES,months:fixedMonths,cycleStats};
+  // Periodos off-cycle: entre ciclos y antes/después
+  const offStats=[];
+  const sortedCycles=[...cycleStats].filter(c=>c.si>=0&&c.ei>=0).sort((a,b)=>a.si-b.si);
+  const offPeriods=[];
+  // Antes del primer ciclo
+  if(sortedCycles.length&&sortedCycles[0].si>0)
+    offPeriods.push({label:'Off cycle',si:0,ei:sortedCycles[0].si-1});
+  // Entre ciclos
+  for(let i=0;i<sortedCycles.length-1;i++)
+    offPeriods.push({label:'Off cycle',si:sortedCycles[i].ei+1,ei:sortedCycles[i+1].si-1});
+  // Después del último ciclo activo completado (solo si hay datos post-ciclo)
+  // (ciclo 2026 está en curso — no añadir "off" después)
+
+  offPeriods.forEach(op=>{
+    if(op.ei<op.si) return;
+    const mo=op.ei-op.si;
+    const dPeso =pesoDat[op.ei]!=null&&pesoDat[op.si]!=null ?+(pesoDat[op.ei] -pesoDat[op.si] ).toFixed(1):null;
+    const dGrasa=grasaDat[op.ei]!=null&&grasaDat[op.si]!=null?+(grasaDat[op.ei]-grasaDat[op.si]).toFixed(1):null;
+    const dMusc =muscDat[op.ei]!=null&&muscDat[op.si]!=null ?+(muscDat[op.ei] -muscDat[op.si] ).toFixed(1):null;
+    offStats.push({
+      ...op, mo, isOff:true,
+      dPeso, dGrasa, dMusc,
+      rPeso:rate(dPeso,mo), rGrasa:rate(dGrasa,mo), rMusc:rate(dMusc,mo)
+    });
+  });
+
+  chartHist._cyclePlugin={cycles:CYCLES,months:fixedMonths,cycleStats,offStats,fmt1,fmtR};
   chartHist.update('none');
   const n=allDataFull.length;
   document.getElementById('histBadge').textContent=`${n} mediciones · ${labels[0]} → ${labels[labels.length-1]}`;
