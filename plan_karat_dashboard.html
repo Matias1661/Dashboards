@@ -360,6 +360,11 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
 // ═══════════════════════════════════════════════════════════════════════════
 const CYCLE_START = new Date('2026-03-23');
 const TAMO_DATE   = new Date('2026-05-14');
+// Historial de ciclos — actualizar end al cerrar cada ciclo, añadir entrada para ciclos futuros
+const CYCLE_HISTORY = [
+  {start:'2025-03-31', end:'2025-08-04', label:'Ciclo 2025'},
+  {start:'2026-03-23', end:'2026-07-20', label:'Ciclo 2026'},
+];
 const CYCLE_WEEKS = 20;
 const BASELINE    = { peso: 86.20, musc: 59.22, grasa: 27.7 };
 
@@ -821,10 +826,7 @@ function applyRange(months){
 // ═══════════════════════════════════════════════════════════════════════════
 function renderHist(){
   if(!allDataFull||!allDataFull.length) return;
-  const CYCLES=[
-    {start:new Date('2025-03-31'), end:new Date('2025-08-04'), label:'Ciclo 2025'},
-    {start:new Date('2026-03-23'), end:new Date('2026-07-20'), label:'Ciclo 2026'},
-  ];
+  const CYCLES=CYCLE_HISTORY.map(c=>({...c,start:new Date(c.start),end:new Date(c.end)}));
   // Agrupar por mes usando _date
   const byMonth={};
   allDataFull.forEach(d=>{
