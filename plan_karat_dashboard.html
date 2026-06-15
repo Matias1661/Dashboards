@@ -484,10 +484,14 @@ Chart.register({
       cycles.forEach(cy=>{
         const startStr=cy.start.getFullYear()+'-'+String(cy.start.getMonth()+1).padStart(2,'0');
         const endStr  =cy.end.getFullYear()  +'-'+String(cy.end.getMonth()+1).padStart(2,'0');
-        const si=months.indexOf(startStr);
-        const ei=months.indexOf(endStr);
-        const x1=si>=0?xs.getPixelForValue(si):chartArea.left;
-        const x2=ei>=0?xs.getPixelForValue(ei):chartArea.right;
+        // Buscar mes más cercano si no hay coincidencia exacta
+        let si=months.indexOf(startStr);
+        if(si<0) si=months.findIndex(m=>m>=startStr);
+        let ei=months.indexOf(endStr);
+        if(ei<0){ ei=months.findIndex(m=>m>endStr); if(ei<0) ei=months.length-1; else ei--; }
+        if(si<0||ei<0||si>ei) return; // ciclo fuera del rango de datos
+        const x1=xs.getPixelForValue(si);
+        const x2=xs.getPixelForValue(ei);
         if(x2>x1){
           ctx.save();
           ctx.fillStyle='rgba(13,138,82,0.08)';
@@ -791,10 +795,12 @@ function renderHist(){
     {start:new Date('2025-03-31'), end:new Date('2025-08-04'), label:'Ciclo 2025'},
     {start:new Date('2026-03-23'), end:new Date('2026-07-20'), label:'Ciclo 2026'},
   ];
-  // Agrupar por mes, media de cada métrica
+  // Agrupar por mes usando _date (Date object), no el label formateado
   const byMonth={};
   allData.forEach(d=>{
-    const key=d.d.slice(0,7);
+    if(!d._date) return;
+    const y=d._date.getFullYear(), mo=String(d._date.getMonth()+1).padStart(2,'0');
+    const key=`${y}-${mo}`;
     if(!byMonth[key])byMonth[key]={peso:[],grasa:[],musc:[]};
     if(d.peso!=null)byMonth[key].peso.push(d.peso);
     if(d.grasa!=null)byMonth[key].grasa.push(d.grasa);
@@ -803,16 +809,18 @@ function renderHist(){
   const months=Object.keys(byMonth).sort();
   const avg=arr=>arr.length?Math.round(arr.reduce((a,b)=>a+b,0)/arr.length*10)/10:null;
   const MO_NAMES=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-  const labels=months.map(m=>{ const [y,mo]=m.split('-'); return `${MO_NAMES[parseInt(mo)-1]} ${y.slice(2)}`; });
+  const labels=months.map(m=>{
+    const [y,mo]=m.split('-');
+    return `${MO_NAMES[parseInt(mo)-1]} ${y}`;
+  });
   chartHist.data.labels=labels;
   chartHist.data.datasets[0].data=months.map(m=>avg(byMonth[m].peso));
   chartHist.data.datasets[1].data=months.map(m=>avg(byMonth[m].grasa));
   chartHist.data.datasets[2].data=months.map(m=>avg(byMonth[m].musc));
-  // Plugin inline para sombreado de ciclos
   chartHist._cyclePlugin={cycles:CYCLES,months};
   chartHist.update('none');
   const n=allData.length;
-  document.getElementById('histBadge').textContent=`${n} mediciones · ${months[0]} → ${months[months.length-1]}`;
+  document.getElementById('histBadge').textContent=`${n} mediciones · ${labels[0]} → ${labels[labels.length-1]}`;
   document.getElementById('histNote').textContent='Sombreado: periodos en ciclo activo (2025 y 2026). Valores = media mensual.';
 }
 
