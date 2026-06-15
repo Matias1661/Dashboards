@@ -236,6 +236,19 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
     </div>
   </div>
 
+  <!-- HISTÓRICO COMPLETO -->
+  <div class="section">
+    <div class="section-title">Histórico completo</div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Peso · Grasa % · Músculo esquelético — todas las mediciones Renpho</span>
+        <span class="card-badge" id="histBadge"></span>
+      </div>
+      <div class="chart-wrap" style="height:220px"><canvas id="c-hist"></canvas></div>
+      <p id="histNote" style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:8px"></p>
+    </div>
+  </div>
+
   <!-- TENSIÓN ARTERIAL -->
   <div class="section">
     <div class="section-title">Tensión arterial</div>
@@ -442,6 +455,8 @@ Chart.register({
     const{ctx,chartArea,scales}=chart;
     if(!chartArea||!scales.x)return;
     const xs=scales.x;
+    if(chart.canvas&&chart.canvas.id==='c-hist'){// handled separately below
+    } else {
     const isBPChart=chart.canvas&&chart.canvas.id==='c-bp';
     const shadeIdx=isBPChart?activeBPShadeIdx:activeCicloIdx;
     if(shadeIdx>=0){
@@ -461,6 +476,30 @@ Chart.register({
       ctx.beginPath();ctx.moveTo(tx,chartArea.top);ctx.lineTo(tx,chartArea.bottom);ctx.stroke();
       ctx.fillStyle='rgba(37,99,190,0.6)';ctx.font='8px DM Mono,monospace';
       ctx.fillText('Tamo',tx+3,chartArea.top+10);ctx.restore();
+    }
+    } // end else (non c-hist charts)
+    // Sombreado ciclos en gráfico histórico (c-hist)
+    if(chart.canvas&&chart.canvas.id==='c-hist'&&chart._cyclePlugin){
+      const{cycles,months}=chart._cyclePlugin;
+      cycles.forEach(cy=>{
+        const startStr=cy.start.getFullYear()+'-'+String(cy.start.getMonth()+1).padStart(2,'0');
+        const endStr  =cy.end.getFullYear()  +'-'+String(cy.end.getMonth()+1).padStart(2,'0');
+        const si=months.indexOf(startStr);
+        const ei=months.indexOf(endStr);
+        const x1=si>=0?xs.getPixelForValue(si):chartArea.left;
+        const x2=ei>=0?xs.getPixelForValue(ei):chartArea.right;
+        if(x2>x1){
+          ctx.save();
+          ctx.fillStyle='rgba(13,138,82,0.08)';
+          ctx.fillRect(x1,chartArea.top,x2-x1,chartArea.bottom-chartArea.top);
+          ctx.strokeStyle='rgba(13,138,82,0.3)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
+          ctx.beginPath();ctx.moveTo(x1,chartArea.top);ctx.lineTo(x1,chartArea.bottom);ctx.stroke();
+          ctx.beginPath();ctx.moveTo(x2,chartArea.top);ctx.lineTo(x2,chartArea.bottom);ctx.stroke();
+          ctx.font='8px DM Mono,monospace';ctx.fillStyle='rgba(13,138,82,0.55)';
+          ctx.fillText(cy.label,x1+4,chartArea.top+11);
+          ctx.restore();
+        }
+      });
     }
   }
 });
@@ -494,6 +533,11 @@ const chartScatter=new Chart(document.getElementById('c-scatter'),{type:'scatter
   {label:'Ciclo activo',data:[],backgroundColor:'rgba(13,138,82,0.75)',pointRadius:6,pointHoverRadius:8}
 ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#6b6d70',bodyColor:'#1a1a18',borderColor:'rgba(0,0,0,0.1)',borderWidth:1,callbacks:{label:ctx=>`${ctx.raw.label}: ${ctx.raw.x} kg — ${ctx.raw.y}% grasa`}}},scales:{x:{min:83.5,max:92,title:{display:true,text:'Peso (kg)',color:'#a8aab0',font:{size:9}},ticks:{font:{size:8},color:'#a8aab0'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}},y:{min:26.5,max:30,title:{display:true,text:'Grasa %',color:'#a8aab0',font:{size:9}},ticks:{font:{size:8},color:'#a8aab0'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}});
 
+const chartHist=new Chart(document.getElementById('c-hist'),{type:'line',data:{labels:[],datasets:[
+  {label:'Peso (kg)',data:[],borderColor:'#2563be',backgroundColor:'transparent',borderWidth:2,pointRadius:2,fill:false,tension:0.3,yAxisID:'yPeso'},
+  {label:'Grasa %',data:[],borderColor:'#c94a30',backgroundColor:'transparent',borderWidth:1.5,pointRadius:2,fill:false,tension:0.3,borderDash:[4,3],yAxisID:'yComp'},
+  {label:'Músculo kg',data:[],borderColor:'#0d8a52',backgroundColor:'transparent',borderWidth:1.5,pointRadius:2,fill:false,tension:0.3,borderDash:[2,3],yAxisID:'yComp'},
+]},options:{responsive:true,maintainAspectRatio:false,spanGaps:true,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,position:'top',labels:{font:{family:'DM Mono',size:8},color:'#6b6d70',boxWidth:12,padding:10}},tooltip:{backgroundColor:'#fff',titleColor:'#6b6d70',bodyColor:'#1a1a18',borderColor:'rgba(0,0,0,0.1)',borderWidth:1}},scales:{x:{ticks:{font:{family:'DM Mono',size:8},color:'#a8aab0',maxRotation:45,autoSkip:true,maxTicksLimit:20},grid:{display:false},border:{display:false}},yPeso:{position:'left',ticks:{font:{size:8},color:'#2563be'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false},title:{display:true,text:'kg',color:'#a8aab0',font:{size:8}}},yComp:{position:'right',ticks:{font:{size:8},color:'#a8aab0'},grid:{display:false},border:{display:false},title:{display:true,text:'% / kg',color:'#a8aab0',font:{size:8}}}}}});
 const chartBP=new Chart(document.getElementById('c-bp'),{type:'line',data:{labels:[],datasets:[
   {label:'Sistólica',data:[],borderColor:'#c94a30',backgroundColor:'rgba(201,74,48,0.06)',borderWidth:2,pointRadius:5,fill:true,tension:0.3},
   {label:'Diastólica',data:[],borderColor:'#9a6200',backgroundColor:'transparent',borderWidth:1.5,pointRadius:4,fill:false,tension:0.3,borderDash:[4,3]},
@@ -737,6 +781,41 @@ function applyRange(months){
   [chartPeso,chartMusc,chartGrasa,chartAgua,chartVisceral].forEach(ch=>ch.update());
   renderTraining(); // re-render frequency with current range
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RENDER HISTÓRICO COMPLETO
+// ═══════════════════════════════════════════════════════════════════════════
+function renderHist(){
+  if(!allData||!allData.length) return;
+  const CYCLES=[
+    {start:new Date('2025-03-31'), end:new Date('2025-08-04'), label:'Ciclo 2025'},
+    {start:new Date('2026-03-23'), end:new Date('2026-07-20'), label:'Ciclo 2026'},
+  ];
+  // Agrupar por mes, media de cada métrica
+  const byMonth={};
+  allData.forEach(d=>{
+    const key=d.d.slice(0,7);
+    if(!byMonth[key])byMonth[key]={peso:[],grasa:[],musc:[]};
+    if(d.peso!=null)byMonth[key].peso.push(d.peso);
+    if(d.grasa!=null)byMonth[key].grasa.push(d.grasa);
+    if(d.musc!=null)byMonth[key].musc.push(d.musc);
+  });
+  const months=Object.keys(byMonth).sort();
+  const avg=arr=>arr.length?Math.round(arr.reduce((a,b)=>a+b,0)/arr.length*10)/10:null;
+  const MO_NAMES=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const labels=months.map(m=>{ const [y,mo]=m.split('-'); return `${MO_NAMES[parseInt(mo)-1]} ${y.slice(2)}`; });
+  chartHist.data.labels=labels;
+  chartHist.data.datasets[0].data=months.map(m=>avg(byMonth[m].peso));
+  chartHist.data.datasets[1].data=months.map(m=>avg(byMonth[m].grasa));
+  chartHist.data.datasets[2].data=months.map(m=>avg(byMonth[m].musc));
+  // Plugin inline para sombreado de ciclos
+  chartHist._cyclePlugin={cycles:CYCLES,months};
+  chartHist.update('none');
+  const n=allData.length;
+  document.getElementById('histBadge').textContent=`${n} mediciones · ${months[0]} → ${months[months.length-1]}`;
+  document.getElementById('histNote').textContent='Sombreado: periodos en ciclo activo (2025 y 2026). Valores = media mensual.';
+}
+
 
 // ═══════════════════════════════════════════════════════════════════════════
 // RENDER BP
@@ -1120,6 +1199,7 @@ async function loadAll(){
     updateBodyKPIs();
     applyRange(12);
     renderBP();
+    renderHist();
     renderAnalysis();
     updateMeta();
   }catch(e){console.error('Load error:',e);}
