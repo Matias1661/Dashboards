@@ -580,8 +580,7 @@ const chartBP=new Chart(document.getElementById('c-bp'),{type:'line',data:{label
   {label:'Diastólica',data:[],borderColor:'#9a6200',backgroundColor:'transparent',borderWidth:1.5,pointRadius:4,fill:false,tension:0.3,borderDash:[4,3]},
   {data:[],borderColor:'rgba(201,74,48,0.35)',backgroundColor:'transparent',borderWidth:1,borderDash:[6,4],pointRadius:0,fill:false},
   {data:[],borderColor:'rgba(154,98,0,0.35)',backgroundColor:'transparent',borderWidth:1,borderDash:[6,4],pointRadius:0,fill:false},
-  {label:'Presión pulso',data:[],borderColor:'rgba(13,138,82,0.7)',backgroundColor:'transparent',borderWidth:1.5,pointRadius:3,fill:false,tension:0.3,borderDash:[2,2],yAxisID:'yPP'},
-]},options:{responsive:true,maintainAspectRatio:false,spanGaps:true,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#6b6d70',bodyColor:'#1a1a18',borderColor:'rgba(0,0,0,0.1)',borderWidth:1,filter:item=>item.datasetIndex<2||item.datasetIndex===4,callbacks:{label:ctx=>{if(ctx.datasetIndex===4)return`PP: ${ctx.raw} mmHg`;const r=bpReadings[ctx.dataIndex];return`${ctx.datasetIndex===0?'Sistólica':'Diastólica'}: ${ctx.raw} mmHg (${BP_TIPO_LABEL[r?.tipo]||''})`;},title:ctx=>`${ctx[0].label}`}}},scales:{x:{ticks:{font:{family:'DM Mono',size:8},color:'#a8aab0'},grid:{display:false},border:{display:false}},y:{min:60,max:155,ticks:{font:{size:8},color:'#a8aab0',callback:v=>(v===140||v===90)?v+' ←':v},grid:{color:ctx=>(ctx.tick.value===140||ctx.tick.value===90)?(ctx.tick.value===140?'rgba(201,74,48,0.15)':'rgba(154,98,0,0.15)'):'rgba(0,0,0,0.04)'},border:{display:false}},yPP:{display:true,position:'right',min:20,max:80,ticks:{font:{size:7},color:'rgba(13,138,82,0.6)',callback:v=>v===60?'PP 60':v===40?'PP 40':''},grid:{display:false},border:{display:false}}}}});
+]},options:{responsive:true,maintainAspectRatio:false,spanGaps:true,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#6b6d70',bodyColor:'#1a1a18',borderColor:'rgba(0,0,0,0.1)',borderWidth:1,filter:item=>item.datasetIndex<2,callbacks:{label:ctx=>{if(ctx.datasetIndex>=2)return null;const r=bpReadings[ctx.dataIndex];return`${ctx.datasetIndex===0?'Sistólica':'Diastólica'}: ${ctx.raw} mmHg (${BP_TIPO_LABEL[r?.tipo]||''})`;},title:ctx=>`${ctx[0].label}`}}},scales:{x:{ticks:{font:{family:'DM Mono',size:8},color:'#a8aab0'},grid:{display:false},border:{display:false}},y:{min:60,max:155,ticks:{font:{size:8},color:'#a8aab0',callback:v=>(v===140||v===90)?v+' ←':v},grid:{color:ctx=>(ctx.tick.value===140||ctx.tick.value===90)?(ctx.tick.value===140?'rgba(201,74,48,0.15)':'rgba(154,98,0,0.15)'):'rgba(0,0,0,0.04)'},border:{display:false}}}}});
 
 const chartVol=new Chart(document.getElementById('c-vol'),{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:[],borderRadius:3,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#6b6d70',bodyColor:'#1a1a18',borderColor:'rgba(0,0,0,0.1)',borderWidth:1}},scales:{x:{ticks:{font:{family:'DM Mono',size:8},color:'#a8aab0',maxRotation:45,autoSkip:true},grid:{display:false},border:{display:false}},y:{ticks:{font:{size:8},color:'#a8aab0',callback:v=>v>=1000?Math.round(v/1000)+'k':v},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}});
 
@@ -974,13 +973,11 @@ function renderBP(){
   chartBP.data.datasets[1].pointRadius=4;
   chartBP.data.datasets[2].data=new Array(n).fill(140);
   chartBP.data.datasets[3].data=new Array(n).fill(90);
-  chartBP.data.datasets[4].data=readings.map(r=>r.sist-r.diast);
   chartBP.options.plugins.tooltip.callbacks={
     title:ctx=>`${ctx[0].label}`,
     label:ctx=>{
-      if(ctx.datasetIndex>=2&&ctx.datasetIndex!==4)return null;
+      if(ctx.datasetIndex>=2)return null;
       const r=readings[ctx.dataIndex];
-      if(ctx.datasetIndex===4)return `PP: ${ctx.raw} mmHg`;
       return `${ctx.datasetIndex===0?'Sistólica':'Diastólica'}: ${ctx.raw} mmHg (${BP_TIPO_LABEL[r?.tipo]||''})`;
     }
   };
@@ -1409,8 +1406,13 @@ async function runAnalysis(){
 
   const freshBPReadings = freshBP ? (freshBP.readings||[]) : bpReadings;
   const bpNocafe = freshBPReadings.filter(r=>r.tipo==='nocafe').slice(-10).map(r=>({
-    d:r.d, sist:r.sist, diast:r.diast
+    d:r.d, sist:r.sist, diast:r.diast, pp:r.sist-r.diast
   }));
+  const ppValues = bpNocafe.map(r=>r.pp);
+  const ppAvg = ppValues.length ? Math.round(ppValues.reduce((a,b)=>a+b,0)/ppValues.length) : null;
+  const ppMax = ppValues.length ? Math.max(...ppValues) : null;
+  const ppTrend = ppValues.length>=3 ? (ppValues.slice(-3).reduce((a,b)=>a+b,0)/3 - ppValues.slice(0,3).reduce((a,b)=>a+b,0)/3).toFixed(1) : null;
+  const ppAlert = ppMax>=60 ? 'ALERTA: PP maxima '+ppMax+' mmHg (umbral critico 60)' : ppAvg>=55 ? 'AVISO: PP media '+ppAvg+' mmHg (cerca del umbral 60)' : 'PP en rango normal';
 
   const cycleStart = '2026-03-23';
   const tamoStart  = '2026-05-14';
@@ -1426,7 +1428,8 @@ async function runAnalysis(){
     'Baseline ciclo: peso 86.20 kg / musculo 59.22 kg / GC 27.7%\n\n'+
     'DATOS RENPHO (ultimas mediciones):\n'+JSON.stringify(last8renpho)+'\n\n'+
     'DATOS HEVY (ultimas sesiones, volumen excluye warmup):\n'+JSON.stringify(last8hevy)+'\n\n'+
-    'TENSION ARTERIAL nocafe (ultimas lecturas):\n'+JSON.stringify(bpNocafe)+'\n\n'+
+    'TENSION ARTERIAL nocafe (ultimas lecturas, incluye PP=sist-diast):\n'+JSON.stringify(bpNocafe)+'\n'+
+    'PP resumen: media='+ppAvg+' mmHg | max='+ppMax+' mmHg | tendencia 3u='+ppTrend+' mmHg | '+ppAlert+'\n\n'+
     'Responde EXCLUSIVAMENTE con un objeto JSON valido (sin backticks, sin texto antes ni despues).'+
     'Estructura del JSON:\n'+
     '{\n'+
@@ -1448,7 +1451,7 @@ async function runAnalysis(){
     '<p style=\"margin-bottom:10px\"><span style=\"font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px\">Entrenamiento</span><br>\n'+
     '[analisis entrenamiento: volumen, frecuencia, tendencia]</p>\n\n'+
     '<p style=\"margin-bottom:10px\"><span style=\"font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px\">Tension arterial</span><br>\n'+
-    '[analisis TA: media reciente, tendencia, alertas si sistolica nocafe >130 sostenida]</p>\n\n'+
+    '[analisis TA: media reciente, tendencia, alertas si sistolica nocafe >130 sostenida. INCLUIR analisis de Presion de Pulso (PP=sist-diast): valor medio, tendencia reciente, y ALERTA EXPLICITA si PP>=60 indicando riesgo de rigidez arterial y recomendando consulta medica]</p>\n\n'+
     '<p style=\"margin-bottom:6px\"><span style=\"font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px\">Recomendaciones</span><br>\n'+
     '1. [accion concreta]<br>\n2. [accion concreta]<br>\n3. [accion concreta]<br>\n4. [accion concreta]</p>\n\n'+
     'Reglas generales:\n- Datos concretos (cifras, fechas)\n'+
