@@ -975,7 +975,7 @@ function renderBP(){
   chartBP.data.datasets[2].data=new Array(n).fill(140);
   chartBP.data.datasets[3].data=new Array(n).fill(90);
   chartBP.options.plugins.tooltip.callbacks={
-    title:ctx=>`${ctx[0].label}`,
+    title:ctx=>ctx&&ctx[0]?`${ctx[0].label}`:'',
     label:ctx=>{
       if(ctx.datasetIndex>=2)return null;
       const r=readings[ctx.dataIndex];
