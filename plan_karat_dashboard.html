@@ -480,29 +480,46 @@ Chart.register({
     } // end else (non c-hist charts)
     // Sombreado ciclos en gráfico histórico (c-hist)
     if(chart.canvas&&chart.canvas.id==='c-hist'&&chart._cyclePlugin){
-      const{cycles,months}=chart._cyclePlugin;
-      cycles.forEach(cy=>{
-        const startStr=cy.start.getFullYear()+'-'+String(cy.start.getMonth()+1).padStart(2,'0');
-        const endStr  =cy.end.getFullYear()  +'-'+String(cy.end.getMonth()+1).padStart(2,'0');
-        // Buscar mes más cercano si no hay coincidencia exacta
-        let si=months.indexOf(startStr);
-        if(si<0) si=months.findIndex(m=>m>=startStr);
-        let ei=months.indexOf(endStr);
-        if(ei<0){ ei=months.findIndex(m=>m>endStr); if(ei<0) ei=months.length-1; else ei--; }
-        if(si<0||ei<0||si>ei) return; // ciclo fuera del rango de datos
+      const{cycleStats}=chart._cyclePlugin;
+      cycleStats.forEach(cy=>{
+        const{si,ei}=cy;
+        if(si<0||ei<0||si>ei) return;
         const x1=xs.getPixelForValue(si);
         const x2=xs.getPixelForValue(ei);
-        if(x2>x1){
-          ctx.save();
-          ctx.fillStyle='rgba(13,138,82,0.08)';
-          ctx.fillRect(x1,chartArea.top,x2-x1,chartArea.bottom-chartArea.top);
-          ctx.strokeStyle='rgba(13,138,82,0.3)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
-          ctx.beginPath();ctx.moveTo(x1,chartArea.top);ctx.lineTo(x1,chartArea.bottom);ctx.stroke();
-          ctx.beginPath();ctx.moveTo(x2,chartArea.top);ctx.lineTo(x2,chartArea.bottom);ctx.stroke();
-          ctx.font='8px DM Mono,monospace';ctx.fillStyle='rgba(13,138,82,0.55)';
-          ctx.fillText(cy.label,x1+4,chartArea.top+11);
-          ctx.restore();
-        }
+        if(x2<=x1) return;
+        ctx.save();
+        // Fondo sombreado
+        ctx.fillStyle='rgba(13,138,82,0.08)';
+        ctx.fillRect(x1,chartArea.top,x2-x1,chartArea.bottom-chartArea.top);
+        // Bordes verticales
+        ctx.strokeStyle='rgba(13,138,82,0.3)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
+        ctx.beginPath();ctx.moveTo(x1,chartArea.top);ctx.lineTo(x1,chartArea.bottom);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(x2,chartArea.top);ctx.lineTo(x2,chartArea.bottom);ctx.stroke();
+        ctx.setLineDash([]);
+        // Etiquetas de delta dentro del área sombreada
+        const midX=x1+(x2-x1)*0.5;
+        const fmt=v=>v===null?'—':(v>0?'+':'')+v;
+        const lines=[
+          cy.label,
+          `Peso: ${fmt(cy.dPeso)} kg`,
+          `Grasa: ${fmt(cy.dGrasa)} pp`,
+          `Músculo: ${fmt(cy.dMusc)} kg`,
+        ];
+        const lineH=12, totalH=lines.length*lineH+6;
+        const boxW=82, boxX=midX-boxW/2, boxY=chartArea.top+14;
+        // Fondo semi-transparente para legibilidad
+        ctx.fillStyle='rgba(255,255,255,0.72)';
+        ctx.beginPath();
+        ctx.roundRect(boxX,boxY,boxW,totalH,4);
+        ctx.fill();
+        // Textos
+        lines.forEach((line,i)=>{
+          ctx.font=i===0?'bold 8px DM Mono,monospace':'8px DM Mono,monospace';
+          ctx.fillStyle=i===0?'rgba(13,138,82,0.85)':'rgba(50,50,50,0.8)';
+          ctx.textAlign='center';
+          ctx.fillText(line,midX,boxY+lineH*(i+1)-1);
+        });
+        ctx.restore();
       });
     }
   }
@@ -797,7 +814,7 @@ function renderHist(){
     {start:new Date('2025-03-31'), end:new Date('2025-08-04'), label:'Ciclo 2025'},
     {start:new Date('2026-03-23'), end:new Date('2026-07-20'), label:'Ciclo 2026'},
   ];
-  // Agrupar por mes usando _date (Date object), no el label formateado
+  // Agrupar por mes usando _date
   const byMonth={};
   allDataFull.forEach(d=>{
     if(!d._date) return;
@@ -808,22 +825,68 @@ function renderHist(){
     if(d.grasa!=null)byMonth[key].grasa.push(d.grasa);
     if(d.musc!=null)byMonth[key].musc.push(d.musc);
   });
-  const months=Object.keys(byMonth).sort();
   const avg=arr=>arr.length?Math.round(arr.reduce((a,b)=>a+b,0)/arr.length*10)/10:null;
   const MO_NAMES=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-  const labels=months.map(m=>{
+
+  // Eje X fijo: todos los meses desde 2024-01 hasta el mes actual
+  const fixedMonths=[];
+  const now=new Date();
+  let cur=new Date(2024,0,1);
+  while(cur<=now){
+    fixedMonths.push(`${cur.getFullYear()}-${String(cur.getMonth()+1).padStart(2,'0')}`);
+    cur.setMonth(cur.getMonth()+1);
+  }
+  const labels=fixedMonths.map(m=>{
     const [y,mo]=m.split('-');
     return `${MO_NAMES[parseInt(mo)-1]} ${y}`;
   });
+
+  // Valores con interpolación lineal para meses sin datos
+  function interpSeries(field){
+    const raw=fixedMonths.map(m=>byMonth[m]?avg(byMonth[m][field]):null);
+    // Interpolación lineal entre puntos conocidos
+    for(let i=0;i<raw.length;i++){
+      if(raw[i]===null){
+        let prev=-1, next=-1;
+        for(let j=i-1;j>=0;j--){ if(raw[j]!==null){prev=j;break;} }
+        for(let j=i+1;j<raw.length;j++){ if(raw[j]!==null){next=j;break;} }
+        if(prev>=0&&next>=0){
+          raw[i]=Math.round((raw[prev]+(raw[next]-raw[prev])*(i-prev)/(next-prev))*10)/10;
+        } else if(prev>=0){ raw[i]=raw[prev]; }
+        else if(next>=0){ raw[i]=raw[next]; }
+      }
+    }
+    return raw;
+  }
+
+  const pesoDat=interpSeries('peso');
+  const grasaDat=interpSeries('grasa');
+  const muscDat =interpSeries('musc');
+
   chartHist.data.labels=labels;
-  chartHist.data.datasets[0].data=months.map(m=>avg(byMonth[m].peso));
-  chartHist.data.datasets[1].data=months.map(m=>avg(byMonth[m].grasa));
-  chartHist.data.datasets[2].data=months.map(m=>avg(byMonth[m].musc));
-  chartHist._cyclePlugin={cycles:CYCLES,months};
+  chartHist.data.datasets[0].data=pesoDat;
+  chartHist.data.datasets[1].data=grasaDat;
+  chartHist.data.datasets[2].data=muscDat;
+
+  // Calcular deltas por ciclo para las etiquetas dentro del sombreado
+  const cycleStats=CYCLES.map(cy=>{
+    const startStr=cy.start.getFullYear()+'-'+String(cy.start.getMonth()+1).padStart(2,'0');
+    const endStr  =cy.end.getFullYear()  +'-'+String(cy.end.getMonth()+1).padStart(2,'0');
+    let si=fixedMonths.indexOf(startStr);
+    if(si<0) si=fixedMonths.findIndex(m=>m>=startStr);
+    let ei=fixedMonths.indexOf(endStr);
+    if(ei<0){ ei=fixedMonths.findIndex(m=>m>endStr); if(ei<0)ei=fixedMonths.length-1; else ei--; }
+    const dPeso=si>=0&&ei>=0&&pesoDat[ei]!=null&&pesoDat[si]!=null?+(pesoDat[ei]-pesoDat[si]).toFixed(1):null;
+    const dGrasa=si>=0&&ei>=0&&grasaDat[ei]!=null&&grasaDat[si]!=null?+(grasaDat[ei]-grasaDat[si]).toFixed(1):null;
+    const dMusc =si>=0&&ei>=0&&muscDat[ei]!=null&&muscDat[si]!=null?+(muscDat[ei]-muscDat[si]).toFixed(1):null;
+    return {...cy, si, ei, dPeso, dGrasa, dMusc};
+  });
+
+  chartHist._cyclePlugin={cycles:CYCLES,months:fixedMonths,cycleStats};
   chartHist.update('none');
   const n=allDataFull.length;
   document.getElementById('histBadge').textContent=`${n} mediciones · ${labels[0]} → ${labels[labels.length-1]}`;
-  document.getElementById('histNote').textContent='Sombreado: periodos en ciclo activo (2025 y 2026). Valores = media mensual.';
+  document.getElementById('histNote').textContent='Sombreado: periodos en ciclo activo. Líneas interpoladas donde no hay medición.';
 }
 
 
