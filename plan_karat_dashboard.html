@@ -247,6 +247,7 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       <div id="bpStatus" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--amber);margin-bottom:8px;display:none"></div>
       <div class="chart-wrap" style="height:180px"><canvas id="c-bp"></canvas></div>
       <p id="bpNote" style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:8px"></p>
+      <div class="chart-insight" id="ins-bp" style="display:none"></div>
     </div>
   </div>
 
@@ -262,6 +263,7 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       <div class="card"><div class="card-header"><span class="card-title">Volumen por sesión — ciclo</span><span class="card-badge" id="volBadge"></span></div><div class="chart-wrap" style="height:180px"><canvas id="c-vol"></canvas></div></div>
       <div class="card"><div class="card-header"><span class="card-title">Frecuencia mensual</span><span class="card-badge" id="freqBadge"></span></div><div class="chart-wrap" style="height:180px"><canvas id="c-freq"></canvas></div></div>
     </div>
+    <div class="chart-insight" id="ins-training" style="display:none;margin-bottom:12px"></div>
     <div class="two-col" id="radarCard">
       <div class="card" style="margin-bottom:0">
         <div class="card-header">
@@ -1225,8 +1227,21 @@ async function runAnalysis(){
     'DATOS RENPHO (ultimas mediciones):\n'+JSON.stringify(last8renpho)+'\n\n'+
     'DATOS HEVY (ultimas sesiones, volumen excluye warmup):\n'+JSON.stringify(last8hevy)+'\n\n'+
     'TENSION ARTERIAL nocafe (ultimas lecturas):\n'+JSON.stringify(bpNocafe)+'\n\n'+
-    'Genera un analisis conciso en HTML puro (sin etiquetas html/body/head).\n'+
-    'Estructura exacta:\n\n'+
+    'Responde EXCLUSIVAMENTE con un objeto JSON valido (sin backticks, sin texto antes ni despues).'+
+    'Estructura del JSON:\n'+
+    '{\n'+
+    '  \"analysis\": \"<HTML del analisis principal>\",\n'+
+    '  \"comments\": {\n'+
+    '    \"peso\": {\"cls\":\"ok|warn|info\", \"trend\":\"frase corta con dato concreto\", \"advice\":\"accion especifica\"},\n'+
+    '    \"musc\": {\"cls\":\"ok|warn|info\", \"trend\":\"...\", \"advice\":\"...\"},\n'+
+    '    \"grasa\": {\"cls\":\"ok|warn|info\", \"trend\":\"...\", \"advice\":\"...\"},\n'+
+    '    \"agua\": {\"cls\":\"ok|warn|info\", \"trend\":\"...\", \"advice\":\"...\"},\n'+
+    '    \"visceral\": {\"cls\":\"ok|warn|info\", \"trend\":\"...\", \"advice\":\"...\"},\n'+
+    '    \"bp\": {\"cls\":\"ok|warn|info\", \"trend\":\"...\", \"advice\":\"...\"},\n'+
+    '    \"training\": {\"cls\":\"ok|warn|info\", \"trend\":\"...\", \"advice\":\"...\"}\n'+
+    '  }\n'+
+    '}\n\n'+
+    'Para el campo \"analysis\", usa HTML puro (sin etiquetas html/body/head). Estructura exacta:\n'+
     '<p style=\"font-weight:600;color:var(--text);margin-bottom:10px\">Semana XX - '+today+'</p>\n\n'+
     '<p style=\"margin-bottom:10px\"><span style=\"font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px\">Composicion corporal</span><br>\n'+
     '[analisis composicion: ultimas metricas, deltas vs baseline, tendencia]</p>\n\n'+
@@ -1236,9 +1251,10 @@ async function runAnalysis(){
     '[analisis TA: media reciente, tendencia, alertas si sistolica nocafe >130 sostenida]</p>\n\n'+
     '<p style=\"margin-bottom:6px\"><span style=\"font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px\">Recomendaciones</span><br>\n'+
     '1. [accion concreta]<br>\n2. [accion concreta]<br>\n3. [accion concreta]<br>\n4. [accion concreta]</p>\n\n'+
-    'Reglas:\n- SOLO HTML PURO. Tu respuesta debe empezar directamente con "<p". Prohibido usar backticks o bloques markdown.\n- Datos concretos (cifras, fechas)\n'+
+    'Reglas generales:\n- Datos concretos (cifras, fechas)\n'+
     '- Calcula semana del ciclo desde '+cycleStart+' hasta hoy\n'+
-    '- Deltas vs baseline indicado arriba\n- Tono directo, sin emojis';
+    '- Deltas vs baseline indicado arriba\n- Tono directo, sin emojis\n'+
+    '- Los \"trend\" y \"advice\" de comments deben ser coherentes con el \"analysis\" — mismos datos y misma interpretacion';
 
   try {
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
@@ -1251,7 +1267,7 @@ async function runAnalysis(){
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1500,
+        max_tokens: 2000,
         messages: [{role:'user', content: prompt}]
       })
     });
@@ -1260,8 +1276,31 @@ async function runAnalysis(){
       throw new Error('API '+resp.status+': '+err.slice(0,200));
     }
     const data = await resp.json();
-    const raw=data.content[0].text.trim(); body.innerHTML=raw.replace(/^```[a-z]*\s*/i,"").replace(/```\s*$/,"");
+    const raw = data.content[0].text.trim().replace(/^```[a-z]*\s*/i,'').replace(/```\s*$/,'');
+    let parsed;
+    try { parsed = JSON.parse(raw); } catch(e) {
+      // fallback: treat entire response as HTML analysis (backward compat)
+      parsed = { analysis: raw, comments: {} };
+    }
+
+    // Inject main analysis
+    body.innerHTML = parsed.analysis || raw;
     dateEl.textContent = 'Actualizado: '+today;
+
+    // Inject chart comments if present
+    const comments = parsed.comments || {};
+    const commentIds = ['peso','musc','grasa','agua','visceral','bp','training'];
+    commentIds.forEach(function(key) {
+      const el = document.getElementById('ins-'+key);
+      if(!el) return;
+      const c = comments[key];
+      if(!c) return;
+      const cls = (c.cls==='ok'||c.cls==='warn'||c.cls==='info') ? c.cls : 'info';
+      el.className = 'chart-insight '+cls;
+      el.innerHTML = '<span class="ins-trend">'+c.trend+'</span><span class="ins-advice">\u2192 '+c.advice+'</span>';
+      el.style.display = '';
+    });
+
     btn.textContent = '✦ Analizar';
     btn.style.color = '';
     btn.style.borderColor = '';
