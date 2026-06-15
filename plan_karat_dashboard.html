@@ -560,7 +560,7 @@ let chartRadarMonth=null;
 // ═══════════════════════════════════════════════════════════════════════════
 // GLOBAL STATE
 // ═══════════════════════════════════════════════════════════════════════════
-let allData=[]; let allSessions=[]; let bpReadings=[];
+let allData=[]; let allDataFull=[]; let allSessions=[]; let bpReadings=[];
 let currentRange=12;
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -569,12 +569,14 @@ let currentRange=12;
 function processRenpho(json){
   const raw=json.measurements||json;
   const cutoff=new Date(); cutoff.setMonth(cutoff.getMonth()-13);
-  allData=raw.map(r=>({
+  const mapped=raw.map(r=>({
     d:fmtLabel(parseDateISO(r.date)), _date:parseDateISO(r.date),
     peso:+r.weight, musc:+(r.skeletal_muscle||0), grasa:+r.body_fat,
     subcutanea:+(r.subcutaneous_fat||0), agua:+r.water, visceral:+r.visceral_fat, prot:+(r.protein||0),
     ciclo:parseDateISO(r.date)>=CYCLE_START, interp:false,
-  })).filter(r=>r._date>=cutoff).sort((a,b)=>a._date-b._date);
+  })).sort((a,b)=>a._date-b._date);
+  allDataFull=mapped;
+  allData=mapped.filter(r=>r._date>=cutoff);
 }
 
 function parseWorkouts(workouts,src){
@@ -790,14 +792,14 @@ function applyRange(months){
 // RENDER HISTÓRICO COMPLETO
 // ═══════════════════════════════════════════════════════════════════════════
 function renderHist(){
-  if(!allData||!allData.length) return;
+  if(!allDataFull||!allDataFull.length) return;
   const CYCLES=[
     {start:new Date('2025-03-31'), end:new Date('2025-08-04'), label:'Ciclo 2025'},
     {start:new Date('2026-03-23'), end:new Date('2026-07-20'), label:'Ciclo 2026'},
   ];
   // Agrupar por mes usando _date (Date object), no el label formateado
   const byMonth={};
-  allData.forEach(d=>{
+  allDataFull.forEach(d=>{
     if(!d._date) return;
     const y=d._date.getFullYear(), mo=String(d._date.getMonth()+1).padStart(2,'0');
     const key=`${y}-${mo}`;
@@ -819,7 +821,7 @@ function renderHist(){
   chartHist.data.datasets[2].data=months.map(m=>avg(byMonth[m].musc));
   chartHist._cyclePlugin={cycles:CYCLES,months};
   chartHist.update('none');
-  const n=allData.length;
+  const n=allDataFull.length;
   document.getElementById('histBadge').textContent=`${n} mediciones · ${labels[0]} → ${labels[labels.length-1]}`;
   document.getElementById('histNote').textContent='Sombreado: periodos en ciclo activo (2025 y 2026). Valores = media mensual.';
 }
