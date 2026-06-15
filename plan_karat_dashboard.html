@@ -499,7 +499,8 @@ const chartBP=new Chart(document.getElementById('c-bp'),{type:'line',data:{label
   {label:'Diastólica',data:[],borderColor:'#9a6200',backgroundColor:'transparent',borderWidth:1.5,pointRadius:4,fill:false,tension:0.3,borderDash:[4,3]},
   {data:[],borderColor:'rgba(201,74,48,0.35)',backgroundColor:'transparent',borderWidth:1,borderDash:[6,4],pointRadius:0,fill:false},
   {data:[],borderColor:'rgba(154,98,0,0.35)',backgroundColor:'transparent',borderWidth:1,borderDash:[6,4],pointRadius:0,fill:false},
-]},options:{responsive:true,maintainAspectRatio:false,spanGaps:true,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#6b6d70',bodyColor:'#1a1a18',borderColor:'rgba(0,0,0,0.1)',borderWidth:1,filter:item=>item.datasetIndex<2}},scales:{x:{ticks:{font:{family:'DM Mono',size:8},color:'#a8aab0'},grid:{display:false},border:{display:false}},y:{min:60,max:155,ticks:{font:{size:8},color:'#a8aab0',callback:v=>(v===140||v===90)?v+' ←':v},grid:{color:ctx=>(ctx.tick.value===140||ctx.tick.value===90)?(ctx.tick.value===140?'rgba(201,74,48,0.15)':'rgba(154,98,0,0.15)'):'rgba(0,0,0,0.04)'},border:{display:false}}}}});
+  {label:'Presión pulso',data:[],borderColor:'rgba(13,138,82,0.7)',backgroundColor:'transparent',borderWidth:1.5,pointRadius:3,fill:false,tension:0.3,borderDash:[2,2],yAxisID:'yPP'},
+]},options:{responsive:true,maintainAspectRatio:false,spanGaps:true,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#6b6d70',bodyColor:'#1a1a18',borderColor:'rgba(0,0,0,0.1)',borderWidth:1,filter:item=>item.datasetIndex<2||item.datasetIndex===4,callbacks:{label:ctx=>{if(ctx.datasetIndex===4)return`PP: ${ctx.raw} mmHg`;const r=bpReadings[ctx.dataIndex];return`${ctx.datasetIndex===0?'Sistólica':'Diastólica'}: ${ctx.raw} mmHg (${BP_TIPO_LABEL[r?.tipo]||''})`;},title:ctx=>`${ctx[0].label}`}}},scales:{x:{ticks:{font:{family:'DM Mono',size:8},color:'#a8aab0'},grid:{display:false},border:{display:false}},y:{min:60,max:155,ticks:{font:{size:8},color:'#a8aab0',callback:v=>(v===140||v===90)?v+' ←':v},grid:{color:ctx=>(ctx.tick.value===140||ctx.tick.value===90)?(ctx.tick.value===140?'rgba(201,74,48,0.15)':'rgba(154,98,0,0.15)'):'rgba(0,0,0,0.04)'},border:{display:false}},yPP:{display:true,position:'right',min:20,max:80,ticks:{font:{size:7},color:'rgba(13,138,82,0.6)',callback:v=>v===60?'PP 60':v===40?'PP 40':''},grid:{display:false},border:{display:false}}}}});
 
 const chartVol=new Chart(document.getElementById('c-vol'),{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:[],borderRadius:3,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#6b6d70',bodyColor:'#1a1a18',borderColor:'rgba(0,0,0,0.1)',borderWidth:1}},scales:{x:{ticks:{font:{family:'DM Mono',size:8},color:'#a8aab0',maxRotation:45,autoSkip:true},grid:{display:false},border:{display:false}},y:{ticks:{font:{size:8},color:'#a8aab0',callback:v=>v>=1000?Math.round(v/1000)+'k':v},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}});
 
@@ -773,11 +774,13 @@ function renderBP(){
   chartBP.data.datasets[1].pointRadius=4;
   chartBP.data.datasets[2].data=new Array(n).fill(140);
   chartBP.data.datasets[3].data=new Array(n).fill(90);
+  chartBP.data.datasets[4].data=readings.map(r=>r.sist-r.diast);
   chartBP.options.plugins.tooltip.callbacks={
     title:ctx=>`${ctx[0].label}`,
     label:ctx=>{
-      if(ctx.datasetIndex>=2)return null;
+      if(ctx.datasetIndex>=2&&ctx.datasetIndex!==4)return null;
       const r=readings[ctx.dataIndex];
+      if(ctx.datasetIndex===4)return `PP: ${ctx.raw} mmHg`;
       return `${ctx.datasetIndex===0?'Sistólica':'Diastólica'}: ${ctx.raw} mmHg (${BP_TIPO_LABEL[r?.tipo]||''})`;
     }
   };
@@ -798,8 +801,9 @@ function renderBP(){
   const nocafe=readings.filter(r=>r.tipo==='nocafe');
   const avgS=nocafe.length?Math.round(nocafe.reduce((s,r)=>s+r.sist,0)/nocafe.length):null;
   const avgD=nocafe.length?Math.round(nocafe.reduce((s,r)=>s+r.diast,0)/nocafe.length):null;
-  if(avgS)document.getElementById('bpBadge').textContent=`media sin café: ${avgS}/${avgD}`;
-  document.getElementById('bpNote').textContent=nocafe.length?`${nocafe.length} lecturas sin café · media ${avgS}/${avgD} mmHg · ${avgS<140&&avgD<90?'✓ bajo umbral 140/90':'⚠ sobre umbral 140/90'}` : '';
+  const avgPP=nocafe.length?Math.round(nocafe.reduce((s,r)=>s+(r.sist-r.diast),0)/nocafe.length):null;
+  if(avgS)document.getElementById('bpBadge').textContent=`media sin café: ${avgS}/${avgD} · PP ${avgPP}`;
+  document.getElementById('bpNote').textContent=nocafe.length?`${nocafe.length} lecturas sin café · media ${avgS}/${avgD} mmHg · PP media ${avgPP} mmHg${avgPP>=60?' ⚠ PP elevada':''} · ${avgS<140&&avgD<90?'✓ bajo umbral 140/90':'⚠ sobre umbral 140/90'}` : '';
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
