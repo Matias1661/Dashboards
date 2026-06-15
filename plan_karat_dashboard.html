@@ -834,7 +834,7 @@ function renderHist(){
   // Eje X fijo: todos los meses desde 2024-01 hasta el mes actual
   const fixedMonths=[];
   const now=new Date();
-  let cur=new Date(2024,0,1);
+  let cur=new Date(2024,2,1); // desde mar 2024 — datos anteriores no fiables
   while(cur<=now){
     fixedMonths.push(`${cur.getFullYear()}-${String(cur.getMonth()+1).padStart(2,'0')}`);
     cur.setMonth(cur.getMonth()+1);
