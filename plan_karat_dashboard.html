@@ -211,17 +211,17 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       </div>
     </div>
     <div class="two-col">
-      <div class="card"><div class="card-header"><span class="card-title">Peso</span><span class="card-badge" id="cbPeso"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-peso"></canvas></div><div class="chart-insight info" id="ins-peso"><span class="ins-trend">+2.65 kg vs baseline (86.20 kg). Pico 90.6 kg el 11 jun, corrección a 88.85 kg el 15 jun.</span><span class="ins-advice"> — Confirmar lunes si la bajada es agua o tejido. Objetivo 89–90 kg.</span></div></div>
-      <div class="card"><div class="card-header"><span class="card-title">Masa muscular</span><span class="card-badge" id="cbMusc"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-musc"></canvas></div><div class="chart-insight ok" id="ins-musc"><span class="ins-trend">+0.93 kg músculo vs baseline (59.22 kg). Se mantiene en 60.15 kg tras 4 días de pausa.</span><span class="ins-advice"> — Volver a entrenar hoy para mantener síntesis proteica elevada.</span></div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Peso</span><span class="card-badge" id="cbPeso"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-peso"></canvas></div><div class="chart-insight info" id="ins-peso"><span class="ins-trend">+2.65 kg vs baseline (86.20 kg). Pico 90.6 kg el 11 jun, corrección a 88.85 kg el 15 jun.</span><span class="ins-advice"> — Fluctuación hídrica probable. Confirmar tendencia en próxima medición.</span></div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Masa muscular</span><span class="card-badge" id="cbMusc"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-musc"></canvas></div><div class="chart-insight ok" id="ins-musc"><span class="ins-trend">+0.93 kg músculo vs baseline (59.22 kg). Estable en 60.15 kg.</span><span class="ins-advice"> — Mantener frecuencia de entrenamiento en las 2 semanas restantes de ciclo.</span></div></div>
     </div>
     <div class="two-col">
-      <div class="card"><div class="card-header"><span class="card-title">Grasa corporal</span><span class="card-badge" id="cbGrasa"></span></div><div class="card-header" style="margin-top:-6px;margin-bottom:0"><span style="font-size:10px;color:var(--text3)"><span style="color:#c94a30">—</span> total &nbsp;<span style="color:rgba(154,98,0,0.8)">- -</span> subcutánea</span></div><div class="chart-wrap" style="height:160px"><canvas id="c-grasa"></canvas></div><div class="chart-insight ok" id="ins-grasa"><span class="ins-trend">+1.0 pp grasa vs baseline (27.7%). Actual: 28.7%. Visceral bajó de 11 a 10.</span><span class="ins-advice"> — Rango aceptable para volumen. Mantener sodio controlado.</span></div></div>
-      <div class="card"><div class="card-header"><span class="card-title">Agua %</span><span class="card-badge" id="cbAgua"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-agua"></canvas></div><div class="chart-insight info" id="ins-agua"><span class="ins-trend">Agua corporal: 51.5%. Leve descenso desde pico ciclo (51.6% jun 5).</span><span class="ins-advice"> — Asegurar ≥2.5 L/día — Testo puede enmascarar retención.</span></div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Grasa corporal</span><span class="card-badge" id="cbGrasa"></span></div><div class="card-header" style="margin-top:-6px;margin-bottom:0"><span style="font-size:10px;color:var(--text3)"><span style="color:#c94a30">—</span> total &nbsp;<span style="color:rgba(154,98,0,0.8)">- -</span> subcutánea</span></div><div class="chart-wrap" style="height:160px"><canvas id="c-grasa"></canvas></div><div class="chart-insight ok" id="ins-grasa"><span class="ins-trend">+1.0 pp grasa vs baseline (27.7%). Actual 28.7%. Visceral bajó de 11 a 10.</span><span class="ins-advice"> — Rango aceptable para volumen. Mantener sodio controlado.</span></div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Agua %</span><span class="card-badge" id="cbAgua"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-agua"></canvas></div><div class="chart-insight info" id="ins-agua"><span class="ins-trend">Agua corporal 51.5%. Leve descenso desde pico (51.6% jun 5).</span><span class="ins-advice"> — Asegurar ≥2.5 L/día — Testo puede enmascarar retención.</span></div></div>
     </div>
     <div class="card" style="margin-top:0">
       <div class="card-header"><span class="card-title">Grasa visceral (índice)</span><span class="card-badge" id="cbVisceral"></span></div>
       <div class="chart-wrap" style="height:110px"><canvas id="c-visceral"></canvas></div>
-      <div class="chart-insight ok" id="ins-visceral"><span class="ins-trend">Grasa visceral: índice 10 (+2 vs baseline). Bajó de 11 a 10 esta semana.</span><span class="ins-advice"> — Tendencia positiva. Dieta baja en sodio y azúcar añadida.</span></div>
+      <div class="chart-insight ok" id="ins-visceral"><span class="ins-trend">Grasa visceral índice 10 (+2 vs baseline). Bajó de 11 a 10 esta semana.</span><span class="ins-advice"> — Tendencia positiva. Dieta baja en sodio y azúcar añadida.</span></div>
     </div>
     <div class="card" style="margin-top:0">
       <div class="card-header">
@@ -260,7 +260,7 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       <div id="bpStatus" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--amber);margin-bottom:8px;display:none"></div>
       <div class="chart-wrap" style="height:180px"><canvas id="c-bp"></canvas></div>
       <p id="bpNote" style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:8px"></p>
-      <div class="chart-insight ok" id="ins-bp"><span class="ins-trend">Media sin café 8–13 jun: 124/77. Rango 120–129 sistólica. Todas bajo 140/90.</span><span class="ins-advice"> — Estabilizada post-Deca/Masteron. Seguir midiendo en ayunas.</span></div>
+      <div class="chart-insight ok" id="ins-bp"><span class="ins-trend">Media nocafé 122/80. PP media 41.4 mmHg (normal). PP máx 58 mmHg el 8 jun (transitoria). Tendencia PP +5.7 mmHg — seguimiento recomendado.</span><span class="ins-advice"> — Si PP vuelve a superar 55 sostenida, consultar médico antes del PCT.</span></div>
     </div>
   </div>
 
@@ -276,7 +276,7 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       <div class="card"><div class="card-header"><span class="card-title">Volumen por sesión — ciclo</span><span class="card-badge" id="volBadge"></span></div><div class="chart-wrap" style="height:180px"><canvas id="c-vol"></canvas></div></div>
       <div class="card"><div class="card-header"><span class="card-title">Frecuencia mensual</span><span class="card-badge" id="freqBadge"></span></div><div class="chart-wrap" style="height:180px"><canvas id="c-freq"></canvas></div></div>
     </div>
-    <div class="chart-insight ok" id="ins-training"><span class="ins-trend">8 sesiones Hevy (27 may–11 jun). Mejor bloque: 4 sesiones consecutivas (8–11 jun).</span><span class="ins-advice"> — Reanudar hoy. Sem 13–14 son las últimas de dosis plena.</span></div>
+    <div class="chart-insight ok" id="ins-training"><span class="ins-trend">8 sesiones Hevy (27 may–11 jun). Última: V Taper 11 jun. Volumen Push progresivo hasta 9008 kg.</span><span class="ins-advice"> — Reanudar hoy. Sem 13–14 son las últimas semanas de dosis plena.</span></div>
     <div class="two-col" id="radarCard">
       <div class="card" style="margin-bottom:0">
         <div class="card-header">
@@ -303,19 +303,20 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       <div id="claudeAnalysisBody" style="font-size:12px;color:var(--text2);line-height:1.65;font-family:'DM Sans',sans-serif"><p style="font-weight:600;color:var(--text);margin-bottom:10px">Semana 13 — 15 Jun 2026</p>
 
 <p style="margin-bottom:10px"><span style="font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px">Composición corporal</span><br>
-Última medición (15 jun): 88.85 kg / 60.15 kg músculo / 28.7% GC / visceral 10. Deltas vs baseline (11 mar): +2.65 kg peso / +0.93 kg músculo / +1.0 pp grasa / visceral +2. La semana muestra corrección desde el pico del ciclo (90.6 kg el 11 jun): −1.75 kg en 4 días con visceral bajando de 11 a 10. El músculo se mantiene en 60.15 kg — la bajada no está comiendo tejido. Grasa en 28.7%, en rango aceptable para volumen.</p>
+Peso actual 88.85 kg (+2.65 vs baseline 86.20). Músculo 60.15 kg (+0.93 vs baseline 59.22). Grasa 28.7% (+1.0 pp vs baseline 27.7%). Visceral 10 (bajó de 11 los días anteriores).<br>
+El pico de la semana fue 90.6 kg el 11 jun, con caída de 1.75 kg en 4 días — fluctuación hídrica, no pérdida de tejido. La grasa sube 1 pp desde baseline pero el músculo acumula +0.93 kg neto: ratio aceptable para un ciclo con Testo sin compuestos de secado activos (Masteron finalizado sem 11). Agua en 51.5% (baja para su rango), parte del peso perdido esta semana es hídrico.</p>
 
 <p style="margin-bottom:10px"><span style="font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px">Entrenamiento</span><br>
-8 sesiones Hevy desde 27 may. Última: 11 jun — V Taper, 5,448 kg, 16 sets (espalda alta, pecho, hombros). Sem 12 (8–11 jun): 4 sesiones consecutivas, mejor bloque del ciclo. Progresión de volumen Push: 3,020 kg (27 may) → 9,008 kg (9 jun). Cobertura Push/Pull/Legs correcta. Sin sesiones desde el 11 jun — 4 días de pausa.</p>
+8 sesiones desde 27 may, frecuencia 4-5/semana las últimas 2 semanas. Volumen Push creciente: 3020 kg (27 may) → 8248 kg (3 jun) → 9008 kg (9 jun). Última sesión 11 jun (V Taper) — 4 días de descanso a hoy. Cobertura completa de grupos: Push, Pull, Leg, V Taper.</p>
 
 <p style="margin-bottom:10px"><span style="font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px">Tensión arterial</span><br>
-Últimas 10 lecturas sin café (28 may – 13 jun): media 127/80, rango 116–133 sistólica. Tendencia estabilizadora en junio: últimas 4 lecturas (8–13 jun) entre 120–129, todas bajo 140/90. El pico de 133/85 (1 jun) coincidió con Deca residual aún activo — ya resuelto.</p>
+Media nocafé 122/80. PP media 41.4 mmHg — rango normal. PP máxima 58 mmHg (8 jun, aislada). Tendencia PP +5.7 mmHg (últimas 3 vs primeras 3) — incremento leve que merece seguimiento. Las lecturas PP 55 (4 jun) y 58 (8 jun) coinciden con el período post-última dosis Masteron; desde el 10 jun regresó a 37-44, sugiriendo efecto transitorio. Sin lecturas &gt;140/90.</p>
 
 <p style="margin-bottom:6px"><span style="font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px">Recomendaciones</span><br>
-1. Retomar entrenamiento hoy o mañana — 4 días de pausa rompen el momentum del mejor bloque del ciclo.<br>
-2. Pesada lunes/martes para confirmar si 88.85 kg es el nuevo piso estable (objetivo: 89–90 kg).<br>
-3. Visceral volvió a 10 — mantener sodio controlado para evitar subida con retención del Testo.<br>
-4. Sem 13–14 son las últimas semanas de dosis plena (3 cm/sem). Maximizar volumen antes del tapering de sem 15.</p></div>
+1. Retomar entrenamiento esta semana — 4 días de descanso, quedan 2 semanas de ciclo activo<br>
+2. Monitorizar PP en próximas mediciones; si vuelve a superar 55 de forma sostenida consultar médico antes de iniciar PCT<br>
+3. Hidratación: agua en 51.5%, mantener ingesta alta para apoyar washout (inicio 6 jul)<br>
+4. Confirmar stock PCT: HCG (3 vials), tamoxifen y clomifeno — revisar fechas de vencimiento antes del 20 jul</p></div>
     </div>
   </div>
 
