@@ -244,7 +244,7 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
         <span class="card-title">Peso · Grasa % · Músculo esquelético — todas las mediciones Renpho</span>
         <span class="card-badge" id="histBadge"></span>
       </div>
-      <div class="chart-wrap" style="height:280px;padding-bottom:60px"><canvas id="c-hist"></canvas></div>
+      <div class="chart-wrap" style="height:280px"><canvas id="c-hist"></canvas></div>
       <p id="histNote" style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:8px"></p>
     </div>
   </div>
@@ -508,7 +508,7 @@ Chart.register({
         const lineH=11, totalH=lines.length*lineH+6;
         const boxW=82, boxX=midX-boxW/2;
         // Posición debajo del área del gráfico (debajo del eje X)
-        const boxY=chartArea.bottom+28;
+        const boxY=chartArea.bottom+36;
         ctx.fillStyle='rgba(240,245,240,0.92)';
         ctx.beginPath();
         if(ctx.roundRect) ctx.roundRect(boxX,boxY,boxW,totalH,4);
@@ -561,7 +561,7 @@ const chartHist=new Chart(document.getElementById('c-hist'),{type:'line',data:{l
   {label:'Peso (kg)',data:[],borderColor:'#2563be',backgroundColor:'transparent',borderWidth:2,pointRadius:2,fill:false,tension:0.3,yAxisID:'yKg'},
   {label:'Grasa %',data:[],borderColor:'#c94a30',backgroundColor:'transparent',borderWidth:1.5,pointRadius:2,fill:false,tension:0.3,borderDash:[4,3],yAxisID:'yPct'},
   {label:'Músculo kg',data:[],borderColor:'#0d8a52',backgroundColor:'transparent',borderWidth:1.5,pointRadius:2,fill:false,tension:0.3,borderDash:[2,3],yAxisID:'yKg'},
-]},options:{responsive:true,maintainAspectRatio:false,spanGaps:true,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,position:'top',labels:{font:{family:'DM Mono',size:8},color:'#6b6d70',boxWidth:12,padding:10}},tooltip:{backgroundColor:'#fff',titleColor:'#6b6d70',bodyColor:'#1a1a18',borderColor:'rgba(0,0,0,0.1)',borderWidth:1}},scales:{x:{ticks:{font:{family:'DM Mono',size:8},color:'#a8aab0',maxRotation:45,autoSkip:true,maxTicksLimit:20},grid:{display:false},border:{display:false}},yKg:{position:'left',ticks:{font:{size:8},color:'#a8aab0'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false},title:{display:true,text:'kg',color:'#a8aab0',font:{size:8}}},yPct:{position:'right',ticks:{font:{size:8},color:'#c94a30'},grid:{display:false},border:{display:false},title:{display:true,text:'%',color:'#c94a30',font:{size:8}}}}}});
+]},options:{responsive:true,maintainAspectRatio:false,spanGaps:true,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,position:'top',labels:{font:{family:'DM Mono',size:8},color:'#6b6d70',boxWidth:12,padding:10}},tooltip:{backgroundColor:'#fff',titleColor:'#6b6d70',bodyColor:'#1a1a18',borderColor:'rgba(0,0,0,0.1)',borderWidth:1}},layout:{padding:{bottom:72}},scales:{x:{ticks:{font:{family:'DM Mono',size:8},color:'#a8aab0',maxRotation:45,autoSkip:true,maxTicksLimit:20},grid:{display:false},border:{display:false}},yKg:{position:'left',ticks:{font:{size:8},color:'#a8aab0'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false},title:{display:true,text:'kg',color:'#a8aab0',font:{size:8}}},yPct:{position:'right',ticks:{font:{size:8},color:'#c94a30'},grid:{display:false},border:{display:false},title:{display:true,text:'%',color:'#c94a30',font:{size:8}}}}}});
 const chartBP=new Chart(document.getElementById('c-bp'),{type:'line',data:{labels:[],datasets:[
   {label:'Sistólica',data:[],borderColor:'#c94a30',backgroundColor:'rgba(201,74,48,0.06)',borderWidth:2,pointRadius:5,fill:true,tension:0.3},
   {label:'Diastólica',data:[],borderColor:'#9a6200',backgroundColor:'transparent',borderWidth:1.5,pointRadius:4,fill:false,tension:0.3,borderDash:[4,3]},
