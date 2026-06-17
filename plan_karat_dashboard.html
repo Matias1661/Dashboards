@@ -1015,7 +1015,7 @@ function aggMuscleRadar(sessions){
     Object.entries(s.musclePrimary||{}).forEach(([g,v])=>{p[g]=(p[g]||0)+v;});
     Object.entries(s.muscleSecondary||{}).forEach(([g,v])=>{s2[g]=(s2[g]||0)+v;});
   });
-  return RADAR_GROUPS.map(g=>(p[g]||0)+(s2[g]||0)*0.5);
+  return RADAR_GROUPS.map(g=>(p[g]||0)+(s2[g]||0));
 }
 
 function renderTraining(){
