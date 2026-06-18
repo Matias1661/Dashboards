@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-06-18T10:00:56.768530+00:00",
+  "fetched_at": "2026-06-18T10:53:45.483662+00:00",
   "readings": [
     {
       "d": "14 may",
@@ -8,22 +8,10 @@
       "tipo": "medico"
     },
     {
-      "d": "18 may",
-      "sist": 129,
-      "diast": 90,
-      "tipo": "cafe"
-    },
-    {
       "d": "19 may",
       "sist": 104,
       "diast": 71,
       "tipo": "nocafe"
-    },
-    {
-      "d": "20 may",
-      "sist": 140,
-      "diast": 85,
-      "tipo": "cafe"
     },
     {
       "d": "21 may",
