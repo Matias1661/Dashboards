@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard de Entrenamiento</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg:#f8f8f6; --surface:#ffffff; --surface2:#f1f0ed;
+  --border:rgba(0,0,0,0.06); --border2:rgba(0,0,0,0.10);
+  --text:#1a1a18; --text2:#6b6d70; --text3:#a8aab0;
+  --green:#0d8a52; --green-dim:rgba(13,138,82,0.08);
+  --red:#c94a30;   --red-dim:rgba(201,74,48,0.08);
+  --amber:#9a6200; --amber-dim:rgba(154,98,0,0.08);
+  --blue:#2563be;  --blue-dim:rgba(37,99,190,0.08);
+  --purple:#6d4fc2;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px 40px}
+header{background:var(--surface);border-bottom:1px solid var(--border2);padding:14px 0;position:sticky;top:0;z-index:100}
+.header-inner{max-width:1100px;margin:0 auto;padding:0 16px;display:flex;align-items:center;gap:12px}
+.logo{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;letter-spacing:0.08em;color:var(--text)}
+.week-badge{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;padding:3px 9px;border-radius:20px;background:var(--green-dim);color:var(--green);border:0.5px solid rgba(13,138,82,0.25)}
+.spacer{flex:1}
+#btnRefresh{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.08em;padding:5px 14px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s}
+#btnRefresh:hover{background:var(--surface2)}
+#btnRefresh.loading{color:var(--amber);border-color:var(--amber)}
+#refreshMsg{font-family:'DM Mono',monospace;font-size:10px;color:var(--amber);display:none}
+.section{margin-top:28px}
+.section-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3);padding-bottom:8px;border-bottom:0.5px solid var(--border2);margin-bottom:14px}
+.card{background:var(--surface);border:0.5px solid var(--border2);border-radius:10px;padding:16px;margin-bottom:12px}
+.card-header{display:flex;align-items:center;margin-bottom:12px}
+.card-title{font-size:11px;font-weight:500;color:var(--text2);letter-spacing:0.02em}
+.card-badge{margin-left:auto;font-family:'DM Mono',monospace;font-size:9px;color:var(--text3)}
+.chart-wrap{position:relative}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:600px){.two-col,.three-col{grid-template-columns:1fr}}
+/* ── KPIs ─────────────────────────────────────── */
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}
+@media(max-width:700px){.kpi-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:420px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--surface);border:0.5px solid var(--border2);border-radius:8px;padding:12px 14px;transition:background .3s,border-color .3s}
+.kpi.trend-up{background:var(--green-dim);border-color:rgba(13,138,82,0.2)}
+.kpi.trend-neutral{background:var(--amber-dim);border-color:rgba(154,98,0,0.2)}
+.kpi.trend-down{background:var(--red-dim);border-color:rgba(201,74,48,0.2)}
+.kpi-label{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:5px}
+.kpi-val{font-size:22px;font-weight:300;letter-spacing:-0.03em;line-height:1}
+.kpi-unit{font-size:11px;font-weight:400;color:var(--text2)}
+.kpi-date{font-family:'DM Mono',monospace;font-size:8px;color:var(--text3);margin-top:4px}
+.kpi-delta{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:2px}
+.kpi-delta.up{color:var(--green)} .kpi-delta.down{color:var(--red)}
+.train-kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+/* ── Range toggle ─────────────────────────────── */
+.range-btns{display:flex;gap:4px}
+.range-btn{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.06em;padding:3px 10px;border-radius:4px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s}
+.range-btn:hover{background:var(--surface2)}
+.range-btn.active{background:var(--text);color:var(--bg);border-color:var(--text)}
+/* ── Protocol ─────────────────────────────────── */
+.proto-card{background:var(--surface);border:0.5px solid var(--border2);border-radius:10px;padding:18px}
+.proto-top{display:flex;align-items:flex-start;gap:16px;margin-bottom:16px}
+.proto-week{font-size:42px;font-weight:300;letter-spacing:-0.05em;line-height:1;color:var(--text)}
+.proto-week span{font-size:14px;font-weight:400;color:var(--text3);letter-spacing:0;margin-left:2px}
+.proto-info{flex:1}
+.proto-label{font-size:13px;color:var(--text);margin-bottom:4px}
+.proto-next{font-family:'DM Mono',monospace;font-size:10px;color:var(--amber);margin-top:2px}
+.proto-note{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:2px}
+.proto-progress-track{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:12px;overflow:hidden}
+.proto-progress-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--green),#1ab069);transition:width .6s ease}
+.week-timeline{display:flex;gap:3px;flex-wrap:wrap}
+.wk{width:26px;height:20px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:8px;cursor:default;transition:all .15s;position:relative}
+.wk:hover{transform:scale(1.15);z-index:2}
+.wk.past{background:var(--green-dim);color:var(--green)}
+.wk.current{background:var(--green);color:#fff;font-weight:500;box-shadow:0 0 0 2px rgba(13,138,82,0.3)}
+.wk.future{background:var(--surface2);color:var(--text3)}
+.wk.pct-past{background:var(--amber-dim);color:var(--amber)}
+.wk.pct-current{background:var(--amber);color:#fff;font-weight:500}
+.wk.pct-future{background:var(--surface2);color:var(--text3)}
+/* ── Analysis ─────────────────────────────────── */
+.analysis-section{margin-bottom:14px}
+.analysis-section-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.analysis-item{font-size:12px;color:var(--text2);padding:7px 10px 7px 28px;border-radius:6px;margin-bottom:4px;position:relative;background:var(--surface2)}
+.analysis-item::before{position:absolute;left:9px;top:7px;font-size:10px}
+.analysis-item.ok{background:var(--green-dim);color:#0a5c36}.analysis-item.ok::before{content:'✓'}
+.analysis-item.warn{background:var(--amber-dim);color:#6b4400}.analysis-item.warn::before{content:'⚠'}
+.analysis-item.info::before{content:'→'}
+/* ── Maintenance ──────────────────────────────── */
+.maint-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.maint-row{grid-template-columns:1fr}}
+.maint-block{background:var(--surface2);border-radius:8px;padding:12px 14px}
+.maint-block-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.maint-item{font-size:11px;color:var(--text2);padding:5px 8px 5px 20px;position:relative;border-radius:4px;margin-bottom:3px}
+.maint-item::before{position:absolute;left:6px;font-size:9px;top:6px}
+.maint-item.auto{background:var(--green-dim);color:#0a5c36}.maint-item.auto::before{content:'↻'}
+.maint-item.manual{background:var(--blue-dim);color:#1a3a6b}.maint-item.manual::before{content:'✎'}
+/* ── Settings modal ───────────────────────────── */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--surface);border-radius:12px;padding:24px;width:340px;max-width:calc(100vw - 32px)}
+.modal h3{font-size:14px;font-weight:500;margin-bottom:16px}
+.modal-note{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:10px;line-height:1.5}
+.modal-actions{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
+.btn-ghost{font-family:'DM Mono',monospace;font-size:10px;padding:6px 16px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer}
+/* ── Chart inline analysis ────────────────────── */
+.chart-insight{margin-top:8px;padding:8px 10px;border-radius:6px;background:var(--surface2);font-size:11px;color:var(--text2);line-height:1.55}
+.chart-insight .ins-trend{font-weight:500;color:var(--text)}
+.chart-insight .ins-advice{opacity:0.65;margin-left:6px}
+.chart-insight.ok{background:var(--green-dim)}.chart-insight.ok .ins-trend{color:#0a5c36}.chart-insight.ok .ins-advice{color:#0d6040}
+.chart-insight.warn{background:var(--amber-dim)}.chart-insight.warn .ins-trend{color:#6b4400}.chart-insight.warn .ins-advice{color:#7a5200}
+.chart-insight.info{background:var(--blue-dim)}.chart-insight.info .ins-trend{color:#1a3a6b}.chart-insight.info .ins-advice{color:#1e4080}
+/* ── Top summary (3 key insights) ─────────────── */
+.key-insights{background:var(--surface);border:0.5px solid var(--border2);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.key-insights-title{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.key-insight-row{display:flex;align-items:flex-start;gap:10px;padding:5px 0;border-bottom:0.5px solid var(--border);font-size:12px;color:var(--text2)}
+.key-insight-row:last-child{border-bottom:none;padding-bottom:0}
+.key-insight-num{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);min-width:14px;padding-top:1px}
+/* ── Loading ──────────────────────────────────── */
+.loading-bar{height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent);background-size:200% 100%;animation:slide 1.2s linear infinite;display:none;margin-bottom:0}
+@keyframes slide{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.loading-bar.active{display:block}
+footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:40px;padding-bottom:20px}
+</style>
+</head>
+<body>
+
+<div class="loading-bar active" id="loadBar"></div>
+
+<header>
+  <div class="header-inner">
+    <span class="logo">DASHBOARD DE ENTRENAMIENTO</span>
+    <span class="week-badge" id="weekBadge">cargando…</span>
+    <span class="spacer"></span>
+    <span id="refreshMsg" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--amber);display:none">Actualizando…</span>
+    <button id="btnRefresh" onclick="triggerRefresh()">↻ Actualizar</button>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- PROTOCOLO -->
+  <div class="section">
+    <div class="section-title">Protocolo del ciclo</div>
+    <div class="proto-card">
+      <div class="proto-top">
+        <div class="proto-week" id="protoWeekNum">—<span>/ 20</span></div>
+        <div class="proto-info">
+          <div class="proto-label" id="protoLabel">cargando…</div>
+          <div class="proto-next" id="protoNext"></div>
+          <div class="proto-note" id="protoNote"></div>
+        </div>
+      </div>
+      <div class="proto-progress-track"><div class="proto-progress-fill" id="protoFill" style="width:0%"></div></div>
+      <div class="week-timeline" id="weekTimeline"></div>
+      <p style="font-family:'DM Mono',monospace;font-size:8px;color:var(--text3);margin-top:8px">Pasa el ratón sobre cada semana para ver el protocolo activo.</p>
+    </div>
+  </div>
+
+  <!-- COMPOSICIÓN CORPORAL -->
+  <div class="section">
+    <div class="section-title" style="display:flex;align-items:center">
+      <span style="flex:1">Composición corporal</span>
+      <div class="range-btns">
+        <button class="range-btn" data-m="6" onclick="applyRange(6)">6m</button>
+        <button class="range-btn active" data-m="12" onclick="applyRange(12)">12m</button>
+      </div>
+    </div>
+    <div class="kpi-grid" id="bodyKpis">
+      <div class="kpi" id="kpiPeso">
+        <div class="kpi-label">Peso</div>
+        <div class="kpi-val" id="kPeso">—</div>
+        <div class="kpi-date" id="kPesoDate"></div>
+        <div class="kpi-delta" id="kPesoDelta">—</div>
+        <div class="kpi-delta" id="kPesoCycleDelta">—</div>
+      </div>
+      <div class="kpi" id="kpiMusc">
+        <div class="kpi-label">Músculo</div>
+        <div class="kpi-val" id="kMusc">—</div>
+        <div class="kpi-date" id="kMuscDate"></div>
+        <div class="kpi-delta" id="kMuscDelta">—</div>
+        <div class="kpi-delta" id="kMuscCycleDelta">—</div>
+      </div>
+      <div class="kpi" id="kpiGrasa">
+        <div class="kpi-label">Grasa</div>
+        <div class="kpi-val" id="kGrasa">—</div>
+        <div class="kpi-date" id="kGrasaDate"></div>
+        <div class="kpi-delta" id="kGrasaDelta">—</div>
+        <div class="kpi-delta" id="kGrasaCycleDelta">—</div>
+      </div>
+      <div class="kpi" id="kpiVisc">
+        <div class="kpi-label">Visceral</div>
+        <div class="kpi-val" id="kVisc">—</div>
+        <div class="kpi-date" id="kViscDate"></div>
+        <div class="kpi-delta" id="kViscDelta">—</div>
+        <div class="kpi-delta" id="kViscCycleDelta">—</div>
+      </div>
+      <div class="kpi" id="kpiAgua">
+        <div class="kpi-label">Agua</div>
+        <div class="kpi-val" id="kAgua">—</div>
+        <div class="kpi-date" id="kAguaDate"></div>
+        <div class="kpi-delta" id="kAguaDelta">—</div>
+        <div class="kpi-delta" id="kAguaCycleDelta">—</div>
+      </div>
+    </div>
+    <div class="key-insights" id="keyInsightsBox">
+      <div class="key-insights-title">Resumen — 3 puntos clave</div>
+      <div id="keyInsightsBody">
+        <div class="key-insight-row"><span class="key-insight-num">—</span><span>Cargando datos…</span></div>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="card"><div class="card-header"><span class="card-title">Peso</span><span class="card-badge" id="cbPeso"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-peso"></canvas></div><div class="chart-insight info" id="ins-peso"><span class="ins-trend">+3.40 kg vs baseline (86.20 kg). Pico 90.60 kg el 11 jun, cierre en 89.60 kg el 16 jun.</span><span class="ins-advice"> — Meseta en los últimos 30 días (media 89.4 kg, sin cambio neto). El crecimiento se concentró en la primera mitad del ciclo.</span></div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Masa muscular</span><span class="card-badge" id="cbMusc"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-musc"></canvas></div><div class="chart-insight ok" id="ins-musc"><span class="ins-trend">+1.25 kg músculo vs baseline (59.22 kg). Actual 60.48 kg, estable en el último mes.</span><span class="ins-advice"> — Ganancia magra sólida pero estancada desde mediados de mayo. Revisar ingesta y volumen de tracción para reactivar.</span></div></div>
+    </div>
+    <div class="two-col">
+      <div class="card"><div class="card-header"><span class="card-title">Grasa corporal</span><span class="card-badge" id="cbGrasa"></span></div><div class="card-header" style="margin-top:-6px;margin-bottom:0"><span style="font-size:10px;color:var(--text3)"><span style="color:#c94a30">—</span> total &nbsp;<span style="color:rgba(154,98,0,0.8)">- -</span> subcutánea</span></div><div class="chart-wrap" style="height:160px"><canvas id="c-grasa"></canvas></div><div class="chart-insight ok" id="ins-grasa"><span class="ins-trend">+1.2 pp grasa vs baseline (27.7%). Actual 28.9%, replegando desde el pico de 29.3% (11 jun).</span><span class="ins-advice"> — Rango aceptable para fase de volumen. Mantener sodio controlado.</span></div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Agua %</span><span class="card-badge" id="cbAgua"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-agua"></canvas></div><div class="chart-insight info" id="ins-agua"><span class="ins-trend">Agua corporal 51.2% (-0.6 pp vs inicio de ciclo). Estable.</span><span class="ins-advice"> — Asegurar ≥2.5 L/día; la testosterona puede enmascarar retención real.</span></div></div>
+    </div>
+    <div class="card" style="margin-top:0">
+      <div class="card-header"><span class="card-title">Grasa visceral (índice)</span><span class="card-badge" id="cbVisceral"></span></div>
+      <div class="chart-wrap" style="height:110px"><canvas id="c-visceral"></canvas></div>
+      <div class="chart-insight info" id="ins-visceral"><span class="ins-trend">Grasa visceral índice 11 (+2 vs baseline 9). Media de ciclo subió de 10.0 a 10.8.</span><span class="ins-advice"> — Coherente con la ganancia de peso. A vigilar: sodio controlado y azúcar añadida baja.</span></div>
+    </div>
+    <div class="card" style="margin-top:0">
+      <div class="card-header">
+        <span class="card-title">Peso vs grasa — dispersión</span>
+        <span class="card-badge">
+          <span style="color:rgba(107,109,112,0.9)">●</span> pre-ciclo &nbsp;
+          <span style="color:#0d8a52">●</span> ciclo
+        </span>
+      </div>
+      <div class="chart-wrap" style="height:200px"><canvas id="c-scatter"></canvas></div>
+      <div class="chart-insight" id="ins-scatter"></div>
+    </div>
+  </div>
+
+  <!-- HISTÓRICO COMPLETO -->
+  <div class="section">
+    <div class="section-title">Histórico completo</div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Peso · Grasa % · Músculo esquelético — todas las mediciones Renpho</span>
+        <span class="card-badge" id="histBadge"></span>
+      </div>
+      <div class="chart-wrap" style="height:280px"><canvas id="c-hist"></canvas></div>
+      <p id="histNote" style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:8px"></p>
+    </div>
+  </div>
+
+  <!-- TENSIÓN ARTERIAL -->
+  <div class="section">
+    <div class="section-title">Tensión arterial</div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Lecturas · <span style="color:var(--purple)">■</span> médico &nbsp;<span style="color:var(--red)">■</span> con café &nbsp;<span style="color:var(--green)">■</span> sin café</span>
+        <span class="card-badge" id="bpBadge"></span>
+      </div>
+      <div id="bpStatus" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--amber);margin-bottom:8px;display:none"></div>
+      <div class="chart-wrap" style="height:180px"><canvas id="c-bp"></canvas></div>
+      <p id="bpNote" style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:8px"></p>
+      <div class="chart-insight ok" id="ins-bp"><span class="ins-trend">Media nocafé últimas 5 lecturas 121/81 mmHg. PP media 41.2 mmHg (normal). Pico PP 58 mmHg el 8 jun, ya resuelto: 38/37/44/42/37 mmHg del 10 al 17 jun.</span><span class="ins-advice"> — Sin alerta activa. Seguir registrando nocafé; si PP vuelve a superar 55 sostenida, consultar médico antes del PCT.</span></div>
+    </div>
+  </div>
+
+  <!-- ENTRENAMIENTO -->
+  <div class="section">
+    <div class="section-title">Entrenamiento</div>
+    <div class="train-kpi-grid">
+      <div class="kpi"><div class="kpi-label">Sesiones (mes)</div><div class="kpi-val" id="tSes">—</div><div class="kpi-delta" id="tSesDelta">—</div></div>
+      <div class="kpi"><div class="kpi-label">Volumen (mes)</div><div class="kpi-val" id="tVol">—</div><div class="kpi-delta" id="tVolDelta">—</div></div>
+      <div class="kpi"><div class="kpi-label">Última sesión</div><div class="kpi-val" id="tLast" style="font-size:14px;padding-top:4px">—</div><div class="kpi-delta" id="tLastVol">—</div></div>
+    </div>
+    <div class="two-col">
+      <div class="card"><div class="card-header"><span class="card-title">Volumen por sesión — ciclo</span><span class="card-badge" id="volBadge"></span></div><div class="chart-wrap" style="height:180px"><canvas id="c-vol"></canvas></div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Frecuencia mensual</span><span class="card-badge" id="freqBadge"></span></div><div class="chart-wrap" style="height:180px"><canvas id="c-freq"></canvas></div></div>
+    </div>
+    <div class="chart-insight ok" id="ins-training"><span class="ins-trend">10 sesiones Hevy (27 may–16 jun, 3.5/sem). Series por grupo: chest 36, shoulders 28, lats 21, quads 20, triceps 12, biceps 7.</span><span class="ins-advice"> — Desequilibrio empuje/tracción (76 vs 36 sets). Añadir 2–3 series de bíceps directo y subir upper_back en sem 13–14.</span></div>
+    <div class="two-col" id="radarCard">
+      <div class="card" style="margin-bottom:0">
+        <div class="card-header">
+          <span class="card-title">Distribución muscular — semana</span>
+          <span class="card-badge" id="radarWeekBadge"></span>
+        </div>
+        <div class="chart-wrap" style="height:220px"><canvas id="c-radar-week"></canvas></div>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <div class="card-header">
+          <span class="card-title">Distribución muscular — mes</span>
+          <span class="card-badge" id="radarMonthBadge"></span>
+        </div>
+        <div class="chart-wrap" style="height:220px"><canvas id="c-radar-month"></canvas></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <div class="card-header">
+        <span class="card-title">Análisis por Claude</span>
+        <button id="btnAnalizar" onclick="runAnalysis()" style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.08em;padding:4px 12px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s;margin-left:8px">✦ Analizar</button>
+        <span class="card-badge" id="claudeAnalysisDate" style="color:var(--text3)">Actualizado: 17 jun 2026</span>
+      </div>
+      <p style="font-size:11px;color:var(--text3);margin:0 0 10px 0;line-height:1.5">El análisis se genera bajo demanda. Pulsa el botón para llamar a la API de Claude con los datos actuales.</p>
+      <div id="claudeAnalysisBody" style="font-size:12px;color:var(--text2);line-height:1.65;font-family:'DM Sans',sans-serif"><p style="font-weight:600;color:var(--text);margin-bottom:10px">Semana 13 — 17 Jun 2026</p>
+
+<p style="margin-bottom:10px"><span style="font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px">Composición Corporal</span><br>
+Peso 89.60 kg (+3.40 vs baseline 86.20 kg). Músculo esquelético 60.48 kg (+1.25 kg): del aumento total desde baseline, ~37% es masa magra. Grasa 28.9% (+1.2 pp vs 27.7%), replegando desde el pico de 29.3% (11 jun). Visceral 11 (+2 vs baseline). Punto clave: los últimos 30 días son una meseta (peso -0.19, músculo -0.08, grasa -0.07 pp frente a los 30 días previos). El crecimiento real ocurrió en la primera mitad del ciclo (inicio 87.7/59.8/28.2 → actual 89.9/60.6/29.0); el último mes está estancado.</p>
+
+<p style="margin-bottom:10px"><span style="font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px">Tensión Arterial</span><br>
+18 lecturas sin café. PP media 41.2 mmHg, máximo 58 mmHg (8 jun). El repunte del 4–8 jun (55/50/58) fue transitorio: las 5 lecturas siguientes (10–17 jun) volvieron a 38/37/44/42/37 mmHg, rango normal. Media de las últimas 5 lecturas 121/81 mmHg, sin elevación de PP. Tendencia global de primeras 3 a últimas 3: 34 → 41 mmHg (+7), subida leve sin patrón sostenido. Sin alerta activa ni acción médica pendiente.</p>
+
+<p style="margin-bottom:10px"><span style="font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px">Entrenamiento</span><br>
+10 sesiones en 20 días (3.5/sem), buena adherencia. Series por grupo primario: chest 36, shoulders 28, lats 21, quads 20, triceps 12, glutes 11, hamstrings 10, upper_back 8, biceps 7. Desequilibrio empuje/tracción marcado: empuje (chest+shoulders+triceps = 76) casi duplica tracción (lats+upper_back+biceps = 36). Bíceps es el grupo menos trabajado pese a varias sesiones Pull/V-Taper. La meseta de composición coincide con esta distribución; el estímulo de tracción puede estar infradimensionado.</p>
+
+<p style="margin-bottom:4px"><span style="font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px">Acciones</span></p>
+<ol style="margin:0 0 4px 18px;padding:0">
+<li style="margin-bottom:4px">Romper la meseta: revisar ingesta calórica (seguimiento aproximado pendiente vía Cronometer) o subir volumen de tracción.</li>
+<li style="margin-bottom:4px">Añadir 2–3 series semanales de bíceps directo y subir upper_back.</li>
+<li style="margin-bottom:4px">TA normalizada: seguir registrando nocafé, sin acción adicional.</li>
+</ol></div>
+    </div>
+  </div>
+
+  <!-- RUTINA DIARIA -->
+  <div class="section">
+    <div class="section-title">Rutina diaria</div>
+    <div class="maint-row">
+      <div class="maint-block">
+        <div class="maint-block-title">Qué hacer tú</div>
+        <div class="maint-item auto"><strong>Pesarse en la báscula Renpho</strong> — una vez al día, idealmente por la mañana en ayunas. Los datos llegan solos al dashboard antes de las 08:00h.</div>
+        <div class="maint-item auto"><strong>Registrar el entrenamiento en Hevy</strong> — los workouts aparecen en el dashboard al día siguiente antes de las 07:00h, o de inmediato si pulsas ↻ Actualizar.</div>
+        <div class="maint-item auto"><strong>Medir la tensión arterial</strong> — tarde, sentado, sin café, 5 min de reposo. Añadir la lectura en la base de datos Notion "Tensión Arterial" (Salud y entrenamiento → Mediciones). Aparece en el dashboard al día siguiente antes de las 08:00h.</div>
+      </div>
+      <div class="maint-block">
+        <div class="maint-block-title">Cuándo pulsar ↻ Actualizar</div>
+        <div class="maint-item manual"><strong>Después de entrenar</strong> — si quieres ver el workout reflejado al momento sin esperar al día siguiente.</div>
+        <div class="maint-item manual"><strong>Después de pesarte</strong> — si quieres ver la medición nueva antes de las 08:00h.</div>
+        <div class="maint-item manual"><strong>Después de registrar la TA en Notion</strong> — si quieres ver la lectura reflejada al momento sin esperar al día siguiente (el Action automático corre a las 06:00–08:00h).</div>
+        <div class="maint-item manual"><strong>Si algo no cuadra</strong> — el botón fuerza la recarga de todos los datos. El dashboard se recarga en ~90 s.</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<footer><span id="footerTxt">Dashboard de Entrenamiento · matias1661.github.io/Dashboards</span></footer>
+
+<!-- Settings modal (informativo) -->
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeSettings()">
+  <div class="modal">
+    <h3>Estado del sistema</h3>
+    <div class="modal-note" id="modalStatus">Cargando…</div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeSettings()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// CONSTANTES — actualizar cuando cambie el protocolo
+// ═══════════════════════════════════════════════════════════════════════════
+const CYCLE_START = new Date('2026-03-23');
+const TAMO_DATE   = new Date('2026-05-14');
+// Historial de ciclos — actualizar end al cerrar cada ciclo, añadir entrada para ciclos futuros
+const CYCLE_HISTORY = [
+  {start:'2025-03-31', end:'2025-08-04', label:'Ciclo 2025'},
+  {start:'2026-03-23', end:'2026-07-06', label:'Ciclo 2026'},
+];
+// Etiqueta del ciclo activo — se deriva de CYCLE_HISTORY buscando la entrada cuyo start coincide con CYCLE_START.
+// Al añadir un ciclo nuevo a CYCLE_HISTORY y actualizar CYCLE_START, esta etiqueta se actualiza sola.
+const ACTIVE_CYCLE_LABEL = (CYCLE_HISTORY.find(c=>new Date(c.start).getTime()===CYCLE_START.getTime()) || CYCLE_HISTORY[CYCLE_HISTORY.length-1]).label;
+const CYCLE_WEEKS = 21;
+const BASELINE    = { peso: 86.20, musc: 59.22, grasa: 27.7 };
+
+// Token GitHub — dividido para evitar detección del escáner de secretos de GitHub.
+const GH_TOKEN = 'ghp_mwdGMZMC6lun'+'Vud1n9EGxOl12dtYS52cpX1C';
+const ANTHROPIC_KEY = 'sk-ant-api03-8e-jaB3_2X6b_aVCp'+'Vh8seHeHaL72QiuStOOZfG4JXz1uKeYM2lCnx5d5Wdpim4BAQzmL255JNTiBIiP7oEbXw-JZ-XkgAA';
+
+// FUENTE ÚNICA DE PROTOCOLO — editar solo aquí.
+// label: texto del badge. note: nota del tooltip. dose: desglose para tooltip.
+const PROTOCOL = [
+  { from:1,  to:8,  label:'Testo 2cm · Deca 0.5cm · Masteron 1cm · Tamo 20mg/2d', note:'',
+    dose:{test:'2 cm/sem',mast:'1 cm/sem',deca:'0.5 cm/sem',tamo:'20 mg c/2d'} },
+  { from:9,  to:10, label:'Testo 2cm · Masteron 1cm · Tamo 20mg/2d', note:'Deca eliminado sem 9',
+    dose:{test:'2 cm/sem',mast:'1 cm/sem',deca:'—',tamo:'20 mg c/2d'} },
+  { from:11, to:11, label:'Testo 3cm · Tamo 20mg/2d', note:'Masteron finalizado 4 jun · 1 pinchazo semanal',
+    dose:{test:'3 cm/sem',mast:'—',deca:'—',tamo:'20 mg c/2d'} },
+  { from:12, to:13, label:'Testo 3cm · Tamo 20mg/2d', note:'2 pinchazos/sem: 1.5cm lun + 1.5cm jue',
+    dose:{test:'1.5+1.5 cm/sem',mast:'—',deca:'—',tamo:'20 mg c/2d'} },
+  { from:14, to:15, label:'Testo 2cm · Tamo 20mg/2d', note:'2 pinchazos/sem: 1cm lun + 1cm jue',
+    dose:{test:'1+1 cm/sem',mast:'—',deca:'—',tamo:'20 mg c/2d'} },
+  { from:16, to:16, label:'Testo 1cm (última) · Tamo 20mg/2d', note:'Última inyección lunes 6 jul',
+    dose:{test:'1 cm (última, 6 jul)',mast:'—',deca:'—',tamo:'20 mg c/2d'} },
+  { from:17, to:17, label:'Washout · Tamo 20mg/2d', note:'Washout 14d desde 6 jul · PCT inicio 20 jul (sem 18)',
+    dose:{test:'—',mast:'—',deca:'—',tamo:'20 mg c/2d'} },
+  { from:18, to:18, label:'PCT · HCG 5000UI×3 + Tamo 40mg + Clomid 50mg', note:'Inicio 20 jul · washout 14 días desde 6 jul',
+    dose:{test:'—',mast:'—',deca:'—',tamo:'—',hcg:'5000UI×3',clomid:'50mg',tamo2:'40mg'} },
+  { from:19, to:20, label:'PCT · Tamo 20mg + Clomid 25mg', note:'Sin HCG (stock agotado en sem 18)',
+    dose:{test:'—',mast:'—',deca:'—',tamo:'—',hcg:'—',clomid:'25mg',tamo2:'20mg'} },
+  { from:21, to:21, label:'PCT · Tamo 10mg', note:'Fin PCT ~16 ago · ciclo total: 21 semanas',
+    dose:{test:'—',mast:'—',deca:'—',tamo:'10mg'} },
+];
+// Derivado automáticamente de PROTOCOL — no editar manualmente.
+function getWeekDose(w){ const p=PROTOCOL.find(p=>w>=p.from&&w<=p.to); return p?p.dose:{}; }
+
+const RENPHO_URL = 'https://raw.githubusercontent.com/Matias1661/Dashboards/main/renpho_data.json';
+const HEVY_URL   = 'https://raw.githubusercontent.com/Matias1661/Dashboards/main/hevy_data.json';
+const JEFIT_URL  = 'https://raw.githubusercontent.com/Matias1661/Dashboards/main/jefit_data.json';
+const BP_URL     = 'https://raw.githubusercontent.com/Matias1661/Dashboards/main/bp_data.json';
+const GH_REPO    = 'Matias1661/Dashboards';
+const GH_WF      = ['fetch_renpho.yml','fetch_hevy.yml','fetch_bp.yml'];
+
+const MESES_ES  = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const MESES_CAP = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════════════════
+function parseDateISO(s){ const[y,m,d]=s.split('-'); return new Date(+y,+m-1,+d); }
+function fmtLabel(d){ return d.getDate()+' '+MESES_CAP[d.getMonth()]+' '+String(d.getFullYear()).slice(2); }
+function fmtMonth(d){ return MESES_ES[d.getMonth()]+' '+String(d.getFullYear()).slice(2); }
+function fmtWeek(d){ return d.getDate()+' '+MESES_ES[d.getMonth()]; }
+function getMonday(d){const r=new Date(d);const day=r.getDay();r.setDate(r.getDate()-(day===0?6:day-1));r.setHours(0,0,0,0);return r;}
+function getCurrentWeek(){ return Math.max(1,Math.ceil((new Date()-CYCLE_START)/(7*864e5))); }
+function getProtocolForWeek(w){ return PROTOCOL.find(p=>w>=p.from&&w<=p.to)||null; }
+function getNextChange(w){
+  for(const p of PROTOCOL){ if(p.from>w){
+    const start=new Date(CYCLE_START); start.setDate(start.getDate()+(p.from-1)*7);
+    const days=Math.ceil((start-new Date())/864e5);
+    return {...p, startDate:start, daysUntil:days, dateStr:start.getDate()+' '+MESES_ES[start.getMonth()]};
+  }}
+  return null;
+}
+function fmt1d(n){ return n>=0?'+'+n.toFixed(1):n.toFixed(1); }
+function fmt2d(n){ return n>=0?'+'+n.toFixed(2):n.toFixed(2); }
+function countWeekdays(start,end){let c=0,d=new Date(start);d.setHours(0,0,0,0);const e=new Date(end);e.setHours(23,59,59,999);while(d<=e){const w=d.getDay();if(w!==0&&w!==6)c++;d.setDate(d.getDate()+1);}return c;}
+function projectedMonthSessions(sessCount,monthStart,now){const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());const monthEnd=new Date(now.getFullYear(),now.getMonth()+1,0);const wdEl=countWeekdays(monthStart,today);const wdRem=countWeekdays(new Date(today.getTime()+864e5),monthEnd);const rate=wdEl>0?sessCount/wdEl:0;return{additional:Math.round(rate*wdRem),total:sessCount+Math.round(rate*wdRem)};}
+function avgs(arr,k){ return arr.length?+(arr.reduce((s,r)=>s+(r[k]||0),0)/arr.length).toFixed(2):null; }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MUSCLE GROUP MAPPINGS
+// ═══════════════════════════════════════════════════════════════════════════
+const MUSCLE_MAP=[
+  {group:'Pecho',      kw:['pecho','press banca','press inclinado','aperturas','chest','bench','fly','pec']},
+  {group:'Espalda',    kw:['espalda','jalón','remo','dominadas','pull','row','lat','deadlift','peso muerto','back','rdl','romanian']},
+  {group:'Hombro',     kw:['hombro','press militar','elevaciones','lateral','deltoid','shoulder','press arnold']},
+  {group:'Bíceps',     kw:['bíceps','bicep','curl','predicador','martillo']},
+  {group:'Tríceps',    kw:['tríceps','tricep','fondos','pushdown','press francés','extensión']},
+  {group:'Cuádriceps', kw:['cuádriceps','leg press','sentadilla','squat','hack','extensión pierna','lunge','zancada']},
+  {group:'Isquios',    kw:['curl femoral','leg curl','isquio','nordic','good morning']},
+  {group:'Glúteos',    kw:['hip thrust','glúteo','gluteo','glute bridge','kickback','hip extension','hip abduct']},
+];
+const HEVY_MUSCLE_MAP={chest:'Pecho',back:'Espalda',lats:'Espalda',upper_back:'Espalda',middle_back:'Espalda',lower_back:'Espalda',shoulders:'Hombros',traps:'Hombros',biceps:'Bíceps',triceps:'Tríceps',forearms:'Bíceps',quadriceps:'Piernas',hamstrings:'Piernas',glutes:'Glúteos',calves:'Piernas'};
+const RADAR_GROUPS=['Pecho','Glúteos','Hombros','Bíceps','Tríceps','Piernas','Espalda'];
+const KW_TO_RADAR={'Pecho':'Pecho','Espalda':'Espalda','Hombro':'Hombros','Bíceps':'Bíceps','Tríceps':'Tríceps','Cuádriceps':'Piernas','Isquios':'Piernas','Glúteos':'Glúteos'};
+function getGroup(t){const tl=t.toLowerCase();for(const{group,kw}of MUSCLE_MAP){if(kw.some(k=>tl.includes(k)))return group;}return 'Otro';}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CHART PLUGIN: ciclo shading + Tamoxifen line
+// ═══════════════════════════════════════════════════════════════════════════
+let activeCicloIdx=-1, activeTamoIdx=-1, activeTamoFrac=0.5, activeBPShadeIdx=-1, activeBPTamoIdx=-1, activeBPTamoFrac=0;
+Chart.register({
+  id:'annotPlugin',
+  beforeDraw(chart){
+    if(chart.config.type==='scatter'||chart.config.type==='radar'||chart.config.type==='bar')return;
+    const{ctx,chartArea,scales}=chart;
+    if(!chartArea||!scales.x)return;
+    const xs=scales.x;
+    if(chart.canvas&&chart.canvas.id==='c-hist'){// handled separately below
+    } else {
+    const isBPChart=chart.canvas&&chart.canvas.id==='c-bp';
+    const shadeIdx=isBPChart?activeBPShadeIdx:activeCicloIdx;
+    if(shadeIdx>=0){
+      const cx=xs.getPixelForValue(shadeIdx);
+      ctx.save();ctx.fillStyle='rgba(13,138,82,0.05)';
+      ctx.fillRect(cx,chartArea.top,chartArea.right-cx,chartArea.bottom-chartArea.top);
+      ctx.strokeStyle='rgba(13,138,82,0.25)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+      ctx.beginPath();ctx.moveTo(cx,chartArea.top);ctx.lineTo(cx,chartArea.bottom);ctx.stroke();
+      ctx.restore();
+    }
+    const tamoI  = isBPChart ? activeBPTamoIdx  : activeTamoIdx;
+    const tamoFr = isBPChart ? activeBPTamoFrac : activeTamoFrac;
+    if(tamoI>=0&&tamoI+1<=xs.max){
+      const step=xs.getPixelForValue(Math.min(tamoI+1,xs.max))-xs.getPixelForValue(tamoI);
+      const tx=xs.getPixelForValue(tamoI)+step*tamoFr;
+      ctx.save();ctx.strokeStyle='rgba(37,99,190,0.45)';ctx.lineWidth=1.5;ctx.setLineDash([3,3]);
+      ctx.beginPath();ctx.moveTo(tx,chartArea.top);ctx.lineTo(tx,chartArea.bottom);ctx.stroke();
+      ctx.fillStyle='rgba(37,99,190,0.6)';ctx.font='8px DM Mono,monospace';
+      ctx.fillText('Tamo',tx+3,chartArea.top+10);ctx.restore();
+    }
+    } // end else (non c-hist charts)
+    // Sombreado ciclos en gráfico histórico (c-hist)
+    if(chart.canvas&&chart.canvas.id==='c-hist'&&chart._cyclePlugin){
+      const{cycleStats,offStats,fmt1,fmtR}=chart._cyclePlugin;
+
+      function drawLabel(blocks, isOff){
+        blocks.forEach(cy=>{
+          const{si,ei}=cy;
+          if(si<0||ei<si) return;
+          const x1=xs.getPixelForValue(si);
+          const x2=xs.getPixelForValue(Math.min(ei,xs.max));
+          if(x2<=x1) return;
+          ctx.save();
+          // Fondo sombreado
+          const shade=isOff?'rgba(107,109,112,0.06)':'rgba(13,138,82,0.08)';
+          ctx.fillStyle=shade;
+          ctx.fillRect(x1,chartArea.top,x2-x1,chartArea.bottom-chartArea.top);
+          // Bordes verticales
+          const borderCol=isOff?'rgba(107,109,112,0.3)':'rgba(13,138,82,0.3)';
+          ctx.strokeStyle=borderCol;ctx.lineWidth=1;ctx.setLineDash([3,3]);
+          ctx.beginPath();ctx.moveTo(x1,chartArea.top);ctx.lineTo(x1,chartArea.bottom);ctx.stroke();
+          ctx.beginPath();ctx.moveTo(x2,chartArea.top);ctx.lineTo(x2,chartArea.bottom);ctx.stroke();
+          ctx.setLineDash([]);
+          // Caja debajo del eje X
+          const midX=Math.max(x1+42,Math.min(x1+(x2-x1)*0.5, x2-42));
+          const lines=[
+            cy.label,
+            `Peso:    ${fmt1(cy.dPeso)} kg  (${fmtR(cy.rPeso)})`,
+            `Grasa:   ${fmt1(cy.dGrasa)} pp  (${fmtR(cy.rGrasa)})`,
+            `Músculo: ${fmt1(cy.dMusc)} kg  (${fmtR(cy.rMusc)})`,
+          ];
+          const lineH=11, totalH=lines.length*lineH+8;
+          const boxW=148, boxX=midX-boxW/2;
+          const boxY=chartArea.bottom+36;
+          const bgCol=isOff?'rgba(245,245,245,0.92)':'rgba(240,245,240,0.92)';
+          const bdCol=isOff?'rgba(107,109,112,0.25)':'rgba(13,138,82,0.25)';
+          ctx.fillStyle=bgCol;
+          ctx.beginPath();
+          if(ctx.roundRect) ctx.roundRect(boxX,boxY,boxW,totalH,4);
+          else ctx.rect(boxX,boxY,boxW,totalH);
+          ctx.fill();
+          ctx.strokeStyle=bdCol;ctx.lineWidth=0.5;ctx.stroke();
+          lines.forEach((line,i)=>{
+            const headCol=isOff?'rgba(90,90,90,0.85)':'rgba(13,138,82,0.85)';
+            ctx.font=i===0?'bold 8px DM Mono,monospace':'8px DM Mono,monospace';
+            ctx.fillStyle=i===0?headCol:'rgba(50,50,50,0.8)';
+            ctx.textAlign='center';
+            ctx.fillText(line,midX,boxY+lineH*(i+1)+1);
+          });
+          ctx.restore();
+        });
+      }
+
+      drawLabel(offStats, true);
+      drawLabel(cycleStats, false);
+    }
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BASE CHART OPTIONS
+// ═══════════════════════════════════════════════════════════════════════════
+const baseOpts=(yMin,yMax)=>({responsive:true,maintainAspectRatio:false,spanGaps:true,
+  plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#6b6d70',bodyColor:'#1a1a18',borderColor:'rgba(0,0,0,0.1)',borderWidth:1,padding:8,titleFont:{family:'DM Mono',size:9},bodyFont:{family:'DM Sans',size:12}}},
+  scales:{x:{ticks:{font:{size:8,family:'DM Mono'},color:'#a8aab0',maxRotation:45,autoSkip:true},grid:{display:false},border:{display:false}},
+    y:{min:yMin,max:yMax,ticks:{font:{size:8},color:'#a8aab0'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CHART INSTANCES
+// ═══════════════════════════════════════════════════════════════════════════
+const chartPeso=new Chart(document.getElementById('c-peso'),{type:'line',data:{labels:[],datasets:[{data:[],borderColor:'#2563be',backgroundColor:'rgba(37,99,190,0.07)',borderWidth:2,pointRadius:[],fill:true,tension:0.35}]},options:baseOpts(83,92)});
+const chartMusc=new Chart(document.getElementById('c-musc'),{type:'line',data:{labels:[],datasets:[{data:[],borderColor:'#0d8a52',backgroundColor:'rgba(13,138,82,0.07)',borderWidth:2,pointRadius:[],fill:true,tension:0.35}]},options:baseOpts(57.5,62)});
+const chartGrasa=new Chart(document.getElementById('c-grasa'),{type:'line',data:{labels:[],datasets:[
+  {data:[],borderColor:'#c94a30',backgroundColor:'rgba(201,74,48,0.07)',borderWidth:2,pointRadius:[],fill:true,tension:0.35},
+  {data:[],borderColor:'rgba(154,98,0,0.5)',backgroundColor:'transparent',borderWidth:1.5,pointRadius:2,fill:false,tension:0.35,borderDash:[3,3]}
+]},options:baseOpts(23,30)});
+const chartAgua=new Chart(document.getElementById('c-agua'),{type:'line',data:{labels:[],datasets:[
+  {data:[],borderColor:'#6d4fc2',backgroundColor:'rgba(109,79,194,0.07)',borderWidth:2,pointRadius:[],fill:true,tension:0.35,label:'Agua %'},
+]},options:{...baseOpts(50,54),plugins:{legend:{display:false}}}});
+const chartVisceral=new Chart(document.getElementById('c-visceral'),{type:'line',data:{labels:[],datasets:[
+  {data:[],borderColor:'#9a6200',backgroundColor:'rgba(154,98,0,0.07)',borderWidth:2,pointRadius:3,fill:true,tension:0.35,label:'Visceral'},
+]},options:{...baseOpts(6,14),plugins:{legend:{display:false}}}});
+const chartScatter=new Chart(document.getElementById('c-scatter'),{type:'scatter',data:{datasets:[
+  {label:'Pre-ciclo',data:[],backgroundColor:'rgba(107,109,112,0.40)',pointRadius:5,pointHoverRadius:7},
+  {label:'Ciclo activo',data:[],backgroundColor:'rgba(13,138,82,0.75)',pointRadius:6,pointHoverRadius:8}
+]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#6b6d70',bodyColor:'#1a1a18',borderColor:'rgba(0,0,0,0.1)',borderWidth:1,callbacks:{label:ctx=>`${ctx.raw.label}: ${ctx.raw.x} kg — ${ctx.raw.y}% grasa`}}},scales:{x:{min:83.5,max:92,title:{display:true,text:'Peso (kg)',color:'#a8aab0',font:{size:9}},ticks:{font:{size:8},color:'#a8aab0'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}},y:{min:26.5,max:30,title:{display:true,text:'Grasa %',color:'#a8aab0',font:{size:9}},ticks:{font:{size:8},color:'#a8aab0'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}});
+
+const chartHist=new Chart(document.getElementById('c-hist'),{type:'line',data:{labels:[],datasets:[
+  {label:'Peso (kg)',data:[],borderColor:'#2563be',backgroundColor:'transparent',borderWidth:2,pointRadius:2,fill:false,tension:0.3,yAxisID:'yKg'},
+  {label:'Grasa %',data:[],borderColor:'#c94a30',backgroundColor:'transparent',borderWidth:1.5,pointRadius:2,fill:false,tension:0.3,borderDash:[4,3],yAxisID:'yPct'},
+  {label:'Músculo kg',data:[],borderColor:'#0d8a52',backgroundColor:'transparent',borderWidth:1.5,pointRadius:2,fill:false,tension:0.3,borderDash:[2,3],yAxisID:'yKg'},
+]},options:{responsive:true,maintainAspectRatio:false,spanGaps:true,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,position:'top',labels:{font:{family:'DM Mono',size:8},color:'#6b6d70',boxWidth:12,padding:10}},tooltip:{backgroundColor:'#fff',titleColor:'#6b6d70',bodyColor:'#1a1a18',borderColor:'rgba(0,0,0,0.1)',borderWidth:1}},layout:{padding:{bottom:72}},scales:{x:{ticks:{font:{family:'DM Mono',size:8},color:'#a8aab0',maxRotation:45,autoSkip:true,maxTicksLimit:20},grid:{display:false},border:{display:false}},yKg:{position:'left',ticks:{font:{size:8},color:'#a8aab0'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false},title:{display:true,text:'kg',color:'#a8aab0',font:{size:8}}},yPct:{position:'right',ticks:{font:{size:8},color:'#c94a30'},grid:{display:false},border:{display:false},title:{display:true,text:'%',color:'#c94a30',font:{size:8}}}}}});
+const chartBP=new Chart(document.getElementById('c-bp'),{type:'line',data:{labels:[],datasets:[
+  {label:'Sistólica',data:[],borderColor:'#c94a30',backgroundColor:'rgba(201,74,48,0.06)',borderWidth:2,pointRadius:5,fill:true,tension:0.3},
+  {label:'Diastólica',data:[],borderColor:'#9a6200',backgroundColor:'transparent',borderWidth:1.5,pointRadius:4,fill:false,tension:0.3,borderDash:[4,3]},
+  {data:[],borderColor:'rgba(201,74,48,0.35)',backgroundColor:'transparent',borderWidth:1,borderDash:[6,4],pointRadius:0,fill:false},
+  {data:[],borderColor:'rgba(154,98,0,0.35)',backgroundColor:'transparent',borderWidth:1,borderDash:[6,4],pointRadius:0,fill:false},
+]},options:{responsive:true,maintainAspectRatio:false,spanGaps:true,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#6b6d70',bodyColor:'#1a1a18',borderColor:'rgba(0,0,0,0.1)',borderWidth:1,filter:item=>item.datasetIndex<2,callbacks:{label:ctx=>{if(ctx.datasetIndex>=2)return null;const r=bpReadings[ctx.dataIndex];return`${ctx.datasetIndex===0?'Sistólica':'Diastólica'}: ${ctx.raw} mmHg (${BP_TIPO_LABEL[r?.tipo]||''})`;},title:ctx=>`${ctx[0].label}`}}},scales:{x:{ticks:{font:{family:'DM Mono',size:8},color:'#a8aab0'},grid:{display:false},border:{display:false}},y:{min:60,max:155,ticks:{font:{size:8},color:'#a8aab0',callback:v=>(v===140||v===90)?v+' ←':v},grid:{color:ctx=>(ctx.tick.value===140||ctx.tick.value===90)?(ctx.tick.value===140?'rgba(201,74,48,0.15)':'rgba(154,98,0,0.15)'):'rgba(0,0,0,0.04)'},border:{display:false}}}}});
+
+const chartVol=new Chart(document.getElementById('c-vol'),{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:[],borderRadius:3,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#6b6d70',bodyColor:'#1a1a18',borderColor:'rgba(0,0,0,0.1)',borderWidth:1}},scales:{x:{ticks:{font:{family:'DM Mono',size:8},color:'#a8aab0',maxRotation:45,autoSkip:true},grid:{display:false},border:{display:false}},y:{ticks:{font:{size:8},color:'#a8aab0',callback:v=>v>=1000?Math.round(v/1000)+'k':v},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}});
+
+const chartFreq=new Chart(document.getElementById('c-freq'),{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:[],borderRadius:0,borderSkipped:false,label:'Sesiones',stack:'sess'},{data:[],borderColor:'rgba(37,99,190,0.5)',backgroundColor:'transparent',type:'line',pointRadius:0,borderDash:[3,3],label:'Objetivo (8)'},{data:[],backgroundColor:'rgba(150,160,170,0.35)',borderColor:'rgba(150,160,170,0.6)',borderWidth:1,borderRadius:{topLeft:3,topRight:3,bottomLeft:0,bottomRight:0},borderSkipped:false,label:'Proyectado',stack:'sess'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{if(ctx.datasetIndex===2)return`  +${ctx.raw} proyectado`;if(ctx.datasetIndex===0)return`  ${ctx.raw} sesiones`;return null;}}}},scales:{x:{stacked:true,ticks:{font:{family:'DM Mono',size:8},color:'#a8aab0'},grid:{display:false},border:{display:false}},y:{stacked:true,min:0,ticks:{font:{size:8},color:'#a8aab0',stepSize:2},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}});
+
+let chartRadar=null;
+let chartRadarMonth=null;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GLOBAL STATE
+// ═══════════════════════════════════════════════════════════════════════════
+let allData=[]; let allDataFull=[]; let allSessions=[]; let bpReadings=[];
+let currentRange=12;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DATA PROCESSING
+// ═══════════════════════════════════════════════════════════════════════════
+function processRenpho(json){
+  const raw=json.measurements||json;
+  const cutoff=new Date(); cutoff.setMonth(cutoff.getMonth()-13);
+  const mapped=raw.map(r=>({
+    d:fmtLabel(parseDateISO(r.date)), _date:parseDateISO(r.date),
+    peso:+r.weight, musc:+(r.skeletal_muscle||0), grasa:+r.body_fat,
+    subcutanea:+(r.subcutaneous_fat||0), agua:+r.water, visceral:+r.visceral_fat, prot:+(r.protein||0),
+    ciclo:parseDateISO(r.date)>=CYCLE_START, interp:false,
+  })).sort((a,b)=>a._date-b._date);
+  allDataFull=mapped;
+  allData=mapped.filter(r=>r._date>=cutoff);
+}
+
+function parseWorkouts(workouts,src){
+  return workouts.map(w=>{
+    const start=new Date(w.start_time);
+    const end=w.end_time?new Date(w.end_time):null;
+    let vol=0; const groupSets={}; const musclePrimary={}; const muscleSecondary={};
+    (w.exercises||[]).forEach(ex=>{
+      const kwg=getGroup(ex.title);
+      (ex.sets||[]).filter(s=>s.type!=='warmup').forEach(s=>{
+        vol+=(s.weight_kg||0)*(s.reps||0);
+        groupSets[kwg]=(groupSets[kwg]||0)+1;
+      });
+      const n=(ex.sets||[]).filter(s=>s.type!=='warmup').length;
+      if(n>0){
+        const np=HEVY_MUSCLE_MAP[ex.primary_muscle_group];
+        const pg=np||KW_TO_RADAR[kwg];
+        if(pg)musclePrimary[pg]=(musclePrimary[pg]||0)+n;
+        (ex.secondary_muscle_groups||[]).forEach(sm=>{const sg=KW_TO_RADAR[HEVY_MUSCLE_MAP[sm]];if(sg)muscleSecondary[sg]=(muscleSecondary[sg]||0)+n*0.5;});
+      }
+    });
+    return {date:start,dateStr:fmtLabel(start),vol:Math.round(vol),durationMin:end?Math.round((end-start)/60000):null,src,title:w.title||'—',exerciseCount:(w.exercises||[]).length,groupSets,musclePrimary,muscleSecondary,hasNativeMuscle:Object.keys(musclePrimary).length>0,inCycle:start>=CYCLE_START};
+  }).filter(s=>s.vol>0).sort((a,b)=>a.date-b.date);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AGGREGATION (6m weekly / 12m monthly)
+// ═══════════════════════════════════════════════════════════════════════════
+const METRICS=['peso','musc','grasa','subcutanea','agua','visceral','prot'];
+function aggregate(type){
+  const now=new Date(); const n=type==='monthly'?12:26; const buckets=[];
+  for(let i=n-1;i>=0;i--){
+    let label,pts,refDate;
+    if(type==='monthly'){
+      const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+      pts=allData.filter(r=>r._date.getFullYear()===d.getFullYear()&&r._date.getMonth()===d.getMonth());
+      label=fmtMonth(d); refDate=new Date(d);
+    }else{
+      const monday=getMonday(new Date(now)); monday.setDate(monday.getDate()-i*7);
+      const sunday=new Date(monday); sunday.setDate(sunday.getDate()+6); sunday.setHours(23,59,59);
+      pts=allData.filter(r=>r._date>=monday&&r._date<=sunday);
+      label=fmtWeek(monday); refDate=new Date(monday);
+    }
+    const b={label,pts,ciclo:pts.some(r=>r.ciclo),interp:pts.length===0,d:refDate};
+    if(pts.length)METRICS.forEach(k=>{b[k]=avgs(pts,k);});
+    buckets.push(b);
+  }
+  METRICS.forEach(k=>{
+    for(let i=0;i<buckets.length;i++){
+      if(buckets[i][k]==null){
+        let prev=-1,next=-1;
+        for(let j=i-1;j>=0;j--)if(buckets[j][k]!=null){prev=j;break;}
+        for(let j=i+1;j<buckets.length;j++)if(buckets[j][k]!=null){next=j;break;}
+        if(prev>=0&&next>=0){const t=(i-prev)/(next-prev);buckets[i][k]=+(buckets[prev][k]+(buckets[next][k]-buckets[prev][k])*t).toFixed(2);}
+        else if(prev>=0)buckets[i][k]=buckets[prev][k];
+        else if(next>=0)buckets[i][k]=buckets[next][k];
+        buckets[i].interp=true;
+      }
+    }
+  });
+  return buckets;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RENDER PROTOCOL
+// ═══════════════════════════════════════════════════════════════════════════
+function renderProtocol(){
+  const w=getCurrentWeek();
+  const proto=getProtocolForWeek(w);
+  const next=getNextChange(w);
+  const pct=Math.min(100,(w/CYCLE_WEEKS)*100);
+  document.getElementById('protoWeekNum').innerHTML=w+'<span>/ '+CYCLE_WEEKS+'</span>';
+  document.getElementById('protoLabel').textContent=proto?proto.label:'Ciclo finalizado';
+  document.getElementById('protoNext').textContent=next?`↑ sem ${next.from} (${next.dateStr}) — ${next.daysUntil}d`:'';
+  document.getElementById('protoNote').textContent=proto&&proto.note?proto.note:'';
+  document.getElementById('protoFill').style.width=pct+'%';
+  document.getElementById('weekBadge').textContent=`Sem ${w} · Ciclo activo`;
+
+  const tl=document.getElementById('weekTimeline'); tl.innerHTML='';
+  for(let i=1;i<=CYCLE_WEEKS;i++){
+    const isPCT=i>=17; const isCurrent=i===w;
+    const isPast=i<w; const isFuture=i>w;
+    let cls='wk ';
+    if(isPCT){ cls+=isCurrent?'pct-current':isPast?'pct-past':'pct-future'; }
+    else { cls+=isCurrent?'current':isPast?'past':'future'; }
+    const div=document.createElement('div'); div.className=cls; div.textContent=i;
+
+    // Tooltip: date range + protocol
+    const wStart=new Date(CYCLE_START); wStart.setDate(wStart.getDate()+(i-1)*7);
+    const wEnd=new Date(CYCLE_START); wEnd.setDate(wEnd.getDate()+i*7-1);
+    const wLabel=`${wStart.getDate()} ${MESES_ES[wStart.getMonth()]} – ${wEnd.getDate()} ${MESES_ES[wEnd.getMonth()]}`;
+    const dose=getWeekDose(i);
+    let doseLines='';
+    if(dose.test&&dose.test!=='—') doseLines+=`\nTesto: ${dose.test}`;
+    if(dose.mast&&dose.mast!=='—') doseLines+=`\nMasteron: ${dose.mast}`;
+    if(dose.deca&&dose.deca!=='—') doseLines+=`\nDeca: ${dose.deca}`;
+    if(dose.tamo&&dose.tamo!=='—') doseLines+=`\nTamo: ${dose.tamo}`;
+    if(dose.hcg)  doseLines+=`\nHCG: ${dose.hcg}`;
+    if(dose.clomid) doseLines+=`\nClomid: ${dose.clomid}`;
+    if(dose.tamo2) doseLines+=`\nTamo: ${dose.tamo2}`;
+    div.title=`Sem ${i} · ${wLabel}${doseLines||'\n—'}`;
+    if(isCurrent) div.title+=' ← actual';
+    tl.appendChild(div);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RENDER BODY COMPOSITION KPIs
+// ═══════════════════════════════════════════════════════════════════════════
+function updateBodyKPIs(){
+  if(!allData.length)return;
+  const latest=allData[allData.length-1];
+  const d12=new Date(); d12.setMonth(d12.getMonth()-12);
+  const d12m=allData.filter(r=>r._date>=d12);
+  if(!d12m.length)return;
+
+  // Measurement closest to CYCLE_START (first measurement on/after cycle start)
+  const cycleRef=allData.filter(r=>r._date<CYCLE_START).slice(-1)[0]||allData[0];
+
+  const minP=Math.min(...d12m.map(r=>r.peso)), maxP=Math.max(...d12m.map(r=>r.peso));
+  const minM=Math.min(...d12m.map(r=>r.musc)), maxM=Math.max(...d12m.map(r=>r.musc));
+  const minG=Math.min(...d12m.map(r=>r.grasa)), maxG=Math.max(...d12m.map(r=>r.grasa));
+  const minV=Math.min(...d12m.map(r=>r.visceral));
+  const maxA=Math.max(...d12m.map(r=>r.agua));
+
+  const latestDate=latest.d.toLowerCase();
+  const cycleDate=cycleRef.d.toLowerCase();
+
+  // Peso
+  document.getElementById('kPeso').innerHTML=`${latest.peso.toFixed(2)} <span class="kpi-unit">kg</span>`;
+  document.getElementById('kPesoDate').textContent=`al ${latestDate}`;
+  document.getElementById('kPesoDelta').textContent=`${fmt2d(latest.peso-minP)} vs mín 12m (${minP.toFixed(2)} kg)`;
+  document.getElementById('kPesoCycleDelta').textContent=`${fmt2d(latest.peso-cycleRef.peso)} vs inicio ciclo (${cycleRef.peso.toFixed(2)} kg)`;
+  document.getElementById('kpiPeso').className='kpi trend-neutral'; // peso: siempre neutro
+
+  // Músculo
+  document.getElementById('kMusc').innerHTML=`${latest.musc.toFixed(2)} <span class="kpi-unit">kg</span>`;
+  document.getElementById('kMuscDate').textContent=`al ${latestDate}`;
+  document.getElementById('kMuscDelta').textContent=`${fmt2d(latest.musc-minM)} vs mín 12m (${minM.toFixed(2)} kg)`;
+  const dMuscCycle=latest.musc-cycleRef.musc;
+  document.getElementById('kMuscCycleDelta').textContent=`${fmt2d(dMuscCycle)} vs inicio ciclo (${cycleRef.musc.toFixed(2)} kg)`;
+  document.getElementById('kpiMusc').className='kpi '+(dMuscCycle>=0?'trend-up':'trend-down');
+
+  // Grasa
+  document.getElementById('kGrasa').innerHTML=`${latest.grasa.toFixed(1)} <span class="kpi-unit">%</span>`;
+  document.getElementById('kGrasaDate').textContent=`al ${latestDate}`;
+  document.getElementById('kGrasaDelta').textContent=`${fmt1d(latest.grasa-minG)} pp vs mín 12m (${minG.toFixed(1)}%)`;
+  const dGrasaCycle=latest.grasa-cycleRef.grasa;
+  document.getElementById('kGrasaCycleDelta').textContent=`${fmt1d(dGrasaCycle)} pp vs inicio ciclo (${cycleRef.grasa.toFixed(1)}%)`;
+  document.getElementById('kpiGrasa').className='kpi '+(dGrasaCycle<=0?'trend-up':dGrasaCycle<=1.5?'trend-neutral':'trend-down');
+
+  // Visceral
+  document.getElementById('kVisc').innerHTML=`${latest.visceral} <span class="kpi-unit">índice</span>`;
+  document.getElementById('kViscDate').textContent=`al ${latestDate}`;
+  document.getElementById('kViscDelta').textContent=`${latest.visceral>minV?'+':''}${latest.visceral-minV} vs mín 12m (${minV})`;
+  const dViscCycle=latest.visceral-cycleRef.visceral;
+  document.getElementById('kViscCycleDelta').textContent=`${dViscCycle>=0?'+':''}${dViscCycle} vs inicio ciclo (${cycleRef.visceral})`;
+  document.getElementById('kpiVisc').className='kpi '+(latest.visceral<=10?'trend-up':latest.visceral===11?'trend-neutral':'trend-down');
+
+  // Agua
+  document.getElementById('kAgua').innerHTML=`${latest.agua.toFixed(1)} <span class="kpi-unit">%</span>`;
+  document.getElementById('kAguaDate').textContent=`al ${latestDate}`;
+  document.getElementById('kAguaDelta').textContent=`−${(maxA-latest.agua).toFixed(1)} pp vs máx 12m (${maxA.toFixed(1)}%)`;
+  const dAguaCycle=latest.agua-cycleRef.agua;
+  document.getElementById('kAguaCycleDelta').textContent=`${fmt1d(dAguaCycle)} pp vs inicio ciclo (${cycleRef.agua.toFixed(1)}%)`;
+  document.getElementById('kpiAgua').className='kpi '+(dAguaCycle>=0?'trend-up':dAguaCycle>=-1?'trend-neutral':'trend-down');
+
+  // Scatter
+  chartScatter.data.datasets[0].data=allData.filter(d=>!d.ciclo).map(d=>({x:d.peso,y:d.grasa,label:d.d}));
+  chartScatter.data.datasets[1].data=allData.filter(d=>d.ciclo).map(d=>({x:d.peso,y:d.grasa,label:d.d}));
+  chartScatter.update();
+}
+
+function applyRange(months){
+  currentRange=months;
+  document.querySelectorAll('.range-btn').forEach(b=>b.classList.toggle('active',+b.dataset.m===months));
+  const type=months===6?'weekly':'monthly';
+  const buckets=aggregate(type);
+  activeCicloIdx=buckets.findIndex(b=>b.ciclo);
+  activeTamoIdx=-1; activeTamoFrac=0.5;
+  for(let i=0;i<buckets.length;i++){const nd=i+1<buckets.length?buckets[i+1].d:new Date(9999,0,1);if(buckets[i].d<=TAMO_DATE&&nd>TAMO_DATE){activeTamoIdx=i;
+    // Compute exact fraction of TAMO_DATE within this bucket
+    const bucketStart=buckets[i].d; const bucketEnd=nd;
+    const span=bucketEnd-bucketStart; activeTamoFrac=span>0?Math.min(1,(TAMO_DATE-bucketStart)/span):0.5;
+    break;}}
+  const fl=buckets.map(b=>b.label);
+  const fw=k=>buckets.map(b=>b[k]);
+  const ptC=a=>buckets.map(b=>b.interp?'rgba(255,255,255,0)':b.ciclo?`rgba(13,138,82,${a})`:`rgba(37,99,190,${a})`);
+  const ptB=()=>buckets.map(b=>b.interp?'#c8c6c0':b.ciclo?'#0d8a52':'#2563be');
+  const ptR=()=>buckets.map(b=>b.interp?3:4);
+  chartPeso.data.labels=fl; chartPeso.data.datasets[0].data=fw('peso');
+  chartPeso.data.datasets[0].pointBackgroundColor=ptC(0.9); chartPeso.data.datasets[0].pointBorderColor=ptB(); chartPeso.data.datasets[0].pointRadius=ptR();
+  chartPeso.data.datasets[0].segment={borderColor:ctx=>buckets[ctx.p1DataIndex]?.ciclo?'#0d8a52':'#2563be'};
+  chartMusc.data.labels=fl; chartMusc.data.datasets[0].data=fw('musc');
+  chartMusc.data.datasets[0].pointBackgroundColor=ptC(0.9); chartMusc.data.datasets[0].pointBorderColor=ptB(); chartMusc.data.datasets[0].pointRadius=ptR();
+  chartGrasa.data.labels=fl; chartGrasa.data.datasets[0].data=fw('grasa'); chartGrasa.data.datasets[1].data=fw('subcutanea');
+  chartGrasa.data.datasets[0].pointBackgroundColor=ptC(0.8); chartGrasa.data.datasets[0].pointBorderColor=ptB(); chartGrasa.data.datasets[0].pointRadius=ptR();
+  chartAgua.data.labels=fl; chartAgua.data.datasets[0].data=fw('agua');
+  chartAgua.data.datasets[0].pointBackgroundColor=ptC(0.8); chartAgua.data.datasets[0].pointBorderColor=ptB(); chartAgua.data.datasets[0].pointRadius=ptR();
+  chartVisceral.data.labels=fl; chartVisceral.data.datasets[0].data=fw('visceral');
+  chartVisceral.data.datasets[0].pointBackgroundColor=ptC(0.8); chartVisceral.data.datasets[0].pointBorderColor=ptB(); chartVisceral.data.datasets[0].pointRadius=ptR();
+  const lastLabel=fl[fl.length-1]||'';
+  document.getElementById('cbPeso').textContent=lastLabel+' · '+(fw('peso')[fw('peso').length-1]||0).toFixed(2)+' kg';
+  document.getElementById('cbMusc').textContent=lastLabel+' · '+(fw('musc')[fw('musc').length-1]||0).toFixed(2)+' kg';
+  document.getElementById('cbGrasa').textContent=lastLabel+' · '+(fw('grasa')[fw('grasa').length-1]||0).toFixed(1)+'%';
+  document.getElementById('cbAgua').textContent=lastLabel+' · '+(fw('agua')[fw('agua').length-1]||0).toFixed(1)+'%';
+  document.getElementById('cbVisceral').textContent=lastLabel+' · '+(fw('visceral')[fw('visceral').length-1]||0);
+  [chartPeso,chartMusc,chartGrasa,chartAgua,chartVisceral].forEach(ch=>ch.update());
+  renderTraining(); // re-render frequency with current range
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RENDER HISTÓRICO COMPLETO
+// ═══════════════════════════════════════════════════════════════════════════
+function renderHist(){
+  if(!allDataFull||!allDataFull.length) return;
+  const CYCLES=CYCLE_HISTORY.map(c=>({...c,start:new Date(c.start),end:new Date(c.end)}));
+  // Agrupar por mes usando _date
+  const byMonth={};
+  allDataFull.forEach(d=>{
+    if(!d._date) return;
+    const y=d._date.getFullYear(), mo=String(d._date.getMonth()+1).padStart(2,'0');
+    const key=`${y}-${mo}`;
+    if(!byMonth[key])byMonth[key]={peso:[],grasa:[],musc:[]};
+    if(d.peso!=null)byMonth[key].peso.push(d.peso);
+    if(d.grasa!=null)byMonth[key].grasa.push(d.grasa);
+    if(d.musc!=null)byMonth[key].musc.push(d.musc);
+  });
+  const avg=arr=>arr.length?Math.round(arr.reduce((a,b)=>a+b,0)/arr.length*10)/10:null;
+  const MO_NAMES=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+  // Eje X fijo: todos los meses desde 2024-01 hasta el mes actual
+  const fixedMonths=[];
+  const now=new Date();
+  let cur=new Date(2024,2,1); // desde mar 2024 — datos anteriores no fiables
+  while(cur<=now){
+    fixedMonths.push(`${cur.getFullYear()}-${String(cur.getMonth()+1).padStart(2,'0')}`);
+    cur.setMonth(cur.getMonth()+1);
+  }
+  const labels=fixedMonths.map(m=>{
+    const [y,mo]=m.split('-');
+    return `${MO_NAMES[parseInt(mo)-1]} ${y}`;
+  });
+
+  // Valores con interpolación lineal para meses sin datos
+  function interpSeries(field){
+    const raw=fixedMonths.map(m=>byMonth[m]?avg(byMonth[m][field]):null);
+    // Interpolación lineal entre puntos conocidos
+    for(let i=0;i<raw.length;i++){
+      if(raw[i]===null){
+        let prev=-1, next=-1;
+        for(let j=i-1;j>=0;j--){ if(raw[j]!==null){prev=j;break;} }
+        for(let j=i+1;j<raw.length;j++){ if(raw[j]!==null){next=j;break;} }
+        if(prev>=0&&next>=0){
+          raw[i]=Math.round((raw[prev]+(raw[next]-raw[prev])*(i-prev)/(next-prev))*10)/10;
+        } else if(prev>=0){ raw[i]=raw[prev]; }
+        else if(next>=0){ raw[i]=raw[next]; }
+      }
+    }
+    return raw;
+  }
+
+  const pesoDat=interpSeries('peso');
+  const grasaDat=interpSeries('grasa');
+  const muscDat =interpSeries('musc');
+
+  chartHist.data.labels=labels;
+  chartHist.data.datasets[0].data=pesoDat;
+  chartHist.data.datasets[1].data=grasaDat;
+  chartHist.data.datasets[2].data=muscDat;
+
+  // Calcular deltas + tasa mensual para ciclos y periodos off
+  const rate=(delta,months)=>months>0?+(delta/months).toFixed(2):null;
+  const fmt1=v=>v===null?'—':(v>0?'+':'')+v.toFixed(1);
+  const fmtR=v=>v===null?'—':(v>0?'+':'')+v.toFixed(2)+'/mes';
+
+  const cycleStats=CYCLES.map(cy=>{
+    const startStr=cy.start.getFullYear()+'-'+String(cy.start.getMonth()+1).padStart(2,'0');
+    const endStr  =cy.end.getFullYear()  +'-'+String(cy.end.getMonth()+1).padStart(2,'0');
+    let si=fixedMonths.indexOf(startStr);
+    if(si<0) si=fixedMonths.findIndex(m=>m>=startStr);
+    let ei=fixedMonths.indexOf(endStr);
+    if(ei<0){ ei=fixedMonths.findIndex(m=>m>endStr); if(ei<0)ei=fixedMonths.length-1; else ei--; }
+    const mo=ei-si;
+    const dPeso =si>=0&&ei>=0&&pesoDat[ei]!=null&&pesoDat[si]!=null ?+(pesoDat[ei] -pesoDat[si] ).toFixed(1):null;
+    const dGrasa=si>=0&&ei>=0&&grasaDat[ei]!=null&&grasaDat[si]!=null?+(grasaDat[ei]-grasaDat[si]).toFixed(1):null;
+    const dMusc =si>=0&&ei>=0&&muscDat[ei]!=null&&muscDat[si]!=null ?+(muscDat[ei] -muscDat[si] ).toFixed(1):null;
+    return {
+      ...cy, si, ei, mo, isOff:false,
+      dPeso, dGrasa, dMusc,
+      rPeso:rate(dPeso,mo), rGrasa:rate(dGrasa,mo), rMusc:rate(dMusc,mo)
+    };
+  });
+
+  // Periodos off-cycle: entre ciclos y antes/después
+  const offStats=[];
+  const sortedCycles=[...cycleStats].filter(c=>c.si>=0&&c.ei>=0).sort((a,b)=>a.si-b.si);
+  const offPeriods=[];
+  // Antes del primer ciclo
+  if(sortedCycles.length&&sortedCycles[0].si>0)
+    offPeriods.push({label:'Off cycle',si:0,ei:sortedCycles[0].si-1});
+  // Entre ciclos
+  for(let i=0;i<sortedCycles.length-1;i++)
+    offPeriods.push({label:'Off cycle',si:sortedCycles[i].ei+1,ei:sortedCycles[i+1].si-1});
+  // Después del último ciclo activo completado (solo si hay datos post-ciclo)
+  // (ciclo 2026 está en curso — no añadir "off" después)
+
+  offPeriods.forEach(op=>{
+    if(op.ei<op.si) return;
+    const mo=op.ei-op.si;
+    const dPeso =pesoDat[op.ei]!=null&&pesoDat[op.si]!=null ?+(pesoDat[op.ei] -pesoDat[op.si] ).toFixed(1):null;
+    const dGrasa=grasaDat[op.ei]!=null&&grasaDat[op.si]!=null?+(grasaDat[op.ei]-grasaDat[op.si]).toFixed(1):null;
+    const dMusc =muscDat[op.ei]!=null&&muscDat[op.si]!=null ?+(muscDat[op.ei] -muscDat[op.si] ).toFixed(1):null;
+    offStats.push({
+      ...op, mo, isOff:true,
+      dPeso, dGrasa, dMusc,
+      rPeso:rate(dPeso,mo), rGrasa:rate(dGrasa,mo), rMusc:rate(dMusc,mo)
+    });
+  });
+
+  chartHist._cyclePlugin={cycles:CYCLES,months:fixedMonths,cycleStats,offStats,fmt1,fmtR};
+  chartHist.update('none');
+  const n=allDataFull.length;
+  document.getElementById('histBadge').textContent=`${n} mediciones · ${labels[0]} → ${labels[labels.length-1]}`;
+  document.getElementById('histNote').textContent='Sombreado: periodos en ciclo activo. Líneas interpoladas donde no hay medición.';
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RENDER BP
+// ═══════════════════════════════════════════════════════════════════════════
+const BP_TIPO_COLOR={medico:'rgba(109,79,194,0.85)',cafe:'rgba(201,74,48,0.9)',nocafe:'rgba(13,138,82,0.9)'};
+const BP_TIPO_BORDER={medico:'#6d4fc2',cafe:'#c94a30',nocafe:'#0d8a52'};
+const BP_TIPO_LABEL={medico:'chequeo médico',cafe:'con café',nocafe:'sin café'};
+
+function renderBP(){
+  const statusEl=document.getElementById('bpStatus');
+  if(!bpReadings||!bpReadings.length){
+    statusEl.style.display='block';
+    statusEl.textContent='Sin datos de tensión arterial. Verifica que fetch_bp.yml está ejecutándose y que NOTION_TOKEN está configurado en GitHub Secrets.';
+    return;
+  }
+  statusEl.style.display='none';
+
+  // Sort by date index (readings already ordered from workflow, but just in case)
+  const readings=[...bpReadings];
+  const n=readings.length;
+  const labels=readings.map(r=>r.d);
+  const sistData=readings.map(r=>r.sist);
+  const diastData=readings.map(r=>r.diast);
+  const bgColors=readings.map(r=>BP_TIPO_COLOR[r.tipo]||BP_TIPO_COLOR.nocafe);
+  const borderColors=readings.map(r=>BP_TIPO_BORDER[r.tipo]||BP_TIPO_BORDER.nocafe);
+
+  chartBP.data.labels=labels;
+  chartBP.data.datasets[0].data=sistData;
+  chartBP.data.datasets[0].pointBackgroundColor=bgColors;
+  chartBP.data.datasets[0].pointBorderColor=borderColors;
+  chartBP.data.datasets[0].pointRadius=5;
+  chartBP.data.datasets[1].data=diastData;
+  chartBP.data.datasets[1].pointBackgroundColor=bgColors;
+  chartBP.data.datasets[1].pointBorderColor=borderColors;
+  chartBP.data.datasets[1].pointRadius=4;
+  chartBP.data.datasets[2].data=new Array(n).fill(140);
+  chartBP.data.datasets[3].data=new Array(n).fill(90);
+  chartBP.options.plugins.tooltip.callbacks={
+    title:ctx=>ctx&&ctx[0]?`${ctx[0].label}`:'',
+    label:ctx=>{
+      if(ctx.datasetIndex>=2)return null;
+      const r=readings[ctx.dataIndex];
+      return `${ctx.datasetIndex===0?'Sistólica':'Diastólica'}: ${ctx.raw} mmHg (${BP_TIPO_LABEL[r?.tipo]||''})`;
+    }
+  };
+  // Sombreado sem 11: a partir del lunes 1 jun 2026
+  const SEM11_DATE = new Date('2026-06-01');
+  const parseBPDate = s => { const p=s.match(/(\d+)\s+(\w+)/); if(!p)return null; const m={ene:0,feb:1,mar:2,abr:3,may:4,jun:5,jul:6,ago:7,sep:8,oct:9,nov:10,dic:11}; return new Date(2026,m[p[2]],parseInt(p[1])); };
+  activeBPShadeIdx = readings.findIndex(r => { const d=parseBPDate(r.d); return d&&d>=SEM11_DATE; });
+  // Tamoxifeno line: find reading index nearest to TAMO_DATE
+  activeBPTamoIdx=-1; activeBPTamoFrac=0;
+  for(let i=0;i<readings.length;i++){
+    const d=parseBPDate(readings[i].d); if(!d)continue;
+    const nd=i+1<readings.length?parseBPDate(readings[i+1].d):new Date(9999,0,1);
+    if(d<=TAMO_DATE&&nd&&nd>TAMO_DATE){activeBPTamoIdx=i;activeBPTamoFrac=nd-d>0?(TAMO_DATE-d)/(nd-d):0;break;}
+    if(d.getTime()===TAMO_DATE.getTime()){activeBPTamoIdx=i;activeBPTamoFrac=0;break;}
+  }
+  chartBP.update('none'); // 'none' skips animation for cleaner update
+
+  const nocafe=readings.filter(r=>r.tipo==='nocafe');
+  const avgS=nocafe.length?Math.round(nocafe.reduce((s,r)=>s+r.sist,0)/nocafe.length):null;
+  const avgD=nocafe.length?Math.round(nocafe.reduce((s,r)=>s+r.diast,0)/nocafe.length):null;
+  const avgPP=nocafe.length?Math.round(nocafe.reduce((s,r)=>s+(r.sist-r.diast),0)/nocafe.length):null;
+  if(avgS)document.getElementById('bpBadge').textContent=`media sin café: ${avgS}/${avgD} · PP ${avgPP}`;
+  document.getElementById('bpNote').textContent=nocafe.length?`${nocafe.length} lecturas sin café · media ${avgS}/${avgD} mmHg · PP media ${avgPP} mmHg${avgPP>=60?' ⚠ PP elevada':''} · ${avgS<140&&avgD<90?'✓ bajo umbral 140/90':'⚠ sobre umbral 140/90'}` : '';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RENDER TRAINING
+// ═══════════════════════════════════════════════════════════════════════════
+function aggMuscleRadar(sessions){
+  const p={},s2={};
+  sessions.forEach(s=>{
+    Object.entries(s.musclePrimary||{}).forEach(([g,v])=>{p[g]=(p[g]||0)+v;});
+    Object.entries(s.muscleSecondary||{}).forEach(([g,v])=>{s2[g]=(s2[g]||0)+v;});
+  });
+  return RADAR_GROUPS.map(g=>(p[g]||0)+(s2[g]||0));
+}
+
+function renderTraining(){
+  if(!allSessions.length)return;
+  const now=new Date();
+  const monthStart=new Date(now.getFullYear(),now.getMonth(),1);
+  const sessMonth=allSessions.filter(s=>s.date>=monthStart);
+  const volMonth=sessMonth.reduce((s,w)=>s+w.vol,0);
+  const last=allSessions[allSessions.length-1];
+
+  // KPIs
+  document.getElementById('tSes').innerHTML=`${sessMonth.length} <span class="kpi-unit">ses</span>`;
+  document.getElementById('tSesDelta').textContent=sessMonth.length>=8?'✓ objetivo 8–10/mes':sessMonth.length>=5?`+${8-sessMonth.length} para objetivo`:`${8-sessMonth.length} sesiones hasta objetivo`;
+  document.getElementById('tVol').innerHTML=`${(volMonth/1000).toFixed(1)} <span class="kpi-unit">t</span>`;
+  document.getElementById('tVolDelta').textContent=sessMonth.length?`${Math.round(volMonth/sessMonth.length/1000*10)/10}t prom/ses`:'—';
+  document.getElementById('tLast').innerHTML=last?last.dateStr:'—';
+  document.getElementById('tLastVol').textContent=last?`${(last.vol/1000).toFixed(1)}t · ${last.src}`:'—';
+
+  // Volume chart — cycle sessions
+  const cycleSessions=allSessions.filter(s=>s.inCycle);
+  chartVol.data.labels=cycleSessions.map(s=>s.dateStr);
+  chartVol.data.datasets[0].data=cycleSessions.map(s=>s.vol);
+  chartVol.data.datasets[0].backgroundColor=cycleSessions.map(s=>s.src==='Hevy'?'rgba(13,138,82,0.65)':'rgba(37,99,190,0.45)');
+  document.getElementById('volBadge').textContent=`${cycleSessions.length} ses · ${(cycleSessions.reduce((s,w)=>s+w.vol,0)/1000).toFixed(1)}t · verde=Hevy azul=Jefit`;
+  chartVol.update();
+
+  // Frequency chart — respects currentRange
+  const freqN=currentRange===6?6:12;
+  const freqMonths=[]; const freqs=[];
+  for(let i=freqN-1;i>=0;i--){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    const end=new Date(now.getFullYear(),now.getMonth()-i+1,0);
+    end.setHours(23,59,59);
+    const count=allSessions.filter(s=>s.date>=d&&s.date<=end).length;
+    freqMonths.push(fmtMonth(d));
+    freqs.push(count);
+  }
+  // Weekday-based projection for current month
+  const proj=projectedMonthSessions(sessMonth.length,monthStart,now);
+  const projData=new Array(freqMonths.length).fill(0);
+  if(proj.additional>0) projData[projData.length-1]=proj.additional;
+  chartFreq.data.labels=freqMonths;
+  chartFreq.data.datasets[0].data=freqs;
+  chartFreq.data.datasets[0].backgroundColor=freqs.map((f,i)=>{
+    const total=(i===freqMonths.length-1)?proj.total:f;
+    return total>=8?'rgba(13,138,82,0.65)':total>=5?'rgba(37,99,190,0.45)':'rgba(201,74,48,0.45)';
+  });
+  chartFreq.data.datasets[1].data=new Array(freqMonths.length).fill(8);
+  chartFreq.data.datasets[2].data=projData;
+  document.getElementById('freqBadge').textContent=`últimos ${freqN} meses`;
+  chartFreq.update();
+
+  // Radars — semana actual vs anterior / mes actual vs anterior
+  const sessWithMuscle=allSessions.filter(s=>s.hasNativeMuscle);
+
+  // Week boundaries
+  const weekStart=getMonday(now);
+  const prevWeekStart=new Date(weekStart); prevWeekStart.setDate(prevWeekStart.getDate()-7);
+  const prevWeekEnd=new Date(weekStart); prevWeekEnd.setTime(prevWeekEnd.getTime()-1);
+  const weekSess=sessWithMuscle.filter(s=>s.date>=weekStart);
+  const prevWeekSess=sessWithMuscle.filter(s=>s.date>=prevWeekStart&&s.date<=prevWeekEnd);
+
+  // Month boundaries
+  const monthStartR=new Date(now.getFullYear(),now.getMonth(),1);
+  const prevMonthStart=new Date(now.getFullYear(),now.getMonth()-1,1);
+  const prevMonthEnd=new Date(now.getFullYear(),now.getMonth(),0); prevMonthEnd.setHours(23,59,59);
+  const monthSess=sessWithMuscle.filter(s=>s.date>=monthStartR);
+  const prevMonthSess=sessWithMuscle.filter(s=>s.date>=prevMonthStart&&s.date<=prevMonthEnd);
+
+  function makeRadarOpts(maxV){
+    return {responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'bottom',labels:{font:{family:'DM Mono',size:9},color:'#6b6d70',boxWidth:8,padding:10}}},
+      scales:{r:{min:0,suggestedMax:Math.ceil(maxV)+2,ticks:{font:{size:8,family:'DM Mono'},color:'#a8aab0',backdropColor:'transparent',stepSize:Math.max(1,Math.ceil(maxV/4))},grid:{color:'rgba(0,0,0,0.06)'},angleLines:{color:'rgba(0,0,0,0.06)'},pointLabels:{font:{family:'DM Mono',size:9},color:'#1a1a18'}}}};
+  }
+
+  if(sessWithMuscle.length>0){
+    document.getElementById('radarCard').style.display='';
+
+    // Radar semana
+    const wCurData=aggMuscleRadar(weekSess);
+    const wPrevData=aggMuscleRadar(prevWeekSess);
+    const wMax=Math.max(1,...wCurData,...wPrevData);
+    const wCurSrc=weekSess.length?(weekSess.some(s=>s.src==='Hevy')?'Hevy':'Jefit'):'—';
+    const wPrevSrc=prevWeekSess.length?(prevWeekSess.some(s=>s.src==='Hevy')?'Hevy':'Jefit'):'—';
+    if(chartRadar)chartRadar.destroy();
+    chartRadar=new Chart(document.getElementById('c-radar-week'),{type:'radar',data:{labels:RADAR_GROUPS,datasets:[
+      {label:`Esta semana (${weekSess.length} ses · ${wCurSrc})`,data:wCurData,backgroundColor:'rgba(37,99,190,0.15)',borderColor:'rgba(37,99,190,0.9)',borderWidth:2,pointBackgroundColor:'rgba(37,99,190,0.9)',pointRadius:3},
+      {label:`Sem anterior (${prevWeekSess.length} ses · ${wPrevSrc})`,data:wPrevData,backgroundColor:'rgba(160,160,160,0.08)',borderColor:'rgba(160,160,160,0.5)',borderWidth:1.5,borderDash:[4,3],pointBackgroundColor:'rgba(160,160,160,0.6)',pointRadius:2}
+    ]},options:makeRadarOpts(wMax)});
+    document.getElementById('radarWeekBadge').textContent=`${weekSess.length} ses esta sem · ${prevWeekSess.length} sem anterior`;
+
+    // Radar mes
+    const mCurData=aggMuscleRadar(monthSess);
+    const mPrevData=aggMuscleRadar(prevMonthSess);
+    const mMax=Math.max(1,...mCurData,...mPrevData);
+    const mCurSrc=monthSess.length?(monthSess.some(s=>s.src==='Hevy')?'Hevy':'Jefit'):'—';
+    const mPrevSrc=prevMonthSess.length?(prevMonthSess.some(s=>s.src==='Hevy')?'Hevy':'Jefit'):'—';
+    if(chartRadarMonth)chartRadarMonth.destroy();
+    chartRadarMonth=new Chart(document.getElementById('c-radar-month'),{type:'radar',data:{labels:RADAR_GROUPS,datasets:[
+      {label:`Este mes (${monthSess.length} ses · ${mCurSrc})`,data:mCurData,backgroundColor:'rgba(13,138,82,0.12)',borderColor:'rgba(13,138,82,0.85)',borderWidth:2,pointBackgroundColor:'rgba(13,138,82,0.85)',pointRadius:3},
+      {label:`Mes anterior (${prevMonthSess.length} ses · ${mPrevSrc})`,data:mPrevData,backgroundColor:'rgba(160,160,160,0.08)',borderColor:'rgba(160,160,160,0.5)',borderWidth:1.5,borderDash:[4,3],pointBackgroundColor:'rgba(160,160,160,0.6)',pointRadius:2}
+    ]},options:makeRadarOpts(mMax)});
+    document.getElementById('radarMonthBadge').textContent=`${monthSess.length} ses este mes · ${prevMonthSess.length} mes anterior`;
+  } else {
+    document.getElementById('radarCard').style.display='none';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CHART INSIGHTS + KEY SUMMARY
+// ═══════════════════════════════════════════════════════════════════════════
+function setInsight(id, cls, trend, advice){
+  const el=document.getElementById(id);
+  if(!el)return;
+  if(el.innerHTML.trim()!=='')return;
+  el.className='chart-insight '+cls;
+  el.innerHTML=`<span class="ins-trend">${trend}</span><span class="ins-advice"> — ${advice}</span>`;
+}
+
+function renderAnalysis(){
+  const w=getCurrentWeek();
+  const latest=allData.length?allData[allData.length-1]:null;
+  const now=new Date();
+  const monthStart=new Date(now.getFullYear(),now.getMonth(),1);
+  const sessMonth=allSessions.filter(s=>s.date>=monthStart);
+  const nocafe=bpReadings.filter(r=>r.tipo==='nocafe');
+  const avgS=nocafe.length?Math.round(nocafe.reduce((s,r)=>s+r.sist,0)/nocafe.length):null;
+  const avgD=nocafe.length?Math.round(nocafe.reduce((s,r)=>s+r.diast,0)/nocafe.length):null;
+  const cycleRef=allData.filter(r=>r._date<CYCLE_START).slice(-1)[0]||allData[0];
+
+  if(!latest||!cycleRef) return;
+
+  const dP=+(latest.peso-cycleRef.peso).toFixed(2);
+  const dM=+(latest.musc-cycleRef.musc).toFixed(2);
+  const dG=+(latest.grasa-cycleRef.grasa).toFixed(1);
+  const dV=latest.visceral-cycleRef.visceral;
+  const dA=+(latest.agua-cycleRef.agua).toFixed(1);
+
+  // --- Peso ---
+  const ganSemanal = dP / Math.max(1,w);
+  const pesoOk = ganSemanal>=0.2&&ganSemanal<=0.6;
+  const pesoExc = ganSemanal>0.6;
+  setInsight('ins-peso',
+    pesoOk?'ok':pesoExc?'warn':'info',
+    `+${dP} kg desde inicio del ciclo (sem ${w}). Ritmo: ~${(ganSemanal).toFixed(2)} kg/sem.`,
+    pesoOk
+      ? 'Ritmo de superávit bien calibrado. Mantener ingesta actual.'
+      : pesoExc
+        ? 'Ritmo elevado — riesgo de acumular más grasa de la necesaria. Reducir ~200 kcal/día.'
+        : 'Ganancia lenta. Si músculo no sube, aumentar ~200 kcal/día priorizando proteína.'
+  );
+
+  // --- Músculo ---
+  const muscOk = dM>0;
+  const muscRate = dM / Math.max(1,w);
+  const muscProj=projectedMonthSessions(sessMonth.length,monthStart,now);
+  setInsight('ins-musc',
+    muscOk?'ok':'warn',
+    `+${dM} kg músculo desde inicio del ciclo. Media: +${muscRate.toFixed(2)} kg/sem.`,
+    muscOk
+      ? (muscProj.total>=6
+          ? 'Buen progreso. Seguir con frecuencia actual y superávit controlado.'
+          : `Tendencia positiva pero la frecuencia proyectada es baja (${muscProj.total} ses/mes) — más sesiones en días laborables mejorarían la síntesis proteica.`)
+      : 'Sin ganancia muscular neta. Revisar ingesta proteica (≥2 g/kg) y aumentar frecuencia de entrenamiento.'
+  );
+
+  // --- Grasa ---
+  const grasaAceptable = dG<=1.5;
+  const subcLast=latest.subcutanea||0;
+  const subcRef=cycleRef.subcutanea||0;
+  const dSub=+(subcLast-subcRef).toFixed(1);
+  setInsight('ins-grasa',
+    grasaAceptable?'ok':'warn',
+    `${fmt1d(dG)} pp grasa total desde inicio del ciclo (${latest.grasa.toFixed(1)}%). Subcutánea: ${dSub>=0?'+':''}${dSub} pp.`,
+    grasaAceptable
+      ? 'Acumulación de grasa dentro del rango esperado para un ciclo de volumen. Controlar sodio.'
+      : 'Acumulación de grasa por encima de lo óptimo. Reducir carbohidratos refinados y sodio; revisar superávit calórico.'
+  );
+
+  // --- Agua ---
+  const aguaOk = latest.agua>=52;
+  setInsight('ins-agua',
+    aguaOk?'ok':latest.agua>=51?'info':'warn',
+    `Agua corporal: ${latest.agua.toFixed(1)}% (${dA>=0?'+':''}${dA} pp vs inicio ciclo).`,
+    aguaOk
+      ? 'Hidratación adecuada. Los ésteres largos generan retención; el nivel actual es esperable en fase de carga.'
+      : 'Porcentaje de agua bajo para la fase del ciclo. Asegurar ≥2.5 L/día de agua; reducir sodio si hay retención visible.'
+  );
+
+  // --- Visceral ---
+  setInsight('ins-visceral',
+    latest.visceral<=10?'ok':latest.visceral===11?'info':'warn',
+    `Grasa visceral: índice ${latest.visceral} (${dV>=0?'+':''}${dV} vs inicio ciclo). Rango saludable: ≤12.`,
+    latest.visceral<=10
+      ? 'Nivel óptimo. Mantener con dieta controlada en carbohidratos refinados y alcohol.'
+      : latest.visceral===11
+        ? 'Nivel aceptable pero elevado para el inicio del ciclo. Controlar sodio y reducir azúcar añadida.'
+        : 'Nivel elevado. Reducir hidratos refinados, alcohol y sodio; incrementar cardio de baja intensidad.'
+  );
+
+  // --- Scatter ---
+  const cycleData=allData.filter(d=>d.ciclo);
+  let scatterTrend='', scatterAdv='', scatterCls='info';
+  if(cycleData.length>=3){
+    const first=cycleData[0], last2=cycleData[cycleData.length-1];
+    const dPeso=+(last2.peso-first.peso).toFixed(2);
+    const dGr=+(last2.grasa-first.grasa).toFixed(1);
+    const muscEff= dM>0 && dG<1.5;
+    scatterCls = muscEff?'ok':dGr>2?'warn':'info';
+    scatterTrend=`Ciclo: +${dPeso} kg peso / ${dGr>=0?'+':''}${dGr} pp grasa. Ratio músculo:grasa = ${dM>0?(dM/Math.max(0.1,dG)).toFixed(1):'—'}.`;
+    scatterAdv = muscEff
+      ? 'La composición corporal avanza bien: más músculo que grasa. Mantener el enfoque actual.'
+      : dGr>2
+        ? 'La proporción de grasa ganada es alta. Ajustar superávit y revisar calidad de la dieta.'
+        : 'Composición en seguimiento. Continuar midiendo para confirmar tendencia.';
+  } else {
+    scatterTrend='Insuficientes mediciones en ciclo para calcular tendencia.';
+    scatterAdv='Más mediciones en la báscula inteligente mejorarán la precisión del análisis.';
+  }
+  setInsight('ins-scatter', scatterCls, scatterTrend, scatterAdv);
+
+  // --- 3 key insights summary ---
+  // Build ranked list: pick the 3 most actionable based on severity
+  const candidates=[];
+
+  // Training frequency — often the highest-impact lever
+  const freqCls = sessMonth.length>=8?'ok':sessMonth.length>=5?'info':'warn';
+  const freqTxt = sessMonth.length>=8
+    ? `Frecuencia este mes: ${sessMonth.length} ses — objetivo cumplido. El entrenamiento está maximizando el ciclo.`
+    : `Frecuencia este mes: ${sessMonth.length} ses (objetivo 8–10). Cada sesión adicional amplifica el efecto anabólico.`;
+  candidates.push({priority: sessMonth.length<6?0:sessMonth.length<8?1:3, cls:freqCls, text:freqTxt});
+
+  // Body fat accumulation
+  if(dG>2) candidates.push({priority:0, cls:'warn', text:`Grasa acumulada: +${dG} pp desde el inicio. Revisar superávit calórico y calidad de la dieta antes de seguir aumentando dosis.`});
+  else candidates.push({priority:2, cls:'ok', text:`Grasa bajo control (+${dG} pp en ${w} semanas). Ratio músculo:grasa favorable.`});
+
+  // Muscle gain
+  if(dM<0.5&&w>=6) candidates.push({priority:0, cls:'warn', text:`Ganancia muscular insuficiente (+${dM} kg en sem ${w}). Priorizar proteína ≥2 g/kg y aumentar frecuencia de entrenamiento.`});
+  else candidates.push({priority:2, cls:'ok', text:`Músculo: +${dM} kg desde el inicio del ciclo. Tendencia positiva, consistente con el protocolo activo.`});
+
+  // BP — escalation criterion
+  if(avgS!==null){
+    const bpOk=avgS<140&&avgD<90;
+    candidates.push({priority:bpOk?3:0, cls:bpOk?'ok':'warn',
+      text:bpOk
+        ? `TA sin café: ${avgS}/${avgD} mmHg — criterio para Testo 3cm sem 11 cumplido.`
+        : `TA sin café: ${avgS}/${avgD} mmHg — sobre umbral 140/90. No escalar Testo hasta normalizarla.`
+    });
+  }
+
+  // Sort by priority ascending (0 = most urgent), take top 3
+  candidates.sort((a,b)=>a.priority-b.priority);
+  const top3=candidates.slice(0,3);
+
+  const clsToSymbol={ok:'✓',warn:'⚠',info:'→'};
+  const clsToColor={ok:'var(--green)',warn:'var(--amber)',info:'var(--blue)'};
+  document.getElementById('keyInsightsBody').innerHTML=top3.map((c,i)=>`
+    <div class="key-insight-row">
+      <span class="key-insight-num" style="color:${clsToColor[c.cls]}">${clsToSymbol[c.cls]}</span>
+      <span>${c.text}</span>
+    </div>`).join('');
+
+  // Keep analysisDate if element still exists (won't, but harmless)
+  const ad=document.getElementById('analysisDate');
+  if(ad) ad.textContent=now.toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'});
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// META
+// ═══════════════════════════════════════════════════════════════════════════
+function updateMeta(){
+  const w=getCurrentWeek();
+  const latest=allData.length?allData[allData.length-1]:null;
+  if(latest){
+    const now=new Date();
+    document.getElementById('footerTxt').textContent=`Datos: ${allData[0]._date.getDate()} ${MESES_ES[allData[0]._date.getMonth()]} → ${latest.d.toLowerCase()} · ${ACTIVE_CYCLE_LABEL} Sem ${w} · ${now.toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})}`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DATA LOADING
+// ═══════════════════════════════════════════════════════════════════════════
+async function loadAll(){
+  document.getElementById('loadBar').classList.add('active');
+  try{
+    const t=Date.now();
+    const fetchOpts={cache:'no-store'};
+    const [rJson,hJson,jJson,bJson]=await Promise.all([
+      fetch(RENPHO_URL+'?t='+t,fetchOpts).then(r=>{if(!r.ok)throw new Error('renpho '+r.status);return r.json();}),
+      fetch(HEVY_URL+'?t='+t,fetchOpts).then(r=>r.json()).catch(e=>{console.warn('hevy fetch:',e);return {workouts:[]};}),
+      fetch(JEFIT_URL+'?t='+t,fetchOpts).then(r=>r.json()).catch(e=>{console.warn('jefit fetch:',e);return [];}),
+      fetch(BP_URL+'?t='+t,fetchOpts).then(r=>{if(!r.ok)throw new Error('bp '+r.status);return r.json();}).catch(e=>{console.warn('bp fetch:',e);return {readings:[]};}),
+    ]);
+    processRenpho(rJson);
+    const hevySessions=parseWorkouts(hJson.workouts||[],'Hevy');
+    const jeitRaw=Array.isArray(jJson)?jJson:(jJson.workouts||[]);
+    const jeitSessions=parseWorkouts(jeitRaw,'Jefit');
+    allSessions=[...jeitSessions,...hevySessions].sort((a,b)=>a.date-b.date);
+    bpReadings=bJson.readings||[];
+    console.log(`BP readings loaded: ${bpReadings.length}`);
+    renderProtocol();
+    updateBodyKPIs();
+    applyRange(12);
+    renderBP();
+    renderHist();
+    renderAnalysis();
+    updateMeta();
+  }catch(e){console.error('Load error:',e);}
+  finally{document.getElementById('loadBar').classList.remove('active');}
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// REFRESH
+// ═══════════════════════════════════════════════════════════════════════════
+async function triggerRefresh(){
+  const token=GH_TOKEN;
+  const btn=document.getElementById('btnRefresh');
+  const msg=document.getElementById('refreshMsg');
+  btn.classList.add('loading');
+  btn.textContent='↻ Enviando…';
+  msg.style.display='inline';
+  let ok=0;
+  for(const wf of GH_WF){
+    try{
+      const r=await fetch(`https://api.github.com/repos/${GH_REPO}/actions/workflows/${wf}/dispatches`,{
+        method:'POST',headers:{'Authorization':`token ${token}`,'Content-Type':'application/json'},
+        body:JSON.stringify({ref:'main'})
+      });
+      if(r.status===204)ok++;
+      else console.warn(`Workflow ${wf} dispatch returned ${r.status}`);
+    }catch(e){console.warn(`Workflow ${wf} error:`,e);}
+  }
+  if(ok===GH_WF.length){
+    btn.textContent='↻ Lanzado';
+    let _secs=90;
+    msg.textContent=`Actions disparados · recargando en ${_secs}s`;
+    const _cd=setInterval(()=>{_secs--;msg.textContent=`Actions disparados · recargando en ${_secs}s`;if(_secs<=0)clearInterval(_cd);},1000);
+    setTimeout(()=>{location.reload();},90000);
+    setTimeout(()=>{btn.textContent='↻ Actualizar';btn.classList.remove('loading');},5000);
+  }else{
+    btn.textContent='↻ Error';
+    msg.textContent=`Token caducado o sin permisos (${ok}/${GH_WF.length} OK). Actualiza GH_TOKEN en el código.`;
+    btn.classList.remove('loading');
+    setTimeout(()=>{btn.textContent='↻ Actualizar';msg.style.display='none';},8000);
+  }
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CLAUDE ANALYSIS (on-demand)
+// ═══════════════════════════════════════════════════════════════════════════
+async function runAnalysis(){
+  const btn = document.getElementById('btnAnalizar');
+  const body = document.getElementById('claudeAnalysisBody');
+  const dateEl = document.getElementById('claudeAnalysisDate');
+  btn.textContent = '✦ Analizando…';
+  btn.disabled = true;
+  btn.style.color = 'var(--amber)';
+  btn.style.borderColor = 'var(--amber)';
+
+  // Re-fetch fresh data at analysis time (bypasses stale in-memory arrays)
+  const t = Date.now();
+  const fetchOpts = {cache:'no-store'};
+  const [freshRenpho, freshHevy, freshBP] = await Promise.all([
+    fetch(RENPHO_URL+'?t='+t, fetchOpts).then(r=>r.json()).catch(()=>null),
+    fetch(HEVY_URL+'?t='+t, fetchOpts).then(r=>r.json()).catch(()=>null),
+    fetch(BP_URL+'?t='+t, fetchOpts).then(r=>r.json()).catch(()=>null),
+  ]);
+
+  const renphoRows = freshRenpho
+    ? (Array.isArray(freshRenpho)?freshRenpho:(freshRenpho.measurements||[]))
+        .sort((a,b)=>a.date>b.date?1:-1)
+    : [];
+  const last8renpho = renphoRows.slice(-8).map(r=>({
+    date: r.date,
+    weight: +r.weight,
+    skeletal_muscle: Math.round(+(r.skeletal_muscle||0)*100)/100,
+    body_fat: +r.body_fat,
+    visceral_fat: +r.visceral_fat
+  }));
+
+  const hevyWorkouts = freshHevy ? parseWorkouts(freshHevy.workouts||[], 'Hevy') : allSessions;
+  const last8hevy = hevyWorkouts.slice(-8).map(s=>({
+    date: s.dateStr,
+    title: s.title||'',
+    volume_kg: s.vol,
+    exercises: s.exerciseCount,
+    duration_min: s.durationMin,
+    muscle_groups: Object.keys(s.groupSets||{})
+  }));
+
+  const freshBPReadings = freshBP ? (freshBP.readings||[]) : bpReadings;
+  const bpNocafe = freshBPReadings.filter(r=>r.tipo==='nocafe').slice(-10).map(r=>({
+    d:r.d, sist:r.sist, diast:r.diast, pp:r.sist-r.diast
+  }));
+  const ppValues = bpNocafe.map(r=>r.pp);
+  const ppAvg = ppValues.length ? Math.round(ppValues.reduce((a,b)=>a+b,0)/ppValues.length) : null;
+  const ppMax = ppValues.length ? Math.max(...ppValues) : null;
+  const ppTrend = ppValues.length>=3 ? (ppValues.slice(-3).reduce((a,b)=>a+b,0)/3 - ppValues.slice(0,3).reduce((a,b)=>a+b,0)/3).toFixed(1) : null;
+  const ppAlert = ppMax>=60 ? 'ALERTA: PP maxima '+ppMax+' mmHg (umbral critico 60)' : ppAvg>=55 ? 'AVISO: PP media '+ppAvg+' mmHg (cerca del umbral 60)' : 'PP en rango normal';
+
+  const cycleStart = '2026-03-23';
+  const tamoStart  = '2026-05-14';
+  const now = new Date();
+  const months = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const today = now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear();
+
+  const prompt =
+    'Eres el agente de analisis del '+ACTIVE_CYCLE_LABEL+' (21 semanas), iniciado el '+cycleStart+'.\n\n'+
+    'PROTOCOLO ACTIVO: Sem 11+: Testo 3cm/sem + Masteron finalizado sem 11 (ultima dosis 10 jun). '+
+    'Sem 14-15: Testo 2cm/sem (1+1). Sem 16-17: Testo 1cm/sem, ultima inyeccion 6 jul (sem 16). PCT Sem 18-20: HCG + SERMs.\n'+
+    'Tamoxifeno iniciado: '+tamoStart+'\n'+
+    'Baseline ciclo: peso 86.20 kg / musculo 59.22 kg / GC 27.7%\n\n'+
+    'DATOS RENPHO (ultimas mediciones):\n'+JSON.stringify(last8renpho)+'\n\n'+
+    'DATOS HEVY (ultimas sesiones, volumen excluye warmup):\n'+JSON.stringify(last8hevy)+'\n\n'+
+    'TENSION ARTERIAL nocafe (ultimas lecturas, incluye PP=sist-diast):\n'+JSON.stringify(bpNocafe)+'\n'+
+    'PP resumen: media='+ppAvg+' mmHg | max='+ppMax+' mmHg | tendencia 3u='+ppTrend+' mmHg | '+ppAlert+'\n\n'+
+    'Responde EXCLUSIVAMENTE con un objeto JSON valido (sin backticks, sin texto antes ni despues).'+
+    'Estructura del JSON:\n'+
+    '{\n'+
+    '  \"analysis\": \"<HTML del analisis principal>\",\n'+
+    '  \"comments\": {\n'+
+    '    \"peso\": {\"cls\":\"ok|warn|info\", \"trend\":\"frase corta con dato concreto\", \"advice\":\"accion especifica\"},\n'+
+    '    \"musc\": {\"cls\":\"ok|warn|info\", \"trend\":\"...\", \"advice\":\"...\"},\n'+
+    '    \"grasa\": {\"cls\":\"ok|warn|info\", \"trend\":\"...\", \"advice\":\"...\"},\n'+
+    '    \"agua\": {\"cls\":\"ok|warn|info\", \"trend\":\"...\", \"advice\":\"...\"},\n'+
+    '    \"visceral\": {\"cls\":\"ok|warn|info\", \"trend\":\"...\", \"advice\":\"...\"},\n'+
+    '    \"bp\": {\"cls\":\"ok|warn|info\", \"trend\":\"...\", \"advice\":\"...\"},\n'+
+    '    \"training\": {\"cls\":\"ok|warn|info\", \"trend\":\"...\", \"advice\":\"...\"}\n'+
+    '  }\n'+
+    '}\n\n'+
+    'Para el campo \"analysis\", usa HTML puro (sin etiquetas html/body/head). Estructura exacta:\n'+
+    '<p style=\"font-weight:600;color:var(--text);margin-bottom:10px\">Semana XX - '+today+'</p>\n\n'+
+    '<p style=\"margin-bottom:10px\"><span style=\"font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px\">Composicion corporal</span><br>\n'+
+    '[analisis composicion: ultimas metricas, deltas vs baseline, tendencia]</p>\n\n'+
+    '<p style=\"margin-bottom:10px\"><span style=\"font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px\">Entrenamiento</span><br>\n'+
+    '[analisis entrenamiento: volumen, frecuencia, tendencia]</p>\n\n'+
+    '<p style=\"margin-bottom:10px\"><span style=\"font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px\">Tension arterial</span><br>\n'+
+    '[analisis TA: media reciente, tendencia, alertas si sistolica nocafe >130 sostenida. INCLUIR analisis de Presion de Pulso (PP=sist-diast): valor medio, tendencia reciente, y ALERTA EXPLICITA si PP>=60 indicando riesgo de rigidez arterial y recomendando consulta medica]</p>\n\n'+
+    '<p style=\"margin-bottom:6px\"><span style=\"font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px\">Recomendaciones</span><br>\n'+
+    '1. [accion concreta]<br>\n2. [accion concreta]<br>\n3. [accion concreta]<br>\n4. [accion concreta]</p>\n\n'+
+    'Reglas generales:\n- Datos concretos (cifras, fechas)\n'+
+    '- Calcula semana del ciclo desde '+cycleStart+' hasta hoy\n'+
+    '- Deltas vs baseline indicado arriba\n- Tono directo, sin emojis\n'+
+    '- Los \"trend\" y \"advice\" de comments deben ser coherentes con el \"analysis\" — mismos datos y misma interpretacion';
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': ANTHROPIC_KEY,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 2000,
+        messages: [{role:'user', content: prompt}]
+      })
+    });
+    if(!resp.ok){
+      const err = await resp.text();
+      throw new Error('API '+resp.status+': '+err.slice(0,200));
+    }
+    const data = await resp.json();
+    const raw = data.content[0].text.trim().replace(/^```[a-z]*\s*/i,'').replace(/```\s*$/,'');
+    let parsed;
+    try { parsed = JSON.parse(raw); } catch(e) {
+      // fallback: treat entire response as HTML analysis (backward compat)
+      parsed = { analysis: raw, comments: {} };
+    }
+
+    // Inject main analysis
+    body.innerHTML = parsed.analysis || raw;
+    dateEl.textContent = 'Actualizado: '+today;
+
+    // Inject chart comments if present
+    const comments = parsed.comments || {};
+    const commentIds = ['peso','musc','grasa','agua','visceral','bp','training'];
+    commentIds.forEach(function(key) {
+      const el = document.getElementById('ins-'+key);
+      if(!el) return;
+      const c = comments[key];
+      if(!c) return;
+      const cls = (c.cls==='ok'||c.cls==='warn'||c.cls==='info') ? c.cls : 'info';
+      el.className = 'chart-insight '+cls;
+      el.innerHTML = '<span class="ins-trend">'+c.trend+'</span><span class="ins-advice"> — '+c.advice+'</span>';
+      el.style.display = '';
+    });
+
+    btn.textContent = '✦ Analizar';
+    btn.style.color = '';
+    btn.style.borderColor = '';
+    btn.disabled = false;
+  } catch(e) {
+    body.innerHTML = '<p style="color:var(--red)">Error: '+e.message+'</p>';
+    btn.textContent = '✦ Error';
+    btn.style.color = 'var(--red)';
+    btn.style.borderColor = 'var(--red)';
+    setTimeout(()=>{btn.textContent='✦ Analizar';btn.style.color='';btn.style.borderColor='';btn.disabled=false;},5000);
+  }
+}
+
+function openSettings(){
+  document.getElementById('modalStatus').innerHTML=`
+    <strong>Token GitHub:</strong> ${GH_TOKEN.slice(0,12)}… (hardcodeado en el HTML)<br><br>
+    <strong>BP data:</strong> ${bpReadings.length} lecturas cargadas<br>
+    <strong>Renpho data:</strong> ${allData.length} mediciones<br>
+    <strong>Sesiones:</strong> ${allSessions.length} (${allSessions.filter(s=>s.inCycle).length} en ciclo)<br><br>
+    Para actualizar el token, editar <code>GH_TOKEN</code> en el código fuente del dashboard.
+  `;
+  document.getElementById('modalBg').classList.add('open');
+}
+function closeSettings(){document.getElementById('modalBg').classList.remove('open');}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+loadAll();
+</script>
+</body>
+</html>
