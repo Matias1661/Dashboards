@@ -448,8 +448,8 @@ const MUSCLE_MAP=[
   {group:'Glúteos',    kw:['hip thrust','glúteo','gluteo','glute bridge','kickback','hip extension','hip abduct']},
 ];
 const HEVY_MUSCLE_MAP={chest:'Pecho',back:'Espalda',lats:'Espalda',upper_back:'Espalda',middle_back:'Espalda',lower_back:'Espalda',shoulders:'Hombros',traps:'Hombros',biceps:'Bíceps',triceps:'Tríceps',forearms:'Bíceps',quadriceps:'Piernas',hamstrings:'Piernas',glutes:'Glúteos',calves:'Piernas'};
-const RADAR_GROUPS=['Pecho','Glúteos','Hombros','Brazos','Piernas','Espalda'];
-const KW_TO_RADAR={'Pecho':'Pecho','Espalda':'Espalda','Hombro':'Hombros','Bíceps':'Brazos','Tríceps':'Brazos','Cuádriceps':'Piernas','Isquios':'Piernas','Glúteos':'Glúteos'};
+const RADAR_GROUPS=['Pecho','Glúteos','Hombros','Bíceps','Tríceps','Piernas','Espalda'];
+const KW_TO_RADAR={'Pecho':'Pecho','Espalda':'Espalda','Hombro':'Hombros','Bíceps':'Bíceps','Tríceps':'Tríceps','Cuádriceps':'Piernas','Isquios':'Piernas','Glúteos':'Glúteos'};
 function getGroup(t){const tl=t.toLowerCase();for(const{group,kw}of MUSCLE_MAP){if(kw.some(k=>tl.includes(k)))return group;}return 'Otro';}
 
 // ═══════════════════════════════════════════════════════════════════════════
