@@ -1324,6 +1324,26 @@ async function loadAll(){
     const jeitRaw=Array.isArray(jJson)?jJson:(jJson.workouts||[]);
     const jeitSessions=parseWorkouts(jeitRaw,'Jefit');
     allSessions=[...jeitSessions,...hevySessions].sort((a,b)=>a.date-b.date);
+    // Merge multiple workouts on the same calendar day into one session
+    const dayMap=new Map();
+    allSessions.forEach(s=>{
+      const key=s.date.toISOString().slice(0,10);
+      if(!dayMap.has(key)){
+        dayMap.set(key,{...s, title: s.title, _titles:[s.title]});
+      } else {
+        const d=dayMap.get(key);
+        d.vol+=s.vol;
+        d._titles.push(s.title);
+        d.title=d._titles.join(' + ');
+        d.durationMin=(d.durationMin||0)+(s.durationMin||0);
+        d.exerciseCount=(d.exerciseCount||0)+(s.exerciseCount||0);
+        Object.keys(s.groupSets).forEach(k=>d.groupSets[k]=(d.groupSets[k]||0)+s.groupSets[k]);
+        Object.keys(s.musclePrimary).forEach(k=>d.musclePrimary[k]=(d.musclePrimary[k]||0)+s.musclePrimary[k]);
+        Object.keys(s.muscleSecondary).forEach(k=>d.muscleSecondary[k]=(d.muscleSecondary[k]||0)+s.muscleSecondary[k]);
+        if(s.src==='Hevy') d.src='Hevy';
+      }
+    });
+    allSessions=Array.from(dayMap.values()).sort((a,b)=>a.date-b.date);
     bpReadings=bJson.readings||[];
     console.log(`BP readings loaded: ${bpReadings.length}`);
     renderProtocol();
