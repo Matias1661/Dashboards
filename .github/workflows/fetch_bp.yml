@@ -39,7 +39,7 @@ jobs:
               'Notion-Version': '2022-06-28',
               'Content-Type': 'application/json',
           }
-          TIPO_MAP = {'Sin café': 'nocafe', 'Con café': 'cafe', 'Chequeo médico': 'medico'}
+          MEDICO_DATE = '2026-05-14'  # chequeo medico inicial que origino el seguimiento (Condicion eliminada del DB)
           MONTH_ES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']
 
           def fmt_label(iso_date):
@@ -65,9 +65,8 @@ jobs:
               sist  = props.get('Sistólica', {}).get('number')
               diast = props.get('Diastólica', {}).get('number')
               if sist is None or diast is None: continue
-              cond_val = props.get('Condición', {}).get('select')
-              cond  = cond_val['name'] if cond_val else 'Sin café'
-              tipo  = TIPO_MAP.get(cond, 'nocafe')
+              fecha_iso = fecha_val['start'][:10]
+              tipo  = 'medico' if fecha_iso == MEDICO_DATE else 'nocafe'
               label = fmt_label(fecha_val['start'])
               readings.append({'d': label, 'sist': int(sist), 'diast': int(diast), 'tipo': tipo})
 
