@@ -477,6 +477,13 @@ Chart.register({
       ctx.strokeStyle='rgba(13,138,82,0.25)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
       ctx.beginPath();ctx.moveTo(cx,chartArea.top);ctx.lineTo(cx,chartArea.bottom);ctx.stroke();
       ctx.restore();
+      if(isBPChart){
+        ctx.save();
+        ctx.fillStyle='rgba(13,138,82,0.75)';
+        ctx.font='8px DM Mono,monospace';
+        ctx.fillText('Sem 11+ (1 jun) · Testo 3cm',cx+4,chartArea.top+10);
+        ctx.restore();
+      }
     }
     const tamoI  = isBPChart ? activeBPTamoIdx  : activeTamoIdx;
     const tamoFr = isBPChart ? activeBPTamoFrac : activeTamoFrac;
