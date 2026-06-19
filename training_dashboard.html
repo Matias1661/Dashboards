@@ -1048,12 +1048,22 @@ function renderTraining(){
   document.getElementById('tLast').innerHTML=last?last.dateStr:'—';
   document.getElementById('tLastVol').textContent=last?`${(last.vol/1000).toFixed(1)}t · ${last.src}`:'—';
 
-  // Volume chart — cycle sessions
+  // Volume chart — cycle sessions agrupadas por día
   const cycleSessions=allSessions.filter(s=>s.inCycle);
-  chartVol.data.labels=cycleSessions.map(s=>s.dateStr);
-  chartVol.data.datasets[0].data=cycleSessions.map(s=>s.vol);
-  chartVol.data.datasets[0].backgroundColor=cycleSessions.map(s=>s.src==='Hevy'?'rgba(13,138,82,0.65)':'rgba(37,99,190,0.45)');
-  chartVol.data._titles=cycleSessions.map(s=>s.title||'—');
+  const volByDay=new Map();
+  cycleSessions.forEach(s=>{
+    const day=s.date.toISOString().slice(0,10);
+    if(!volByDay.has(day)) volByDay.set(day,{dateStr:s.dateStr,vol:0,titles:[],src:s.src});
+    const e=volByDay.get(day);
+    e.vol+=s.vol;
+    e.titles.push(s.title||'—');
+    if(s.src==='Hevy') e.src='Hevy';
+  });
+  const volDays=[...volByDay.values()];
+  chartVol.data.labels=volDays.map(d=>d.dateStr);
+  chartVol.data.datasets[0].data=volDays.map(d=>d.vol);
+  chartVol.data.datasets[0].backgroundColor=volDays.map(d=>d.src==='Hevy'?'rgba(13,138,82,0.65)':'rgba(37,99,190,0.45)');
+  chartVol.data._titles=volDays.map(d=>d.titles.join(' + '));
   document.getElementById('volBadge').textContent=`${cycleSessions.length} ses · ${(cycleSessions.reduce((s,w)=>s+w.vol,0)/1000).toFixed(1)}t · verde=Hevy azul=Jefit`;
   chartVol.update();
 
