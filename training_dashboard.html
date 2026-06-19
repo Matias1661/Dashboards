@@ -630,10 +630,13 @@ function parseWorkouts(workouts,src){
     const start=new Date(w.start_time);
     const end=w.end_time?new Date(w.end_time):null;
     let vol=0; const groupSets={}; const musclePrimary={}; const muscleSecondary={};
+    const _bw=(()=>{const valid=(allDataFull||[]).filter(r=>r.agua>0);return valid.length?valid[valid.length-1].peso:0;})();
     (w.exercises||[]).forEach(ex=>{
       const kwg=getGroup(ex.title);
+      const _assisted=/\(Asistida\)/i.test(ex.title);
       (ex.sets||[]).filter(s=>s.type!=='warmup').forEach(s=>{
-        vol+=(s.weight_kg||0)*(s.reps||0);
+        const _w=s.weight_kg||0; const _r=s.reps||0;
+        vol+=_assisted&&_bw>0?Math.max(0,_bw-_w)*_r:_w*_r;
         groupSets[kwg]=(groupSets[kwg]||0)+1;
       });
       const n=(ex.sets||[]).filter(s=>s.type!=='warmup').length;
