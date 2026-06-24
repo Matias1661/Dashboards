@@ -211,17 +211,27 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       </div>
     </div>
     <div class="two-col">
-      <div class="card"><div class="card-header"><span class="card-title">Peso</span><span class="card-badge" id="cbPeso"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-peso"></canvas></div><div class="chart-insight info" id="ins-peso">Peso 89.6 kg (+3.4 vs baseline). Semana 16-22 jun plana; pico 90.95 el 21 jun con corrección al día siguiente — <span style="opacity:0.65">retención hídrica; monitorear diariamente en washout.</span></div></div>
-      <div class="card"><div class="card-header"><span class="card-title">Masa muscular</span><span class="card-badge" id="cbMusc"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-musc"></canvas></div><div class="chart-insight ok" id="ins-musc">Músculo 60.48 kg (+1.25 vs baseline, ~37% del peso ganado). — <span style="opacity:0.65">Ratio de partición bajo para ciclo asistido; priorizar entrenamiento de pierna.</span></div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Peso</span><span class="card-badge" id="cbPeso"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-peso"></canvas></div><div class="chart-insight info" id="ins-peso">
+Peso actual de 90.75 kg con un excedente de 4.55 kg sobre baseline; la composición sugiere que parte de esa ganancia corresponde a retención hídrica secundaria al protocolo activo, por lo que se esperará estabilización al iniciar PCT.
+</div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Masa muscular</span><span class="card-badge" id="cbMusc"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-musc"></canvas></div><div class="chart-insight ok" id="ins-musc">
+La masa muscular de 60.98 kg representa un incremento de 1.76 kg respecto al baseline, progreso positivo y coherente con el volumen de entrenamiento acumulado en junio (14 sesiones, 86.9 toneladas).
+</div></div>
     </div>
     <div class="two-col">
-      <div class="card"><div class="card-header"><span class="card-title">Grasa corporal</span><span class="card-badge" id="cbGrasa"></span></div><div class="card-header" style="margin-top:-6px;margin-bottom:0"><span style="font-size:10px;color:var(--text3)"><span style="color:#c94a30">—</span> total &nbsp;<span style="color:rgba(154,98,0,0.8)">- -</span> subcutánea</span></div><div class="chart-wrap" style="height:160px"><canvas id="c-grasa"></canvas></div><div class="chart-insight info" id="ins-grasa">Grasa 28.9% (+1.2 pp vs baseline). Tendencia ascendente sostenida. — <span style="opacity:0.65">Reducir exceso calórico y sodio antes de PCT.</span></div></div>
-      <div class="card"><div class="card-header"><span class="card-title">Agua %</span><span class="card-badge" id="cbAgua"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-agua"></canvas></div><div class="chart-insight info" id="ins-agua">Agua sin variación significativa. Fluctuación semanal visible (pico lunes, caída fin de semana). — <span style="opacity:0.65">Patrón de retención hídrica vinculado al ciclo.</span></div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Grasa corporal</span><span class="card-badge" id="cbGrasa"></span></div><div class="card-header" style="margin-top:-6px;margin-bottom:0"><span style="font-size:10px;color:var(--text3)"><span style="color:#c94a30">—</span> total &nbsp;<span style="color:rgba(154,98,0,0.8)">- -</span> subcutánea</span></div><div class="chart-wrap" style="height:160px"><canvas id="c-grasa"></canvas></div><div class="chart-insight info" id="ins-grasa">
+El porcentaje de grasa corporal del 29.3% se sitúa por encima del rango óptimo para el objetivo de V-Taper; se recomienda ajuste calórico moderado para iniciar descenso controlado sin comprometer la retención muscular.
+</div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Agua %</span><span class="card-badge" id="cbAgua"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-agua"></canvas></div><div class="chart-insight info" id="ins-agua">
+El agua corporal total en 51% está por debajo del umbral de referencia saludable (55-60%) para la masa magra de Matias, lo que puede reflejar distribución extracelular elevada asociada al protocolo hormonal activo.
+</div></div>
     </div>
     <div class="card" style="margin-top:0">
       <div class="card-header"><span class="card-title">Grasa visceral (índice)</span><span class="card-badge" id="cbVisceral"></span></div>
       <div class="chart-wrap" style="height:110px"><canvas id="c-visceral"></canvas></div>
-      <div class="chart-insight info" id="ins-visceral">Visceral 11.0 (+2.0 vs baseline de 9). Indicador más crítico del ciclo. — <span style="opacity:0.65">Requiere acción inmediata: déficit calórico moderado y cardio antes de PCT.</span></div>
+      <div class="chart-insight info" id="ins-visceral">
+El índice de grasa visceral de 11 se encuentra en el límite superior del rango moderado; su seguimiento es prioritario dado el contexto de protocolo con testosterona, ya que valores por encima de 12 requieren intervención dietética inmediata.
+</div>
     </div>
     <div class="card" style="margin-top:0">
       <div class="card-header">
@@ -260,7 +270,9 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       <div id="bpStatus" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--amber);margin-bottom:8px;display:none"></div>
       <div class="chart-wrap" style="height:180px"><canvas id="c-bp"></canvas></div>
       <p id="bpNote" style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:8px"></p>
-      <div class="chart-insight warning" id="ins-bp">TA última lectura 120/83 (17 jun), PP=37 mmHg — sin alertas activas. PP máx 58 (8 jun) coincidió con Masteron, ya normalizado. — <span style="opacity:0.65">Continuar monitoreo; PP media ciclo 41.2 mmHg, dentro de rango.</span></div>
+      <div class="chart-insight warning" id="ins-bp">
+La media tensional nocafeína de 121/80 mmHg es aceptable, aunque la presión de pulso media de 41.2 mmHg con máximo de 58 mmHg registrado el 8 de junio obliga a mantener monitorización diaria; la ausencia de datos desde el 17 de junio es el punto de atención más urgente del ciclo.
+</div>
     </div>
   </div>
 
@@ -276,7 +288,9 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       <div class="card"><div class="card-header"><span class="card-title">Volumen por sesión — ciclo</span><span class="card-badge" id="volBadge"></span></div><div class="chart-wrap" style="height:180px"><canvas id="c-vol"></canvas></div></div>
       <div class="card"><div class="card-header"><span class="card-title">Frecuencia mensual</span><span class="card-badge" id="freqBadge"></span></div><div class="chart-wrap" style="height:180px"><canvas id="c-freq"></canvas></div><div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:10px;font-family:'DM Mono',monospace;color:#6b6d70;align-items:center;"><span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(13,138,82,0.65);display:inline-block;"></span>≥ 8 ses</span><span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(37,99,190,0.45);display:inline-block;"></span>5–7 ses</span><span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(201,74,48,0.45);display:inline-block;"></span>&lt; 5 ses</span><span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(150,160,170,0.35);border:1px solid rgba(150,160,170,0.6);display:inline-block;"></span>proyectado</span></div></div>
     </div>
-    <div class="chart-insight ok" id="ins-training">14 sesiones en 4 semanas (media 3.5/sem), tendencia ascendente. Déficit: solo 2 Leg en 4 semanas. — <span style="opacity:0.65">Priorizar Leg las 2 semanas restantes de ciclo.</span></div>
+    <div class="chart-insight ok" id="ins-training">
+Con 14 sesiones y 86.9 toneladas acumuladas en junio y 2 sesiones completadas en la semana 14, el ritmo de entrenamiento es consistente con el patrón PPL; se recomienda no superar 4 sesiones semanales en las últimas dos semanas previas al inicio de PCT para favorecer la recuperación hormonal.
+</div>
     <div class="two-col" id="radarCard">
       <div class="card" style="margin-bottom:0">
         <div class="card-header">
@@ -297,43 +311,272 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       <div class="card-header">
         <span class="card-title">Análisis por Claude</span>
         <button id="btnAnalizar" onclick="runAnalysis()" style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.08em;padding:4px 12px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s;margin-left:8px">✦ Analizar</button>
-        <span class="card-badge" id="claudeAnalysisDate" style="color:var(--text3)">22 jun 2026</span>
+        <span class="card-badge" id="claudeAnalysisDate" style="color:var(--text3)">24 jun 2026</span>
       </div>
       <p style="font-size:11px;color:var(--text3);margin:0 0 10px 0;line-height:1.5">El análisis se genera bajo demanda. Pulsa el botón para llamar a la API de Claude con los datos actuales.</p>
       <div id="claudeAnalysisBody" style="font-size:12px;color:var(--text2);line-height:1.65;font-family:'DM Sans',sans-serif">
-<h3 style="margin:0 0 12px;font-size:1rem;color:var(--accent)">Plan Karat — Semana 14 · 22 jun 2026</h3>
+<h3 style="border-bottom:1px solid #e0e0e0;padding-bottom:6px;margin-top:1.2rem;margin-bottom:0.6rem">1. Composición Corporal</h3>
 
-<p><strong>Resumen ejecutivo:</strong> Ganancia muscular modesta (+1.25 kg) acompañada de incremento de grasa y grasa visceral que supera lo deseable. Tensión arterial mejorada en las últimas lecturas tras picos de PP elevados a inicio de junio. Frecuencia de entrenamiento en ascenso pero con déficit crónico de pierna. A dos semanas de la última inyección; foco en controlar grasa visceral y preparar salida limpia hacia PCT.</p>
+<p>
+  El peso actual registrado el 23 de junio es de <strong>90.75 kg</strong>, frente a los 86.20 kg del baseline
+  del 11 de marzo, lo que supone un <strong>incremento neto de +4.55 kg</strong> a lo largo del ciclo.
+  Durante la semana en curso (22-23 jun) el peso oscila entre 89.6 y 90.95 kg, rango de variación
+  fisiológica normal que refleja fluctuaciones de glucógeno, agua intracelular y contenido digestivo.
+  No se aprecian señales de retención hídrica aguda atípica dentro de esta oscilación.
+</p>
 
-<table style="width:100%;border-collapse:collapse;font-size:0.82rem;margin:10px 0">
-<thead><tr style="border-bottom:1px solid var(--border)">
-<th style="text-align:left;padding:4px 8px">Métrica</th>
-<th style="text-align:right;padding:4px 8px">Baseline (11 mar)</th>
-<th style="text-align:right;padding:4px 8px">Actual (22 jun)</th>
-<th style="text-align:right;padding:4px 8px">Δ</th>
-</tr></thead>
-<tbody>
-<tr><td style="padding:4px 8px">Peso</td><td style="text-align:right;padding:4px 8px">86.2 kg</td><td style="text-align:right;padding:4px 8px">89.6 kg</td><td style="text-align:right;padding:4px 8px;color:#f59e0b">+3.4 kg</td></tr>
-<tr><td style="padding:4px 8px">Músculo esq.</td><td style="text-align:right;padding:4px 8px">59.22 kg</td><td style="text-align:right;padding:4px 8px">60.48 kg</td><td style="text-align:right;padding:4px 8px;color:#10b981">+1.25 kg</td></tr>
-<tr><td style="padding:4px 8px">Grasa</td><td style="text-align:right;padding:4px 8px">27.7%</td><td style="text-align:right;padding:4px 8px">28.9%</td><td style="text-align:right;padding:4px 8px;color:#f59e0b">+1.2 pp</td></tr>
-<tr><td style="padding:4px 8px">Visceral</td><td style="text-align:right;padding:4px 8px">9.0</td><td style="text-align:right;padding:4px 8px">11.0</td><td style="text-align:right;padding:4px 8px;color:#ef4444">+2.0</td></tr>
-</tbody></table>
+<p>
+  La <strong>masa muscular</strong> ha aumentado +1.76 kg desde baseline (59.22 → 60.98 kg), con una
+  tendencia que sigue creciendo aunque a ritmo moderado en las últimas dos semanas
+  (60.48 kg el 16 jun → 60.98 kg el 23 jun, +0.50 kg en 7 días). Este ritmo de moderación es
+  esperable a medida que avanza el ciclo y el organismo se aproxima a su techo adaptativo inmediato.
+</p>
 
-<p style="font-size:0.82rem">Ratio de partición: ~37% del peso ganado es músculo, bajo para ciclo asistido. Grasa visceral +2 en 14 semanas indica exceso calórico sostenido o cardio insuficiente. Semana 16-22 jun prácticamente plana en términos reales (retención hídrica con corrección posterior).</p>
+<p>
+  El dato de composición más relevante es el <strong>ratio músculo/peso ganado</strong>: de los
+  4.55 kg totales ganados, únicamente 1.76 kg corresponden a masa muscular, lo que representa
+  el <strong>38.7% del peso ganado</strong>. El 61.3% restante se distribuye entre grasa, agua y
+  otros compartimentos. Este ratio es aceptable en un contexto de volumen con protocolo hormonal,
+  pero indica que la eficiencia de la ganancia no es óptima y que el excedente calórico podría
+  estar sobredimensionado.
+</p>
 
-<p><strong>Tensión arterial:</strong> PP medio 41.2 mmHg (N=18) · PP máx 58 mmHg (8 jun) · tendencia global +7.0 mmHg (artefacto del dataset; segunda mitad de junio es claramente descendente). Picos de inicio de junio (PP 55 el 4 jun, PP 58 el 8 jun) coincidieron con últimas dosis de Masteron Prop — derivados DHT aumentan rigidez arterial. Tras washout, normalización: últimas 4 lecturas (10-17 jun) con PP 37-44. Sin alertas PP≥55 ni PP≥60 en lecturas recientes. Estado actual: sin alertas activas.</p>
+<p>
+  La <strong>grasa corporal</strong> se sitúa en el 29.3% (+1.6 puntos porcentuales desde baseline).
+  Si bien este incremento es esperable en fase de volumen, conviene vigilar activamente que no
+  supere el umbral del 30% antes del cierre del ciclo. La grasa <strong>visceral</strong> marca
+  nivel 11, dos puntos por encima del baseline (9), lo que la sitúa en zona de vigilancia
+  (objetivo recomendado: &lt;10). Este parámetro no ha mostrado cambios desde mayo, lo que
+  sugiere estabilización, pero no mejora. El agua corporal registrada es del <strong>51.0%</strong>,
+  ligeramente por debajo del rango óptimo esperado (52-55%), lo que puede indicar hidratación
+  insuficiente o un ligero desplazamiento del agua hacia compartimentos extracelulares.
+</p>
 
-<p><strong>Entrenamiento:</strong> 14 sesiones en 4 semanas de ciclo (media 3.5/sem), tendencia ascendente — semana 13 con 6 sesiones, mejor del ciclo. Distribución: Pull 36% · Push 29% · V-Taper 14% · Leg 14%. Solo 2 sesiones de Leg en 4 semanas (ratio Pull:Leg = 2.5:1). Tres Pull en semana 13 indica sesiones improvisadas; no óptimo para distribución de estímulo.</p>
+<table style="width:100%;border-collapse:collapse;font-size:0.92rem;margin-top:0.8rem">
+  <thead>
+    <tr style="background:#f5f5f5">
+      <th style="text-align:left;padding:6px 10px;border:1px solid #ddd">Parámetro</th>
+      <th style="text-align:center;padding:6px 10px;border:1px solid #ddd">Baseline (11 mar)</th>
+      <th style="text-align:center;padding:6px 10px;border:1px solid #ddd">Actual (23 jun)</th>
+      <th style="text-align:center;padding:6px 10px;border:1px solid #ddd">Delta ciclo</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="padding:6px 10px;border:1px solid #ddd">Peso</td>
+      <td style="text-align:center;padding:6px 10px;border:1px solid #ddd">86.20 kg</td>
+      <td style="text-align:center;padding:6px 10px;border:1px solid #ddd">90.75 kg</td>
+      <td style="text-align:center;padding:6px 10px;border:1px solid #ddd;color:#c0392b"><strong>+4.55 kg</strong></td>
+    </tr>
+    <tr style="background:#fafafa">
+      <td style="padding:6px 10px;border:1px solid #ddd">Músculo</td>
+      <td style="text-align:center;padding:6px 10px;border:1px solid #ddd">59.22 kg</td>
+      <td style="text-align:center;padding:6px 10px;border:1px solid #ddd">60.98 kg</td>
+      <td style="text-align:center;padding:6px 10px;border:1px solid #ddd;color:#27ae60"><strong>+1.76 kg</strong></td>
+    </tr>
+    <tr>
+      <td style="padding:6px 10px;border:1px solid #ddd">Grasa corporal</td>
+      <td style="text-align:center;padding:6px 10px;border:1px solid #ddd">27.7%</td>
+      <td style="text-align:center;padding:6px 10px;border:1px solid #ddd">29.3%</td>
+      <td style="text-align:center;padding:6px 10px;border:1px solid #ddd;color:#e67e22"><strong>+1.6 pp</strong></td>
+    </tr>
+    <tr style="background:#fafafa">
+      <td style="padding:6px 10px;border:1px solid #ddd">Grasa visceral</td>
+      <td style="text-align:center;padding:6px 10px;border:1px solid #ddd">9</td>
+      <td style="text-align:center;padding:6px 10px;border:1px solid #ddd">11</td>
+      <td style="text-align:center;padding:6px 10px;border:1px solid #ddd;color:#e67e22"><strong>+2</strong></td>
+    </tr>
+    <tr>
+      <td style="padding:6px 10px;border:1px solid #ddd">Agua corporal</td>
+      <td style="text-align:center;padding:6px 10px;border:1px solid #ddd">—</td>
+      <td style="text-align:center;padding:6px 10px;border:1px solid #ddd">51.0%</td>
+      <td style="text-align:center;padding:6px 10px;border:1px solid #ddd">—</td>
+    </tr>
+  </tbody>
+</table>
 
-<p><strong>Estado del ciclo:</strong> Sem 14/15. Masteron Prop fuera del sistema desde ~18 jun. Tamoxifeno 5.5 semanas on-cycle. Última inyección Testo 6 jul → washout 14d → PCT 20 jul (HCG 20/22/24 jul) → SERMs sems 18-19 → analítica oct 2026.</p>
+<h3 style="border-bottom:1px solid #e0e0e0;padding-bottom:6px;margin-top:1.2rem;margin-bottom:0.6rem">2. Entrenamiento</h3>
 
-<p style="margin-top:10px"><strong>Acciones:</strong></p>
-<ol style="margin:4px 0;padding-left:18px;font-size:0.85rem">
-<li>Controlar grasa visceral (en 11, +2 desde baseline) — reducir exceso calórico y sodio antes de PCT.</li>
-<li>Recuperar Leg: mínimo 1 sesión/semana las 2 semanas restantes de ciclo.</li>
-<li>Redistribuir Pull: rotar Push → Pull → Leg → V-Taper sin repetir antes de cubrir los otros.</li>
-<li>Coordinar suspensión de Tamoxifeno con inicio de PCT — no duplicar protección sin estructura.</li>
-<li>Registrar peso diario próximas 2 semanas para separar señal real de ruido hídrico antes de washout.</li>
+<p>
+  Junio de 2026 se perfila como el <strong>mejor mes de entrenamiento del ciclo</strong>: 14 sesiones
+  registradas en Hevy con un volumen total de <strong>86.9 toneladas</strong>. Para contextualizar,
+  mayo solo contabilizó 2 sesiones (desde el 27 de mayo) con 7.5 t, dado que el registro comenzó
+  a final de mes. El salto en consistencia y volumen durante junio es significativo y refleja una
+  muy buena adherencia al programa.
+</p>
+
+<p>
+  La <strong>semana 13</strong> (15-21 jun) fue la más productiva hasta la fecha: 6 sesiones con un
+  volumen acumulado de aproximadamente <strong>32.7 toneladas</strong>, distribuidas en sesiones de
+  Push (6.2 t), Leg (12.4 t), Pull (2.1 t), V-Taper (4.9 t) y dos sesiones de Pull adicionales
+  (2.6 t y 4.5 t). La sesión de Leg destaca como la de mayor volumen individual de la semana,
+  liderada por la Sentadilla en Máquina (12.7 t acumuladas en el ciclo).
+</p>
+
+<p>
+  La <strong>semana 14</strong> está en curso con 2 sesiones completadas a fecha 23 de junio:
+  una sesión en el gimnasio del edificio el 22 jun (4.9 t) y una sesión Push el 23 jun (5.5 t).
+  Si el ritmo se mantiene al nivel de la semana 13, junio cerrará con una consistencia difícilmente
+  superable dentro del ciclo actual.
+</p>
+
+<p>
+  El <strong>patrón de entrenamiento</strong> es Push/Pull/Leg con sesiones adicionales de V-Taper,
+  ejecutado predominantemente en máquinas. El top de ejercicios por volumen acumulado refleja
+  un enfoque equilibrado entre empuje de pecho (Press de Pecho Máquina: 15.7 t), fuerza de tren
+  inferior (Sentadilla Máquina: 12.7 t) y hombros (Press Hombros Sentado Máquina: 10.6 t),
+  con trabajo de espalda en progresión (Jalón al Pecho: 6.0 t / Remo Sentado: 5.4 t).
+  Las últimas 2 semanas suman 10 sesiones, confirmando un ritmo de frecuencia alta sostenida.
+</p>
+
+<table style="width:100%;border-collapse:collapse;font-size:0.92rem;margin-top:0.8rem">
+  <thead>
+    <tr style="background:#f5f5f5">
+      <th style="text-align:left;padding:6px 10px;border:1px solid #ddd">Ejercicio</th>
+      <th style="text-align:center;padding:6px 10px;border:1px solid #ddd">Volumen acumulado (ciclo)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="padding:6px 10px;border:1px solid #ddd">Press de Pecho (Máquina)</td>
+      <td style="text-align:center;padding:6px 10px;border:1px solid #ddd">15.7 t</td>
+    </tr>
+    <tr style="background:#fafafa">
+      <td style="padding:6px 10px;border:1px solid #ddd">Sentadilla (Máquina)</td>
+      <td style="text-align:center;padding:6px 10px;border:1px solid #ddd">12.7 t</td>
+    </tr>
+    <tr>
+      <td style="padding:6px 10px;border:1px solid #ddd">Press de Hombros Sentado (Máquina)</td>
+      <td style="text-align:center;padding:6px 10px;border:1px solid #ddd">10.6 t</td>
+    </tr>
+    <tr style="background:#fafafa">
+      <td style="padding:6px 10px;border:1px solid #ddd">Jalón al Pecho (Máquina)</td>
+      <td style="text-align:center;padding:6px 10px;border:1px solid #ddd">6.0 t</td>
+    </tr>
+    <tr>
+      <td style="padding:6px 10px;border:1px solid #ddd">Remo Sentado (Máquina)</td>
+      <td style="text-align:center;padding:6px 10px;border:1px solid #ddd">5.4 t</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 style="border-bottom:1px solid #e0e0e0;padding-bottom:6px;margin-top:1.2rem;margin-bottom:0.6rem">3. Tensión Arterial y Pulso de Presión</h3>
+
+<p>
+  Sobre un total de 18 lecturas nocafe registradas entre el 19 de mayo y el 17 de junio, los valores
+  medios son: <strong>sistólica 121.1 mmHg / diastólica 79.9 mmHg / PP media 41.2 mmHg</strong>.
+  La sistólica media se sitúa en el límite superior del rango normal-alto, sin alcanzar criterios
+  de hipertensión de estadio 1 (≥130 mmHg), aunque el margen es estrecho y la monitorización
+  continua sigue siendo prioritaria.
+</p>
+
+<p>
+  El parámetro de mayor interés clínico es el <strong>Pulso de Presión (PP)</strong>. Los valores
+  más elevados se registraron el <strong>4 de junio (PP=55 mmHg)</strong> y el
+  <strong>8 de junio (PP=58 mmHg)</strong>, este último muy próximo al umbral de 60 mmHg asociado
+  a mayor riesgo de rigidez arterial. Ambos picos coinciden temporalmente con las últimas semanas
+  de administración de Masteron Propionato, cuya última dosis se aplicó el 4 de junio.
+  Esta coincidencia temporal es llamativa, aunque con 18 mediciones no es posible establecer
+  una relación de causalidad definitiva; pueden influir otros factores como la ingesta de sodio,
+  el estrés, la hidratación o la carga de entrenamiento acumulada.
+</p>
+
+<p>
+  Tras la eliminación del Masteron Prop, el PP ha retornado progresivamente a rangos más favorables.
+  Las últimas 3 lecturas disponibles (10, 12/13, 15 y 17 de junio) muestran PP entre
+  <strong>37 y 44 mmHg</strong>, lo que representa una recuperación clara respecto al pico.
+  La evolución del PP en el ciclo es ilustrativa: media de las primeras 3 lecturas = 34.0 mmHg
+  vs. media de las últimas 3 lecturas = 41.0 mmHg (delta +7 pp), aunque el tramo central
+  mostró el pico y la tendencia más reciente es descendente.
+</p>
+
+<p style="background:#fff8e1;border-left:4px solid #f9a825;padding:8px 12px;margin-top:0.8rem">
+  <strong>Alerta:</strong> Han transcurrido <strong>7 días sin ninguna medición</strong> (última
+  lectura: 17 de junio). Con la Testosterona todavía activa y el inicio del protocolo de cierre
+  a 12 días vista, retomar las mediciones esta misma semana es prioritario. Un mínimo de
+  2-3 lecturas nocafe en días distintos permitiría confirmar que el PP se mantiene en rango
+  favorable antes del washout.
+</p>
+
+<h3 style="border-bottom:1px solid #e0e0e0;padding-bottom:6px;margin-top:1.2rem;margin-bottom:0.6rem">Sección 4 — Protocolo ciclo: estado actual y cuenta atrás</h3>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-bottom:1rem">
+
+  <div style="background:#f9f9f9;border:1px solid #e0e0e0;border-radius:6px;padding:1rem">
+    <div style="font-size:0.75rem;text-transform:uppercase;color:#888;margin-bottom:0.3rem">Fase actual</div>
+    <div style="font-size:1.05rem;font-weight:600;color:#333">Semana 14 — Fin de ciclo</div>
+    <div style="font-size:0.85rem;color:#555;margin-top:0.3rem">Inicio ciclo: 23 mar 2026 &nbsp;|&nbsp; Hoy: 24 jun 2026</div>
+  </div>
+
+  <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:6px;padding:1rem">
+    <div style="font-size:0.75rem;text-transform:uppercase;color:#888;margin-bottom:0.3rem">Última inyección — Testosterona C</div>
+    <div style="font-size:1.6rem;font-weight:700;color:#f9a825">12 días</div>
+    <div style="font-size:0.85rem;color:#555;margin-top:0.2rem">Lunes 6 jul 2026 &nbsp;|&nbsp; 3 cm³/sem</div>
+  </div>
+
+  <div style="background:#e8f5e9;border:1px solid #a5d6a7;border-radius:6px;padding:1rem">
+    <div style="font-size:0.75rem;text-transform:uppercase;color:#888;margin-bottom:0.3rem">Inicio PCT</div>
+    <div style="font-size:1.6rem;font-weight:700;color:#2e7d32">26 días</div>
+    <div style="font-size:0.85rem;color:#555;margin-top:0.2rem">Domingo 20 jul 2026 &nbsp;|&nbsp; Washout 14 días post-última inj.</div>
+  </div>
+
+</div>
+
+<table style="width:100%;border-collapse:collapse;font-size:0.88rem;margin-bottom:0.8rem">
+  <thead>
+    <tr style="background:#f0f0f0">
+      <th style="text-align:left;padding:7px 10px;border:1px solid #ddd">Compuesto</th>
+      <th style="text-align:left;padding:7px 10px;border:1px solid #ddd">Estado</th>
+      <th style="text-align:left;padding:7px 10px;border:1px solid #ddd">Fecha eliminación / fin</th>
+      <th style="text-align:left;padding:7px 10px;border:1px solid #ddd">Observación</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="padding:7px 10px;border:1px solid #ddd">Testosterona Cipionato</td>
+      <td style="padding:7px 10px;border:1px solid #ddd"><span style="color:#e65100;font-weight:600">Activo</span></td>
+      <td style="padding:7px 10px;border:1px solid #ddd">6 jul 2026 (última inj.)</td>
+      <td style="padding:7px 10px;border:1px solid #ddd">3 cm³/sem; washout estimado 14 días por semivida larga</td>
+    </tr>
+    <tr style="background:#fafafa">
+      <td style="padding:7px 10px;border:1px solid #ddd">Masteron Propionato</td>
+      <td style="padding:7px 10px;border:1px solid #ddd"><span style="color:#388e3c;font-weight:600">Eliminado</span></td>
+      <td style="padding:7px 10px;border:1px solid #ddd">4 jun 2026</td>
+      <td style="padding:7px 10px;border:1px solid #ddd">Semivida corta; niveles residuales despreciables</td>
+    </tr>
+    <tr>
+      <td style="padding:7px 10px;border:1px solid #ddd">Deca (Nandrolona D.)</td>
+      <td style="padding:7px 10px;border:1px solid #ddd"><span style="color:#388e3c;font-weight:600">Eliminado</span></td>
+      <td style="padding:7px 10px;border:1px solid #ddd">Semana 9 (~18 may 2026)</td>
+      <td style="padding:7px 10px;border:1px solid #ddd">Semivida larga; posible supresión residual a considerar en PCT</td>
+    </tr>
+    <tr style="background:#fafafa">
+      <td style="padding:7px 10px;border:1px solid #ddd">Tamoxifeno</td>
+      <td style="padding:7px 10px;border:1px solid #ddd"><span style="color:#e65100;font-weight:600">Activo</span></td>
+      <td style="padding:7px 10px;border:1px solid #ddd">Desde 14 may 2026 (cada 48 h)</td>
+      <td style="padding:7px 10px;border:1px solid #ddd">Continúa en ciclo; se integra en protocolo SERM de PCT sem 18-19</td>
+    </tr>
+  </tbody>
+</table>
+
+<div style="background:#e3f2fd;border:1px solid #90caf9;border-radius:6px;padding:1rem;font-size:0.88rem;color:#1a237e">
+  <strong>Hoja de ruta PCT confirmada:</strong>
+  <ul style="margin:0.5rem 0 0 1.2rem;padding:0;line-height:1.8">
+    <li><strong>6 jul 2026</strong> — Última inyección Testosterona Cipionato</li>
+    <li><strong>7–19 jul 2026</strong> — Washout 14 días (sin administración de AAS)</li>
+    <li><strong>20, 22, 24 jul 2026</strong> — HCG (pulsos de estimulación testicular)</li>
+    <li><strong>Sem 18–19</strong> (desde ~20 jul) — SERMs: Tamoxifeno + eventual Clomifeno según protocolo</li>
+    <li><strong>Octubre 2026</strong> — Analítica de seguimiento (eje HPTA, lipidograma, hematología)</li>
+  </ul>
+</div>
+
+<h3 style="border-bottom:1px solid #e0e0e0;padding-bottom:6px;margin-top:1.2rem;margin-bottom:0.6rem">5. Recomendaciones</h3>
+<ol>
+<li>Retomar mediciones de tensión arterial diarias a partir de hoy: el intervalo sin datos desde el 17 de junio impide evaluar la tendencia antes del cierre de ciclo y del inicio de PCT el 20 de julio.</li>
+<li>Mantener la ingesta de sodio por debajo de 2 g/día y priorizar alimentos ricos en potasio y magnesio para estabilizar la presión de pulso, que aún registra variabilidad moderada (rango 37-44 mmHg en las últimas tres lecturas).</li>
+<li>Controlar el aumento de peso en las próximas semanas: el excedente de 4.55 kg sobre baseline con grasa corporal en 29.3% y agua en 51% sugiere retención hídrica activa; reducir carbohidratos de rápida absorción en la última comida del día.</li>
+<li>Completar las sesiones restantes de la semana 14 con carga moderada y descanso adecuado, priorizando el V-Taper; a partir de la semana 16 iniciar la fase de descarga progresiva para llegar con recuperación óptima al inicio de PCT.</li>
+<li>Programar analítica completa (hemograma, lipidograma, función hepática, testosterona total y LH/FSH) antes del 15 de julio para disponer de valores basales pre-PCT y ajustar el protocolo de Tamoxifen si fuera necesario.</li>
 </ol>
 </div>
     </div>
