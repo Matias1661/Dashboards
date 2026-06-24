@@ -264,7 +264,7 @@ Grasa visceral en nivel 11, por encima del umbral de riesgo metabolico bajo (niv
     <div class="section-title">Tensión arterial</div>
     <div class="card">
       <div class="card-header">
-        <span class="card-title">Lecturas · <span style="color:var(--purple)">■</span> médico &nbsp;<span style="color:var(--green)">■</span> sin café</span>
+        <span class="card-title">Lecturas · <span style="color:var(--purple)">■</span> médico &nbsp;<span style="color:var(--green)">■</span> tensiómetro casa</span>
         <span class="card-badge" id="bpBadge"></span>
       </div>
       <div id="bpStatus" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--amber);margin-bottom:8px;display:none"></div>
@@ -1088,7 +1088,7 @@ function renderHist(){
 // ═══════════════════════════════════════════════════════════════════════════
 const BP_TIPO_COLOR={medico:'rgba(109,79,194,0.85)',nocafe:'rgba(13,138,82,0.9)'};
 const BP_TIPO_BORDER={medico:'#6d4fc2',nocafe:'#0d8a52'};
-const BP_TIPO_LABEL={medico:'chequeo médico',nocafe:'sin café'};
+const BP_TIPO_LABEL={medico:'chequeo médico',nocafe:'tensiómetro casa'};
 
 function renderBP(){
   const statusEl=document.getElementById('bpStatus');
