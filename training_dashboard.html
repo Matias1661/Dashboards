@@ -211,17 +211,17 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       </div>
     </div>
     <div class="two-col">
-      <div class="card"><div class="card-header"><span class="card-title">Peso</span><span class="card-badge" id="cbPeso"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-peso"></canvas></div><div class="chart-insight info" id="ins-peso"><strong>92.35 kg</strong> (+6.15 kg vs baseline)</div></div>
-      <div class="card"><div class="card-header"><span class="card-title">Masa muscular</span><span class="card-badge" id="cbMusc"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-musc"></canvas></div><div class="chart-insight ok" id="ins-musc"><strong>61.51 kg</strong> (+2.29 kg vs baseline)</div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Peso</span><span class="card-badge" id="cbPeso"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-peso"></canvas></div><div class="chart-insight" id="ins-peso"></div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Masa muscular</span><span class="card-badge" id="cbMusc"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-musc"></canvas></div><div class="chart-insight" id="ins-musc"></div></div>
     </div>
     <div class="two-col">
-      <div class="card"><div class="card-header"><span class="card-title">Grasa corporal</span><span class="card-badge" id="cbGrasa"></span></div><div class="card-header" style="margin-top:-6px;margin-bottom:0"><span style="font-size:10px;color:var(--text3)"><span style="color:#c94a30">—</span> total &nbsp;<span style="color:rgba(154,98,0,0.8)">- -</span> subcutánea</span></div><div class="chart-wrap" style="height:160px"><canvas id="c-grasa"></canvas></div><div class="chart-insight info" id="ins-grasa"><strong>29.9%</strong> (+2.2 pp vs baseline)</div></div>
-      <div class="card"><div class="card-header"><span class="card-title">Agua %</span><span class="card-badge" id="cbAgua"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-agua"></canvas></div><div class="chart-insight info" id="ins-agua"><strong>50.6%</strong></div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Grasa corporal</span><span class="card-badge" id="cbGrasa"></span></div><div class="card-header" style="margin-top:-6px;margin-bottom:0"><span style="font-size:10px;color:var(--text3)"><span style="color:#c94a30">—</span> total &nbsp;<span style="color:rgba(154,98,0,0.8)">- -</span> subcutánea</span></div><div class="chart-wrap" style="height:160px"><canvas id="c-grasa"></canvas></div><div class="chart-insight" id="ins-grasa"></div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Agua %</span><span class="card-badge" id="cbAgua"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-agua"></canvas></div><div class="chart-insight" id="ins-agua"></div></div>
     </div>
     <div class="card" style="margin-top:0">
       <div class="card-header"><span class="card-title">Grasa visceral (índice)</span><span class="card-badge" id="cbVisceral"></span></div>
       <div class="chart-wrap" style="height:110px"><canvas id="c-visceral"></canvas></div>
-      <div class="chart-insight info" id="ins-visceral"><strong>11</strong> (baseline: 9)</div>
+      <div class="chart-insight" id="ins-visceral"></div>
     </div>
     <div class="card" style="margin-top:0">
       <div class="card-header">
@@ -260,7 +260,7 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       <div id="bpStatus" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--amber);margin-bottom:8px;display:none"></div>
       <div class="chart-wrap" style="height:180px"><canvas id="c-bp"></canvas></div>
       <p id="bpNote" style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:8px"></p>
-      <div class="chart-insight ok" id="ins-bp"><strong>127/83 mmHg</strong> (24 jun) — PP=44 | PP media sin café: 41.4</div>
+      <div class="chart-insight" id="ins-bp"></div>
     </div>
   </div>
 
@@ -276,7 +276,7 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       <div class="card"><div class="card-header"><span class="card-title">Volumen por sesión — ciclo</span><span class="card-badge" id="volBadge"></span></div><div class="chart-wrap" style="height:180px"><canvas id="c-vol"></canvas></div></div>
       <div class="card"><div class="card-header"><span class="card-title">Frecuencia mensual</span><span class="card-badge" id="freqBadge"></span></div><div class="chart-wrap" style="height:180px"><canvas id="c-freq"></canvas></div><div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:10px;font-family:'DM Mono',monospace;color:#6b6d70;align-items:center;"><span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(13,138,82,0.65);display:inline-block;"></span>≥ 8 ses</span><span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(37,99,190,0.45);display:inline-block;"></span>5–7 ses</span><span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(201,74,48,0.45);display:inline-block;"></span>&lt; 5 ses</span><span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(150,160,170,0.35);border:1px solid rgba(150,160,170,0.6);display:inline-block;"></span>proyectado</span></div></div>
     </div>
-    <div class="chart-insight ok" id="ins-training"><strong>16 sesiones</strong> (Hevy, jun 2026) | volumen total: 107,794 kg | mejor mes del ciclo</div>
+    <div class="chart-insight" id="ins-training"></div>
     <div class="two-col" id="radarCard">
       <div class="card" style="margin-bottom:0">
         <div class="card-header">
@@ -564,6 +564,19 @@ const baseOpts=(yMin,yMax)=>({responsive:true,maintainAspectRatio:false,spanGaps
     y:{min:yMin,max:yMax,ticks:{font:{size:8},color:'#a8aab0'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}
 });
 
+// Calcula min/max de eje con margen proporcional a partir de los valores visibles.
+// marginRatio: fracción del rango de datos a añadir a cada lado (default 15%).
+// minSpan: rango mínimo del eje para evitar que datos casi planos se vean como ruido.
+function autoRange(values,marginRatio=0.15,minSpan=0){
+  const vals=(values||[]).filter(v=>v!==null&&v!==undefined&&!isNaN(v));
+  if(!vals.length) return {min:undefined,max:undefined};
+  let lo=Math.min(...vals), hi=Math.max(...vals);
+  let span=hi-lo;
+  if(span<minSpan){const pad=(minSpan-span)/2; lo-=pad; hi+=pad; span=minSpan;}
+  const margin=Math.max(span*marginRatio,minSpan*0.05||0.01);
+  return {min:lo-margin,max:hi+margin};
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // CHART INSTANCES
 // ═══════════════════════════════════════════════════════════════════════════
@@ -582,7 +595,7 @@ const chartVisceral=new Chart(document.getElementById('c-visceral'),{type:'line'
 const chartScatter=new Chart(document.getElementById('c-scatter'),{type:'scatter',data:{datasets:[
   {label:'Pre-ciclo',data:[],backgroundColor:'rgba(107,109,112,0.40)',pointRadius:5,pointHoverRadius:7},
   {label:'Ciclo activo',data:[],backgroundColor:'rgba(13,138,82,0.75)',pointRadius:6,pointHoverRadius:8}
-]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#6b6d70',bodyColor:'#1a1a18',borderColor:'rgba(0,0,0,0.1)',borderWidth:1,callbacks:{label:ctx=>`${ctx.raw.label}: ${ctx.raw.x} kg — ${ctx.raw.y}% grasa`}}},scales:{x:{min:83.5,max:92,title:{display:true,text:'Peso (kg)',color:'#a8aab0',font:{size:9}},ticks:{font:{size:8},color:'#a8aab0'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}},y:{min:26.5,max:30,title:{display:true,text:'Grasa %',color:'#a8aab0',font:{size:9}},ticks:{font:{size:8},color:'#a8aab0'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}});
+]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#6b6d70',bodyColor:'#1a1a18',borderColor:'rgba(0,0,0,0.1)',borderWidth:1,callbacks:{label:ctx=>`${ctx.raw.label}: ${ctx.raw.x} kg — ${ctx.raw.y}% grasa`}}},scales:{x:{title:{display:true,text:'Peso (kg)',color:'#a8aab0',font:{size:9}},ticks:{font:{size:8},color:'#a8aab0'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}},y:{title:{display:true,text:'Grasa %',color:'#a8aab0',font:{size:9}},ticks:{font:{size:8},color:'#a8aab0'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}});
 
 const chartHist=new Chart(document.getElementById('c-hist'),{type:'line',data:{labels:[],datasets:[
   {label:'Peso (kg)',data:[],borderColor:'#2563be',backgroundColor:'transparent',borderWidth:2,pointRadius:2,fill:false,tension:0.3,yAxisID:'yKg'},
@@ -796,6 +809,10 @@ function updateBodyKPIs(){
   // Scatter
   chartScatter.data.datasets[0].data=allData.filter(d=>!d.ciclo).map(d=>({x:d.peso,y:d.grasa,label:d.d}));
   chartScatter.data.datasets[1].data=allData.filter(d=>d.ciclo).map(d=>({x:d.peso,y:d.grasa,label:d.d}));
+  {const allPts=allData.map(d=>d.peso); const rX=autoRange(allPts,0.1,1);
+   chartScatter.options.scales.x.min=rX.min; chartScatter.options.scales.x.max=rX.max;
+   const allGr=allData.map(d=>d.grasa); const rY=autoRange(allGr,0.1,1);
+   chartScatter.options.scales.y.min=rY.min; chartScatter.options.scales.y.max=rY.max;}
   chartScatter.update();
 }
 
@@ -819,14 +836,19 @@ function applyRange(months){
   chartPeso.data.labels=fl; chartPeso.data.datasets[0].data=fw('peso');
   chartPeso.data.datasets[0].pointBackgroundColor=ptC(0.9); chartPeso.data.datasets[0].pointBorderColor=ptB(); chartPeso.data.datasets[0].pointRadius=ptR();
   chartPeso.data.datasets[0].segment={borderColor:ctx=>buckets[ctx.p1DataIndex]?.ciclo?'#0d8a52':'#2563be'};
+  {const r=autoRange(fw('peso'),0.15,1); chartPeso.options.scales.y.min=r.min; chartPeso.options.scales.y.max=r.max;}
   chartMusc.data.labels=fl; chartMusc.data.datasets[0].data=fw('musc');
   chartMusc.data.datasets[0].pointBackgroundColor=ptC(0.9); chartMusc.data.datasets[0].pointBorderColor=ptB(); chartMusc.data.datasets[0].pointRadius=ptR();
+  {const r=autoRange(fw('musc'),0.15,0.8); chartMusc.options.scales.y.min=r.min; chartMusc.options.scales.y.max=r.max;}
   chartGrasa.data.labels=fl; chartGrasa.data.datasets[0].data=fw('grasa'); chartGrasa.data.datasets[1].data=fw('subcutanea');
   chartGrasa.data.datasets[0].pointBackgroundColor=ptC(0.8); chartGrasa.data.datasets[0].pointBorderColor=ptB(); chartGrasa.data.datasets[0].pointRadius=ptR();
+  {const r=autoRange(fw('grasa'),0.15,1); chartGrasa.options.scales.y.min=r.min; chartGrasa.options.scales.y.max=r.max;}
   chartAgua.data.labels=fl; chartAgua.data.datasets[0].data=fw('agua');
   chartAgua.data.datasets[0].pointBackgroundColor=ptC(0.8); chartAgua.data.datasets[0].pointBorderColor=ptB(); chartAgua.data.datasets[0].pointRadius=ptR();
+  {const r=autoRange(fw('agua'),0.15,0.5); chartAgua.options.scales.y.min=r.min; chartAgua.options.scales.y.max=r.max;}
   chartVisceral.data.labels=fl; chartVisceral.data.datasets[0].data=fw('visceral');
   chartVisceral.data.datasets[0].pointBackgroundColor=ptC(0.8); chartVisceral.data.datasets[0].pointBorderColor=ptB(); chartVisceral.data.datasets[0].pointRadius=ptR();
+  {const r=autoRange(fw('visceral'),0.15,2); chartVisceral.options.scales.y.min=r.min; chartVisceral.options.scales.y.max=r.max;}
   const lastLabel=fl[fl.length-1]||'';
   document.getElementById('cbPeso').textContent=lastLabel+' · '+(fw('peso')[fw('peso').length-1]||0).toFixed(2)+' kg';
   document.getElementById('cbMusc').textContent=lastLabel+' · '+(fw('musc')[fw('musc').length-1]||0).toFixed(2)+' kg';
