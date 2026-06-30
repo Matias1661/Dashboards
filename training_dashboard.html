@@ -211,17 +211,17 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       </div>
     </div>
     <div class="two-col">
-      <div class="card"><div class="card-header"><span class="card-title">Peso</span><span class="card-badge" id="cbPeso"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-peso"></canvas></div><div class="chart-insight" id="ins-peso"></div></div>
-      <div class="card"><div class="card-header"><span class="card-title">Masa muscular</span><span class="card-badge" id="cbMusc"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-musc"></canvas></div><div class="chart-insight" id="ins-musc"></div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Peso</span><span class="card-badge" id="cbPeso"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-peso"></canvas></div><div class="chart-insight" id="ins-peso">Salto de 90.8 a 93.0 kg en 3 días (27-30 jun). Agua bajó en el mismo tramo — inconsistente con retención pura. Confirmar con medición en ayunas.</div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Masa muscular</span><span class="card-badge" id="cbMusc"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-musc"></canvas></div><div class="chart-insight" id="ins-musc">Músculo esquelético 61.75 kg, +2.53 kg vs. baseline de ciclo. Tendencia ascendente sostenida.</div></div>
     </div>
     <div class="two-col">
-      <div class="card"><div class="card-header"><span class="card-title">Grasa corporal</span><span class="card-badge" id="cbGrasa"></span></div><div class="card-header" style="margin-top:-6px;margin-bottom:0"><span style="font-size:10px;color:var(--text3)"><span style="color:#c94a30">—</span> total &nbsp;<span style="color:rgba(154,98,0,0.8)">- -</span> subcutánea</span></div><div class="chart-wrap" style="height:160px"><canvas id="c-grasa"></canvas></div><div class="chart-insight" id="ins-grasa"></div></div>
-      <div class="card"><div class="card-header"><span class="card-title">Agua %</span><span class="card-badge" id="cbAgua"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-agua"></canvas></div><div class="chart-insight" id="ins-agua"></div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Grasa corporal</span><span class="card-badge" id="cbGrasa"></span></div><div class="card-header" style="margin-top:-6px;margin-bottom:0"><span style="font-size:10px;color:var(--text3)"><span style="color:#c94a30">—</span> total &nbsp;<span style="color:rgba(154,98,0,0.8)">- -</span> subcutánea</span></div><div class="chart-wrap" style="height:160px"><canvas id="c-grasa"></canvas></div><div class="chart-insight" id="ins-grasa">Grasa corporal 30.1%, +2.4pp vs. baseline (27.7%). Subió 0.8pp en los últimos 3 días junto al salto de peso.</div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Agua %</span><span class="card-badge" id="cbAgua"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-agua"></canvas></div><div class="chart-insight" id="ins-agua">Agua corporal 50.5%, bajando ligeramente desde 51.3% (17 jun). No respalda hipótesis de retención en el salto de peso reciente.</div></div>
     </div>
     <div class="card" style="margin-top:0">
       <div class="card-header"><span class="card-title">Grasa visceral (índice)</span><span class="card-badge" id="cbVisceral"></span></div>
       <div class="chart-wrap" style="height:110px"><canvas id="c-visceral"></canvas></div>
-      <div class="chart-insight" id="ins-visceral"></div>
+      <div class="chart-insight" id="ins-visceral">Grasa visceral subió de 11 a 12 (30 jun), tras mantenerse estable en 11 durante junio.</div>
     </div>
     <div class="card" style="margin-top:0">
       <div class="card-header">
@@ -260,7 +260,7 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       <div id="bpStatus" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--amber);margin-bottom:8px;display:none"></div>
       <div class="chart-wrap" style="height:180px"><canvas id="c-bp"></canvas></div>
       <p id="bpNote" style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:8px"></p>
-      <div class="chart-insight" id="ins-bp"></div>
+      <div class="chart-insight" id="ins-bp">PP medio 41.4, máximo 58 (8 jun, sin alcanzar alerta de 60). Estabilizado en 37-44 desde el 10 jun. Pico histórico coincidió con última semana de Masterona.</div>
     </div>
   </div>
 
@@ -276,7 +276,7 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       <div class="card"><div class="card-header"><span class="card-title">Volumen por sesión — ciclo</span><span class="card-badge" id="volBadge"></span></div><div class="chart-wrap" style="height:180px"><canvas id="c-vol"></canvas></div></div>
       <div class="card"><div class="card-header"><span class="card-title">Frecuencia mensual</span><span class="card-badge" id="freqBadge"></span></div><div class="chart-wrap" style="height:180px"><canvas id="c-freq"></canvas></div><div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:10px;font-family:'DM Mono',monospace;color:#6b6d70;align-items:center;"><span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(13,138,82,0.65);display:inline-block;"></span>≥ 8 ses</span><span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(37,99,190,0.45);display:inline-block;"></span>5–7 ses</span><span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(201,74,48,0.45);display:inline-block;"></span>&lt; 5 ses</span><span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(150,160,170,0.35);border:1px solid rgba(150,160,170,0.6);display:inline-block;"></span>proyectado</span></div></div>
     </div>
-    <div class="chart-insight" id="ins-training"></div>
+    <div class="chart-insight" id="ins-training">19 sesiones registradas desde 25 may. 6 sesiones en los últimos 9 días, frecuencia sólida con el split PPL.</div>
     <div class="two-col" id="radarCard">
       <div class="card" style="margin-bottom:0">
         <div class="card-header">
@@ -300,24 +300,18 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
         <span class="card-badge" id="claudeAnalysisDate" style="color:var(--text3)">30 jun 2026</span>
       </div>
       <p style="font-size:11px;color:var(--text3);margin:0 0 10px 0;line-height:1.5">El análisis se genera bajo demanda. Pulsa el botón para llamar a la API de Claude con los datos actuales.</p>
-      <div id="claudeAnalysisBody" style="font-size:12px;color:var(--text2);line-height:1.65;font-family:'DM Sans',sans-serif">
-<p><strong style="border-bottom: 1px solid #444; padding-bottom: 4px; display:block; margin-bottom:8px">Composición corporal</strong></p>
-<p>Peso actual 92.35 kg, +6.15 kg vs baseline (86.20 kg). Masa muscular esquelética 61.51 kg (+2.29 kg). Grasa corporal 29.9% (+2.2 pp vs baseline). Visceral estable en 11. Destaca un salto de +2.55 kg en los últimos 3 días (90.8 → 92.35 kg), con +1.6 kg solo entre el 29 y 30 de junio. La grasa corporal subió en paralelo (29.3% → 29.9% en el mismo intervalo), lo que sugiere un componente real de ganancia, no solo retención hídrica puntual. Tres días de datos son insuficientes para confirmar tendencia; requiere seguimiento la próxima semana antes de cualquier ajuste de protocolo.</p>
-
-<p><strong style="border-bottom: 1px solid #444; padding-bottom: 4px; display:block; margin-bottom:8px">Tensión arterial</strong></p>
-<p>19 lecturas sin café desde el 19 de mayo. PP medio 41.4 mmHg, máximo 58 mmHg (8 jun), ya regularizado. Tendencia PP primeras 3 lecturas (34.0) vs últimas 3 (41.0): aumento leve, dentro de rango normal. Sistólica subiendo de media (111.7 → 121.0 mmHg), diastólica estable (77.7 → 80.0 mmHg). Sin alertas activas (PP&lt;55 en todas las lecturas recientes); no se requiere consulta médica en este momento.</p>
-
-<p><strong style="border-bottom: 1px solid #444; padding-bottom: 4px; display:block; margin-bottom:8px">Entrenamiento</strong></p>
-<p>16 sesiones registradas en junio en Hevy, volumen total 107,794 kg — el mejor mes del ciclo hasta la fecha, superando claramente a mayo. Buena consistencia con el split PPL + V-Taper, con sesiones de Leg y Push de alto volumen (12,000-13,000 kg) intercaladas con sesiones más ligeras de Pull.</p>
-
-<p><strong style="border-bottom: 1px solid #444; padding-bottom: 4px; display:block; margin-bottom:8px">Recomendaciones prioritarias</strong></p>
-<ol>
-  <li>Confirmar en los próximos días si el salto de peso (+2.55 kg en 3 días) se mantiene o revierte antes de modificar dosis o dieta; no actuar sobre un único dato puntual.</li>
-  <li>Mantener la frecuencia de entrenamiento actual — junio es el mejor mes del ciclo en volumen y consistencia.</li>
-  <li>Tensión arterial estable, sin acción requerida; continuar registro habitual sin café.</li>
-  <li>Aprovechar la ventana restante con testosterona activa (última inyección 6 jul) para maximizar estímulo antes del washout.</li>
-</ol>
-</div>
+      <div id="claudeAnalysisBody" style="font-size:12px;color:var(--text2);line-height:1.65;font-family:'DM Sans',sans-serif"><p><strong style="display:block;border-bottom:1px solid var(--border,#333);padding-bottom:4px;margin-bottom:6px">Composición corporal</strong>
+Peso 93.0 kg (+6.8 kg vs. baseline de ciclo 86.20 kg). Músculo esquelético 61.75 kg (+2.53 kg). Grasa corporal 30.1% (+2.4pp vs. 27.7% baseline). Grasa visceral subió de 11 a 12.<br>
+Salto de 90.8 → 93.0 kg en 3 días (27-30 jun), con grasa subiendo 0.8pp y agua bajando de 51.0% a 50.5% — inconsistente con retención pura de agua. Confirmar con medición en ayunas antes de asumir causa.</p>
+<p><strong style="display:block;border-bottom:1px solid var(--border,#333);padding-bottom:4px;margin-bottom:6px;margin-top:10px">Tensión arterial (PP)</strong>
+19 lecturas sin café desde 19 may. PP medio 41.4, máximo 58 (8 jun), por debajo del umbral de alerta (60) pero cruzó el aviso (55) en dos ocasiones, coincidiendo con la última semana de Masterona. Desde 10 jun estabilizado en 37-44 (última: 24 jun, PP=44). Sin alerta activa.</p>
+<p><strong style="display:block;border-bottom:1px solid var(--border,#333);padding-bottom:4px;margin-bottom:6px;margin-top:10px">Entrenamiento</strong>
+19 sesiones desde 25 may. Últimos 9 días: Pull, gimnasio edificio, Push, Leg, Push, Pull — 6 sesiones, frecuencia sólida y consistente con el split PPL.</p>
+<p><strong style="display:block;border-bottom:1px solid var(--border,#333);padding-bottom:4px;margin-bottom:6px;margin-top:10px">Recomendaciones</strong>
+1. Repetir Renpho en ayunas en 1-2 días para confirmar si el salto de peso es retención de sodio o cambio real.<br>
+2. Mantener vigilancia TA/PP cerca de la última inyección de Testo (6 jul) antes del lavado.<br>
+3. Sin cambios de protocolo: última Testo lunes 6 jul, lavado 14 días, PCT (HCG) inicia 20 jul.<br>
+4. Seguir registrando nutrición vía Nutrition MCP — quedan ~3 semanas para las 4 necesarias antes de integrar panel al dashboard.</p></div>
     </div>
   </div>
 
