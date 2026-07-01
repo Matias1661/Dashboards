@@ -15,10 +15,6 @@ jobs:
   fetch:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GH_PAT }}
-
       - name: Fetch BP from Notion database
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
@@ -99,26 +95,43 @@ jobs:
       - name: Push via GitHub API
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
+          FNAME: bp_data.json
         run: |
-          python3 - <<'PYEOF3'
+          python3 - <<'PYPUSH'
           import base64, json, urllib.request, urllib.error, os, sys, time
+          from datetime import datetime, timezone
           token = os.environ['GH_PAT']
           repo  = 'Matias1661/Dashboards'
-          fname = 'bp_data.json'
+          fname = os.environ['FNAME']
           if not os.path.exists(fname):
               print(f"ERROR: {fname} not found. Files: {os.listdir('.')}")
               sys.exit(1)
-          with open(fname, 'rb') as f:
-              new_content = base64.b64encode(f.read()).decode()
+          new_bytes = open(fname, 'rb').read()
+
+          def canonical(b):
+              # JSON sin fetched_at, serializado de forma estable, para detectar cambios reales
+              try:
+                  d = json.loads(b)
+                  d.pop('fetched_at', None)
+                  return json.dumps(d, sort_keys=True)
+              except Exception:
+                  return None
+
           url = f'https://api.github.com/repos/{repo}/contents/{fname}'
-          from datetime import datetime, timezone
           msg = f'Update {fname} [{datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")}] [skip ci]'
           for attempt in range(5):
               try:
                   req = urllib.request.Request(url, headers={'Authorization': f'token {token}'})
                   with urllib.request.urlopen(req) as r:
-                      sha = json.loads(r.read())['sha']
-                  payload = json.dumps({'message': msg, 'content': new_content, 'sha': sha}).encode()
+                      cur = json.loads(r.read())
+                  sha = cur['sha']
+                  cur_canon = canonical(base64.b64decode(cur.get('content', '') or ''))
+                  if cur_canon is not None and cur_canon == canonical(new_bytes):
+                      print(f"Sin cambios reales en {fname} (solo fetched_at) — commit omitido")
+                      sys.exit(0)
+                  payload = json.dumps({'message': msg,
+                                        'content': base64.b64encode(new_bytes).decode(),
+                                        'sha': sha}).encode()
                   req2 = urllib.request.Request(url, data=payload, method='PUT',
                       headers={'Authorization': f'token {token}', 'Content-Type': 'application/json'})
                   with urllib.request.urlopen(req2) as r:
@@ -132,4 +145,4 @@ jobs:
                       time.sleep(3 * (attempt + 1))
           print("All retries exhausted")
           sys.exit(1)
-          PYEOF3
+          PYPUSH
