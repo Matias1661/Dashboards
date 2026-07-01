@@ -412,6 +412,9 @@ const MESES_CAP = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','
 // HELPERS
 // ═══════════════════════════════════════════════════════════════════════════
 function parseDateISO(s){ const[y,m,d]=s.split('-'); return new Date(+y,+m-1,+d); }
+// BP: fallback para lecturas antiguas sin campo `date` (asume 2026)
+const parseBPDate = s => { const p=s.match(/(\d+)\s+(\w+)/); if(!p)return null; const m={ene:0,feb:1,mar:2,abr:3,may:4,jun:5,jul:6,ago:7,sep:8,oct:9,nov:10,dic:11}; return new Date(2026,m[p[2]],parseInt(p[1])); };
+const bpDateOf = r => r.date ? parseDateISO(r.date) : (parseBPDate(r.d)||new Date(0));
 function fmtLabel(d){ return d.getDate()+' '+MESES_CAP[d.getMonth()]+' '+String(d.getFullYear()).slice(2); }
 function fmtMonth(d){ return MESES_ES[d.getMonth()]+' '+String(d.getFullYear()).slice(2); }
 function fmtWeek(d){ return d.getDate()+' '+MESES_ES[d.getMonth()]; }
@@ -986,8 +989,8 @@ function renderBP(){
   }
   statusEl.style.display='none';
 
-  // Sort by date index (readings already ordered from workflow, but just in case)
-  const readings=[...bpReadings];
+  // Orden cronologico garantizado: usa campo ISO `date` si existe (fallback: parseo del label)
+  const readings=[...bpReadings].sort((a,b)=>bpDateOf(a)-bpDateOf(b));
   const n=readings.length;
   const labels=readings.map(r=>r.d);
   const sistData=readings.map(r=>r.sist);
@@ -1016,13 +1019,12 @@ function renderBP(){
   };
   // Sombreado sem 11: a partir del lunes 1 jun 2026
   const SEM11_DATE = new Date('2026-06-01');
-  const parseBPDate = s => { const p=s.match(/(\d+)\s+(\w+)/); if(!p)return null; const m={ene:0,feb:1,mar:2,abr:3,may:4,jun:5,jul:6,ago:7,sep:8,oct:9,nov:10,dic:11}; return new Date(2026,m[p[2]],parseInt(p[1])); };
-  activeBPShadeIdx = readings.findIndex(r => { const d=parseBPDate(r.d); return d&&d>=SEM11_DATE; });
+  activeBPShadeIdx = readings.findIndex(r => { const d=bpDateOf(r); return d&&d>=SEM11_DATE; });
   // Tamoxifeno line: find reading index nearest to TAMO_DATE
   activeBPTamoIdx=-1; activeBPTamoFrac=0;
   for(let i=0;i<readings.length;i++){
-    const d=parseBPDate(readings[i].d); if(!d)continue;
-    const nd=i+1<readings.length?parseBPDate(readings[i+1].d):new Date(9999,0,1);
+    const d=bpDateOf(readings[i]); if(!d)continue;
+    const nd=i+1<readings.length?bpDateOf(readings[i+1]):new Date(9999,0,1);
     if(d<=TAMO_DATE&&nd&&nd>TAMO_DATE){activeBPTamoIdx=i;activeBPTamoFrac=nd-d>0?(TAMO_DATE-d)/(nd-d):0;break;}
     if(d.getTime()===TAMO_DATE.getTime()){activeBPTamoIdx=i;activeBPTamoFrac=0;break;}
   }
