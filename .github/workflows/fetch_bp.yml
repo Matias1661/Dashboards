@@ -65,19 +65,28 @@ jobs:
               sist  = props.get('Sistólica', {}).get('number')
               diast = props.get('Diastólica', {}).get('number')
               if sist is None or diast is None: continue
+              pulso = props.get('Pulso', {}).get('number')
               fecha_iso = fecha_val['start'][:10]
               tipo  = 'medico' if fecha_iso == MEDICO_DATE else 'nocafe'
               label = fmt_label(fecha_val['start'])
-              readings.append({'d': label, 'sist': int(sist), 'diast': int(diast), 'tipo': tipo})
+              readings.append({'date': fecha_iso, 'd': label, 'sist': int(sist),
+                               'diast': int(diast), 'pulso': pulso, 'tipo': tipo})
 
+          # Agrupar por fecha ISO (no por label sin año) y ordenar cronologicamente
           grouped = defaultdict(list)
           for r in readings:
-              grouped[(r['d'], r['tipo'])].append(r)
-          bp_final = [
-              {'d': d, 'sist': round(sum(r['sist'] for r in g)/len(g)),
-               'diast': round(sum(r['diast'] for r in g)/len(g)), 'tipo': tipo}
-              for (d, tipo), g in grouped.items()
-          ]
+              grouped[(r['date'], r['tipo'])].append(r)
+          bp_final = []
+          for (fecha_iso, tipo), g in sorted(grouped.items()):
+              pulsos = [r['pulso'] for r in g if r['pulso'] is not None]
+              bp_final.append({
+                  'date': fecha_iso,
+                  'd': g[0]['d'],
+                  'sist': round(sum(r['sist'] for r in g)/len(g)),
+                  'diast': round(sum(r['diast'] for r in g)/len(g)),
+                  'pulso': round(sum(pulsos)/len(pulsos)) if pulsos else None,
+                  'tipo': tipo,
+              })
 
           with open('bp_data.json', 'w') as f:
               json.dump({
