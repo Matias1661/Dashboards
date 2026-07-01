@@ -1,124 +1,164 @@
 {
-  "fetched_at": "2026-07-01T09:23:55.480985+00:00",
+  "fetched_at": "2026-07-01T19:57:40.102254+00:00",
   "readings": [
     {
+      "date": "2026-05-14",
       "d": "14 may",
       "sist": 124,
       "diast": 90,
+      "pulso": null,
       "tipo": "medico"
     },
     {
+      "date": "2026-05-19",
       "d": "19 may",
       "sist": 104,
       "diast": 71,
+      "pulso": 86,
       "tipo": "nocafe"
     },
     {
+      "date": "2026-05-21",
       "d": "21 may",
       "sist": 110,
       "diast": 80,
+      "pulso": 89,
       "tipo": "nocafe"
     },
     {
+      "date": "2026-05-22",
       "d": "22 may",
       "sist": 121,
       "diast": 82,
+      "pulso": 92,
       "tipo": "nocafe"
     },
     {
+      "date": "2026-05-25",
       "d": "25 may",
       "sist": 115,
       "diast": 82,
+      "pulso": 96,
       "tipo": "nocafe"
     },
     {
+      "date": "2026-05-26",
       "d": "26 may",
       "sist": 127,
       "diast": 83,
+      "pulso": 88,
       "tipo": "nocafe"
     },
     {
+      "date": "2026-05-27",
       "d": "27 may",
       "sist": 115,
       "diast": 81,
+      "pulso": 97,
       "tipo": "nocafe"
     },
     {
+      "date": "2026-05-28",
       "d": "28 may",
       "sist": 116,
       "diast": 83,
+      "pulso": 84,
       "tipo": "nocafe"
     },
     {
+      "date": "2026-05-29",
       "d": "29 may",
       "sist": 121,
       "diast": 82,
+      "pulso": 85,
       "tipo": "nocafe"
     },
     {
+      "date": "2026-06-01",
       "d": "1 jun",
       "sist": 133,
       "diast": 85,
+      "pulso": 80,
       "tipo": "nocafe"
     },
     {
+      "date": "2026-06-02",
       "d": "2 jun",
       "sist": 129,
       "diast": 81,
+      "pulso": 66,
       "tipo": "nocafe"
     },
     {
+      "date": "2026-06-04",
       "d": "4 jun",
       "sist": 132,
       "diast": 77,
+      "pulso": 76,
       "tipo": "nocafe"
     },
     {
+      "date": "2026-06-05",
       "d": "5 jun",
       "sist": 125,
       "diast": 75,
+      "pulso": 77,
       "tipo": "nocafe"
     },
     {
+      "date": "2026-06-08",
       "d": "8 jun",
       "sist": 129,
       "diast": 71,
+      "pulso": 81,
       "tipo": "nocafe"
     },
     {
+      "date": "2026-06-10",
       "d": "10 jun",
       "sist": 122,
       "diast": 84,
+      "pulso": 71,
       "tipo": "nocafe"
     },
     {
+      "date": "2026-06-12",
       "d": "12 jun",
       "sist": 120,
       "diast": 83,
+      "pulso": 72,
       "tipo": "nocafe"
     },
     {
+      "date": "2026-06-13",
       "d": "13 jun",
       "sist": 125,
       "diast": 81,
+      "pulso": 80,
       "tipo": "nocafe"
     },
     {
+      "date": "2026-06-15",
       "d": "15 jun",
       "sist": 116,
       "diast": 74,
+      "pulso": 79,
       "tipo": "nocafe"
     },
     {
+      "date": "2026-06-17",
       "d": "17 jun",
       "sist": 120,
       "diast": 83,
+      "pulso": 80,
       "tipo": "nocafe"
     },
     {
+      "date": "2026-06-24",
       "d": "24 jun",
       "sist": 127,
       "diast": 83,
+      "pulso": 81,
       "tipo": "nocafe"
     }
   ]
