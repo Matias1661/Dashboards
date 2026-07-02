@@ -300,6 +300,19 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       </div>
       <p style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:6px">1RM estimado = peso × (1 + reps/30). Máximo por sesión de series efectivas (sin calentamiento). Solo Hevy (desde 25 may).</p>
     </div>
+    <div class="card" style="margin-top:12px">
+      <div class="card-header">
+        <span class="card-title">Series semanales por grupo muscular</span>
+        <span class="card-badge" id="setsBadge"></span>
+      </div>
+      <div class="chart-wrap" style="height:220px"><canvas id="c-sets"></canvas></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:10px;font-family:'DM Mono',monospace;color:#6b6d70;align-items:center;">
+        <span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(37,99,190,0.65);display:inline-block;"></span>Semana actual</span>
+        <span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(150,160,170,0.35);border:1px solid rgba(150,160,170,0.6);display:inline-block;"></span>Semana previa</span>
+        <span style="display:flex;align-items:center;gap:4px;"><span style="width:14px;height:2px;background:rgba(13,138,82,0.4);display:inline-block;border-top:2px dashed rgba(13,138,82,0.6);"></span>Rango 10–20</span>
+      </div>
+      <p style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:6px">Series directas (primarias) por grupo muscular, semana en curso (lunes–hoy) vs semana anterior completa. Landmark de referencia: 10–20 series/semana por grupo para hipertrofia. Solo Hevy (desde 25 may).</p>
+    </div>
     <div class="two-col" id="radarCard">
       <div class="card" style="margin-bottom:0">
         <div class="card-header">
@@ -635,6 +648,13 @@ const chartE1RM=new Chart(document.getElementById('c-e1rm'),{type:'line',data:{l
   {label:'Sentadilla',data:[],borderColor:'#0d8a52',backgroundColor:'transparent',borderWidth:2,pointRadius:3,fill:false,tension:0.3,spanGaps:true},
   {label:'Jalón pecho',data:[],borderColor:'#9a6200',backgroundColor:'transparent',borderWidth:2,pointRadius:3,fill:false,tension:0.3,spanGaps:true},
 ]},options:{responsive:true,maintainAspectRatio:false,spanGaps:true,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#6b6d70',bodyColor:'#1a1a18',borderColor:'rgba(0,0,0,0.1)',borderWidth:1,callbacks:{label:ctx=>ctx.raw!==null?`${ctx.dataset.label}: ${ctx.raw} kg`:null}}},scales:{x:{ticks:{font:{family:'DM Mono',size:8},color:'#a8aab0',maxRotation:45,autoSkip:true},grid:{display:false},border:{display:false}},y:{ticks:{font:{size:8},color:'#a8aab0',callback:v=>v+' kg'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}});
+
+const chartSets=new Chart(document.getElementById('c-sets'),{type:'bar',data:{labels:[],datasets:[
+  {label:'Semana actual',data:[],backgroundColor:'rgba(37,99,190,0.65)',borderRadius:3,borderSkipped:false},
+  {label:'Semana previa',data:[],backgroundColor:'rgba(150,160,170,0.35)',borderColor:'rgba(150,160,170,0.6)',borderWidth:1,borderRadius:3,borderSkipped:false},
+  {type:'line',data:[],borderColor:'rgba(13,138,82,0.5)',backgroundColor:'transparent',borderWidth:1.5,borderDash:[5,3],pointRadius:0,fill:false},
+  {type:'line',data:[],borderColor:'rgba(13,138,82,0.5)',backgroundColor:'transparent',borderWidth:1.5,borderDash:[5,3],pointRadius:0,fill:false},
+]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#6b6d70',bodyColor:'#1a1a18',borderColor:'rgba(0,0,0,0.1)',borderWidth:1,filter:item=>item.datasetIndex<2,callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.raw} series`}}},scales:{x:{ticks:{font:{family:'DM Mono',size:8},color:'#a8aab0'},grid:{display:false},border:{display:false}},y:{min:0,ticks:{font:{size:8},color:'#a8aab0',stepSize:5},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}});
 
 const chartPulse=new Chart(document.getElementById('c-pulse'),{type:'line',data:{labels:[],datasets:[
   {data:[],borderColor:'#6d4fc2',backgroundColor:'rgba(109,79,194,0.06)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#6d4fc2',fill:true,tension:0.3,label:'Pulso'},
@@ -1140,6 +1160,55 @@ function renderStrength(){
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// RENDER MUSCLE SETS (series semanales por grupo — landmark 10–20)
+// ═══════════════════════════════════════════════════════════════════════════
+// Series directas (primarias) por grupo muscular. Semana en curso (lunes–hoy, incompleta) vs
+// semana anterior completa (lunes–domingo). Usa HEVY_MUSCLE_MAP / RADAR_GROUPS ya definidos para e1RM/radar.
+function renderMuscleSets(){
+  if(!hevyRaw||!hevyRaw.length)return;
+  const today=new Date();
+  const curMon=getMonday(today);
+  const prevMon=new Date(curMon); prevMon.setDate(prevMon.getDate()-7);
+  const prevSun=new Date(curMon); prevSun.setDate(prevSun.getDate()-1); prevSun.setHours(23,59,59,999);
+
+  const curSets={}, prevSets={};
+  hevyRaw.forEach(w=>{
+    const st=w.start_time; if(!st)return;
+    const dt=new Date(st);
+    let bucket=null;
+    if(dt>=curMon&&dt<=today) bucket=curSets;
+    else if(dt>=prevMon&&dt<=prevSun) bucket=prevSets;
+    if(!bucket)return;
+    (w.exercises||[]).forEach(ex=>{
+      const working=(ex.sets||[]).filter(s=>s.type!=='warmup');
+      if(!working.length)return;
+      const pg=HEVY_MUSCLE_MAP[ex.primary_muscle_group];
+      if(pg) bucket[pg]=(bucket[pg]||0)+working.length;
+    });
+  });
+
+  const labels=RADAR_GROUPS;
+  const curData=labels.map(g=>curSets[g]||0);
+  const prevData=labels.map(g=>prevSets[g]||0);
+  chartSets.data.labels=labels;
+  chartSets.data.datasets[0].data=curData;
+  chartSets.data.datasets[1].data=prevData;
+  chartSets.data.datasets[2].data=new Array(labels.length).fill(10);
+  chartSets.data.datasets[3].data=new Array(labels.length).fill(20);
+  const maxVal=Math.max(20,...curData,...prevData);
+  chartSets.options.scales.y.max=maxVal+3;
+  chartSets.update('none');
+
+  const under=labels.filter((g,i)=>curData[i]>0&&curData[i]<10);
+  const over=labels.filter((g,i)=>curData[i]>20);
+  const zero=labels.filter((g,i)=>curData[i]===0);
+  let badgeTxt=`semana desde ${fmtLabel(curMon)}`;
+  if(under.length)badgeTxt+=` · bajo 10: ${under.join(', ')}`;
+  if(over.length)badgeTxt+=` · sobre 20: ${over.join(', ')}`;
+  document.getElementById('setsBadge').textContent=badgeTxt;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // RENDER TRAINING
 // ═══════════════════════════════════════════════════════════════════════════
 function aggMuscleRadar(sessions){
@@ -1486,6 +1555,7 @@ async function loadAll(){
     applyRange(12);
     renderBP();
     renderStrength();
+    renderMuscleSets();
     renderHist();
     renderAnalysis();
     updateMeta();
