@@ -203,6 +203,13 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
         <div class="kpi-delta" id="kAguaDelta">—</div>
         <div class="kpi-delta" id="kAguaCycleDelta">—</div>
       </div>
+      <div class="kpi" id="kpiRatio">
+        <div class="kpi-label">Ratio músculo/peso</div>
+        <div class="kpi-val" id="kRatio">—</div>
+        <div class="kpi-date" id="kRatioDate"></div>
+        <div class="kpi-delta" id="kRatioDelta">—</div>
+        <div class="kpi-delta" id="kRatioCycleDelta">—</div>
+      </div>
     </div>
     <div class="key-insights" id="keyInsightsBox">
       <div class="key-insights-title">Resumen — 3 puntos clave</div>
@@ -259,6 +266,8 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       </div>
       <div id="bpStatus" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--amber);margin-bottom:8px;display:none"></div>
       <div class="chart-wrap" style="height:180px"><canvas id="c-bp"></canvas></div>
+      <div class="card-header" style="margin-top:10px;margin-bottom:4px"><span class="card-title" style="font-size:11px">Pulso en reposo · <span style="color:var(--purple)">■</span> lpm</span><span class="card-badge" id="pulseBadge"></span></div>
+      <div class="chart-wrap" style="height:110px"><canvas id="c-pulse"></canvas></div>
       <p id="bpNote" style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:8px"></p>
       <div class="chart-insight" id="ins-bp">Última lectura sin café (1 jul): 130/81, PP=49. PP medio ciclo 41.4 mmHg — dentro de rango (<55). PP máximo registrado: 58 mmHg (8 jun), sin alcanzar umbral de consulta (60). Sin alerta activa.</div>
     </div>
@@ -277,6 +286,20 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       <div class="card"><div class="card-header"><span class="card-title">Frecuencia mensual</span><span class="card-badge" id="freqBadge"></span></div><div class="chart-wrap" style="height:180px"><canvas id="c-freq"></canvas></div><div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:10px;font-family:'DM Mono',monospace;color:#6b6d70;align-items:center;"><span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(13,138,82,0.65);display:inline-block;"></span>≥ 8 ses</span><span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(37,99,190,0.45);display:inline-block;"></span>5–7 ses</span><span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(201,74,48,0.45);display:inline-block;"></span>&lt; 5 ses</span><span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(150,160,170,0.35);border:1px solid rgba(150,160,170,0.6);display:inline-block;"></span>proyectado</span></div></div>
     </div>
     <div class="chart-insight" id="ins-training">19 sesiones ciclo total. Junio: 17 sesiones, 113.3 t — mejor mes del ciclo. Frecuencia consistente con split PPL durante todo junio, sin semanas en blanco.</div>
+    <div class="card" style="margin-top:12px">
+      <div class="card-header">
+        <span class="card-title">Progresión de fuerza · 1RM estimado (Epley)</span>
+        <span class="card-badge" id="e1rmBadge"></span>
+      </div>
+      <div class="chart-wrap" style="height:220px"><canvas id="c-e1rm"></canvas></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:10px;font-family:'DM Mono',monospace;color:#6b6d70;align-items:center;">
+        <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:3px;background:#c94a30;display:inline-block;"></span>Press pecho</span>
+        <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:3px;background:#2563be;display:inline-block;"></span>Press hombro</span>
+        <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:3px;background:#0d8a52;display:inline-block;"></span>Sentadilla</span>
+        <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:3px;background:#9a6200;display:inline-block;"></span>Jalón pecho</span>
+      </div>
+      <p style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:6px">1RM estimado = peso × (1 + reps/30). Máximo por sesión de series efectivas (sin calentamiento). Solo Hevy (desde 25 may).</p>
+    </div>
     <div class="two-col" id="radarCard">
       <div class="card" style="margin-bottom:0">
         <div class="card-header">
@@ -606,6 +629,17 @@ const chartBP=new Chart(document.getElementById('c-bp'),{type:'line',data:{label
   {data:[],borderColor:'rgba(154,98,0,0.35)',backgroundColor:'transparent',borderWidth:1,borderDash:[6,4],pointRadius:0,fill:false},
 ]},options:{responsive:true,maintainAspectRatio:false,spanGaps:true,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#6b6d70',bodyColor:'#1a1a18',borderColor:'rgba(0,0,0,0.1)',borderWidth:1,filter:item=>item.datasetIndex<2,callbacks:{label:ctx=>{if(ctx.datasetIndex>=2)return null;const r=bpReadings[ctx.dataIndex];return`${ctx.datasetIndex===0?'Sistólica':'Diastólica'}: ${ctx.raw} mmHg`;},title:ctx=>`${ctx[0].label}`}}},scales:{x:{ticks:{font:{family:'DM Mono',size:8},color:'#a8aab0'},grid:{display:false},border:{display:false}},y:{min:60,max:155,ticks:{font:{size:8},color:'#a8aab0',callback:v=>(v===140||v===90)?v+' ←':v},grid:{color:ctx=>(ctx.tick.value===140||ctx.tick.value===90)?(ctx.tick.value===140?'rgba(201,74,48,0.15)':'rgba(154,98,0,0.15)'):'rgba(0,0,0,0.04)'},border:{display:false}}}}});
 
+const chartE1RM=new Chart(document.getElementById('c-e1rm'),{type:'line',data:{labels:[],datasets:[
+  {label:'Press pecho',data:[],borderColor:'#c94a30',backgroundColor:'transparent',borderWidth:2,pointRadius:3,fill:false,tension:0.3,spanGaps:true},
+  {label:'Press hombro',data:[],borderColor:'#2563be',backgroundColor:'transparent',borderWidth:2,pointRadius:3,fill:false,tension:0.3,spanGaps:true},
+  {label:'Sentadilla',data:[],borderColor:'#0d8a52',backgroundColor:'transparent',borderWidth:2,pointRadius:3,fill:false,tension:0.3,spanGaps:true},
+  {label:'Jalón pecho',data:[],borderColor:'#9a6200',backgroundColor:'transparent',borderWidth:2,pointRadius:3,fill:false,tension:0.3,spanGaps:true},
+]},options:{responsive:true,maintainAspectRatio:false,spanGaps:true,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#6b6d70',bodyColor:'#1a1a18',borderColor:'rgba(0,0,0,0.1)',borderWidth:1,callbacks:{label:ctx=>ctx.raw!==null?`${ctx.dataset.label}: ${ctx.raw} kg`:null}}},scales:{x:{ticks:{font:{family:'DM Mono',size:8},color:'#a8aab0',maxRotation:45,autoSkip:true},grid:{display:false},border:{display:false}},y:{ticks:{font:{size:8},color:'#a8aab0',callback:v=>v+' kg'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}});
+
+const chartPulse=new Chart(document.getElementById('c-pulse'),{type:'line',data:{labels:[],datasets:[
+  {data:[],borderColor:'#6d4fc2',backgroundColor:'rgba(109,79,194,0.06)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#6d4fc2',fill:true,tension:0.3,label:'Pulso'},
+]},options:{responsive:true,maintainAspectRatio:false,spanGaps:true,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#6b6d70',bodyColor:'#1a1a18',borderColor:'rgba(0,0,0,0.1)',borderWidth:1,callbacks:{label:ctx=>`Pulso: ${ctx.raw} lpm`}}},scales:{x:{ticks:{font:{family:'DM Mono',size:8},color:'#a8aab0'},grid:{display:false},border:{display:false}},y:{ticks:{font:{size:8},color:'#a8aab0'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}});
+
 const chartVol=new Chart(document.getElementById('c-vol'),{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:[],borderRadius:3,borderSkipped:false}],_titles:[]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#6b6d70',bodyColor:'#1a1a18',borderColor:'rgba(0,0,0,0.1)',borderWidth:1,callbacks:{label:ctx=>{const t=chartVol.data._titles&&chartVol.data._titles[ctx.dataIndex];const vol=ctx.raw>=1000?(ctx.raw/1000).toFixed(1)+'t':ctx.raw+'kg';return t?[vol,t]:[vol];}}}},scales:{x:{ticks:{font:{family:'DM Mono',size:8},color:'#a8aab0',maxRotation:45,autoSkip:true},grid:{display:false},border:{display:false}},y:{ticks:{font:{size:8},color:'#a8aab0',callback:v=>v>=1000?Math.round(v/1000)+'k':v},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}});
 
 const chartFreq=new Chart(document.getElementById('c-freq'),{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:[],borderRadius:0,borderSkipped:false,label:'Sesiones',stack:'sess'},{data:[],borderColor:'rgba(37,99,190,0.5)',backgroundColor:'transparent',type:'line',pointRadius:0,borderDash:[3,3],label:'Objetivo (8)'},{data:[],backgroundColor:'rgba(150,160,170,0.35)',borderColor:'rgba(150,160,170,0.6)',borderWidth:1,borderRadius:{topLeft:3,topRight:3,bottomLeft:0,bottomRight:0},borderSkipped:false,label:'Proyectado',stack:'sess'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{if(ctx.datasetIndex===2)return`  +${ctx.raw} proyectado`;if(ctx.datasetIndex===0)return`  ${ctx.raw} sesiones`;return null;}}}},scales:{x:{stacked:true,ticks:{font:{family:'DM Mono',size:8},color:'#a8aab0'},grid:{display:false},border:{display:false}},y:{stacked:true,min:0,ticks:{font:{size:8},color:'#a8aab0',stepSize:2},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}});
@@ -616,7 +650,7 @@ let chartRadarMonth=null;
 // ═══════════════════════════════════════════════════════════════════════════
 // GLOBAL STATE
 // ═══════════════════════════════════════════════════════════════════════════
-let allData=[]; let allDataFull=[]; let allSessions=[]; let bpReadings=[];
+let allData=[]; let allDataFull=[]; let allSessions=[]; let bpReadings=[]; let hevyRaw=[];
 let currentRange=12;
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -802,6 +836,16 @@ function updateBodyKPIs(){
   const dAguaCycle=latest.agua-cycleRef.agua;
   document.getElementById('kAguaCycleDelta').textContent=`${fmt1d(dAguaCycle)} pp vs inicio ciclo (${cycleRef.agua.toFixed(1)}%)`;
   document.getElementById('kpiAgua').className='kpi '+(dAguaCycle>=0?'trend-up':dAguaCycle>=-1?'trend-neutral':'trend-down');
+
+  // Ratio músculo/peso ganado: kg de músculo esquelético por kg de peso total ganado desde inicio de ciclo.
+  // Interpretación: >0.5 excelente, 0.3–0.5 aceptable en volumen, <0.3 exceso de grasa/agua. Sin peso ganado el ratio no aplica.
+  const dPesoCycle=latest.peso-cycleRef.peso;
+  const ratio = dPesoCycle>0 ? dMuscCycle/dPesoCycle : null;
+  document.getElementById('kRatio').innerHTML = ratio===null ? '—' : `${ratio.toFixed(2)} <span class="kpi-unit">kg/kg</span>`;
+  document.getElementById('kRatioDate').textContent=`al ${latestDate}`;
+  document.getElementById('kRatioDelta').textContent = `${fmt2d(dMuscCycle)} kg músculo / ${fmt2d(dPesoCycle)} kg peso`;
+  document.getElementById('kRatioCycleDelta').textContent = ratio===null ? 'sin peso ganado vs inicio ciclo' : (ratio>=0.5?'proporción alta de músculo':ratio>=0.3?'proporción aceptable (volumen)':'revisar grasa/sodio');
+  document.getElementById('kpiRatio').className='kpi '+(ratio===null?'trend-neutral':ratio>=0.5?'trend-up':ratio>=0.3?'trend-neutral':'trend-down');
 
   // Scatter
   chartScatter.data.datasets[0].data=allData.filter(d=>!d.ciclo).map(d=>({x:d.peso,y:d.grasa,label:d.d}));
@@ -1030,12 +1074,69 @@ function renderBP(){
   }
   chartBP.update('none'); // 'none' skips animation for cleaner update
 
+  // Pulso en reposo: solo lecturas con pulso registrado, orden cronológico (mismo readings ya ordenado)
+  const pulseData=readings.map(r=>(r.pulso!==null&&r.pulso!==undefined)?r.pulso:null);
+  const pulseVals=pulseData.filter(v=>v!==null);
+  chartPulse.data.labels=labels;
+  chartPulse.data.datasets[0].data=pulseData;
+  if(pulseVals.length){const rP=autoRange(pulseVals,0.2,10); chartPulse.options.scales.y.min=rP.min; chartPulse.options.scales.y.max=rP.max;}
+  chartPulse.update('none');
+  if(pulseVals.length){
+    const avgPulse=Math.round(pulseVals.reduce((a,b)=>a+b,0)/pulseVals.length);
+    const lastPulse=pulseVals[pulseVals.length-1];
+    document.getElementById('pulseBadge').textContent=`último ${lastPulse} · media ${avgPulse} lpm`;
+  } else {
+    document.getElementById('pulseBadge').textContent='sin datos de pulso';
+  }
+
   const nocafe=readings.filter(r=>r.tipo==='nocafe');
   const avgS=nocafe.length?Math.round(nocafe.reduce((s,r)=>s+r.sist,0)/nocafe.length):null;
   const avgD=nocafe.length?Math.round(nocafe.reduce((s,r)=>s+r.diast,0)/nocafe.length):null;
   const avgPP=nocafe.length?Math.round(nocafe.reduce((s,r)=>s+(r.sist-r.diast),0)/nocafe.length):null;
   if(avgS)document.getElementById('bpBadge').textContent=`media sin café: ${avgS}/${avgD} · PP ${avgPP}`;
   document.getElementById('bpNote').textContent=nocafe.length?`${nocafe.length} lecturas sin café · media ${avgS}/${avgD} mmHg · PP media ${avgPP} mmHg${avgPP>=60?' ⚠ PP elevada':''} · ${avgS<140&&avgD<90?'✓ bajo umbral 140/90':'⚠ sobre umbral 140/90'}` : '';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RENDER STRENGTH (1RM estimado — Epley)
+// ═══════════════════════════════════════════════════════════════════════════
+// Levantamientos clave, uno por patrón de movimiento. Títulos exactos de las plantillas Hevy.
+const E1RM_LIFTS=['Press de Pecho (Máquina)','Press de Hombros Sentado (Máquina)','Sentadilla (Máquina)','Jalón al Pecho (Máquina)'];
+function renderStrength(){
+  if(!hevyRaw||!hevyRaw.length)return;
+  const ws=[...hevyRaw].sort((a,b)=>new Date(a.start_time)-new Date(b.start_time));
+  // Fechas únicas (label día) donde aparece al menos uno de los levantamientos clave
+  const dayLabels=[]; const dayKeys=[];
+  const perDay={}; // key ISO -> {lift: e1rm max}
+  ws.forEach(w=>{
+    const key=(w.start_time||'').slice(0,10); if(!key)return;
+    (w.exercises||[]).forEach(ex=>{
+      const t=ex.title||''; if(!E1RM_LIFTS.includes(t))return;
+      (ex.sets||[]).forEach(s=>{
+        if(s.type==='warmup')return;
+        const wt=s.weight_kg||0, r=s.reps||0;
+        if(wt>0&&r>0){
+          const e=wt*(1+r/30);
+          if(!perDay[key])perDay[key]={};
+          if(e>(perDay[key][t]||0))perDay[key][t]=e;
+        }
+      });
+    });
+  });
+  const keys=Object.keys(perDay).sort();
+  keys.forEach(k=>{ const[y,m,d]=k.split('-'); dayLabels.push(fmtLabel(new Date(+y,+m-1,+d))); });
+  chartE1RM.data.labels=dayLabels;
+  E1RM_LIFTS.forEach((lift,i)=>{
+    chartE1RM.data.datasets[i].data=keys.map(k=>perDay[k][lift]!==undefined?+perDay[k][lift].toFixed(1):null);
+  });
+  // Badge: mejor e1RM absoluto del ciclo (mayor progreso relativo lo cuenta el usuario en tooltip)
+  let bestLift='',bestVal=0;
+  E1RM_LIFTS.forEach((lift,i)=>{
+    const vals=chartE1RM.data.datasets[i].data.filter(v=>v!==null);
+    if(vals.length){const mx=Math.max(...vals); if(mx>bestVal){bestVal=mx;bestLift=chartE1RM.data.datasets[i].label;}}
+  });
+  document.getElementById('e1rmBadge').textContent=bestVal?`máx ${bestLift} ${bestVal.toFixed(0)} kg`:'sin datos';
+  chartE1RM.update('none');
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1353,6 +1454,7 @@ async function loadAll(){
       fetch(BP_URL+'?t='+t,fetchOpts).then(r=>{if(!r.ok)throw new Error('bp '+r.status);return r.json();}).catch(e=>{console.warn('bp fetch:',e);return {readings:[]};}),
     ]);
     processRenpho(rJson);
+    hevyRaw=hJson.workouts||[];
     const hevySessions=parseWorkouts(hJson.workouts||[],'Hevy');
     const jeitRaw=Array.isArray(jJson)?jJson:(jJson.workouts||[]);
     const jeitSessions=parseWorkouts(jeitRaw,'Jefit');
@@ -1383,6 +1485,7 @@ async function loadAll(){
     updateBodyKPIs();
     applyRange(12);
     renderBP();
+    renderStrength();
     renderHist();
     renderAnalysis();
     updateMeta();
