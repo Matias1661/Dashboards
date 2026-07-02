@@ -211,17 +211,17 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       </div>
     </div>
     <div class="two-col">
-      <div class="card"><div class="card-header"><span class="card-title">Peso</span><span class="card-badge" id="cbPeso"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-peso"></canvas></div><div class="chart-insight" id="ins-peso">Peso actual 90.9 kg (+4.7 kg vs baseline 86.2 kg). Oscilación 90.8→93.0→90.9 kg en 5 días — variabilidad hídrica, no cambio real de tejido. SM estable en el mismo período confirma la lectura.</div></div>
-      <div class="card"><div class="card-header"><span class="card-title">Masa muscular</span><span class="card-badge" id="cbMusc"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-musc"></canvas></div><div class="chart-insight" id="ins-musc">Músculo esquelético 60.99 kg (+1.76 kg vs baseline 59.22 kg). Rango estable 60.99–61.75 kg en los últimos 5 días. Ganancia neta ciclo sólida; oscilaciones de peso recientes son agua/glucógeno.</div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Peso</span><span class="card-badge" id="cbPeso"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-peso"></canvas></div><div class="chart-insight" id="ins-peso">Peso actual 90.9 kg (+4.7 kg vs baseline 86.2 kg). Pico de 93.0 kg del 30 jun corregido al día siguiente — retención hídrica, no cambio real de tejido.</div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Masa muscular</span><span class="card-badge" id="cbMusc"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-musc"></canvas></div><div class="chart-insight" id="ins-musc">Músculo esquelético 60.99 kg (+1.77 kg vs baseline 59.22 kg). Estable en el rango 60.5-61.7 kg durante junio. Ganancia neta de ciclo sólida.</div></div>
     </div>
     <div class="two-col">
-      <div class="card"><div class="card-header"><span class="card-title">Grasa corporal</span><span class="card-badge" id="cbGrasa"></span></div><div class="card-header" style="margin-top:-6px;margin-bottom:0"><span style="font-size:10px;color:var(--text3)"><span style="color:#c94a30">—</span> total &nbsp;<span style="color:rgba(154,98,0,0.8)">- -</span> subcutánea</span></div><div class="chart-wrap" style="height:160px"><canvas id="c-grasa"></canvas></div><div class="chart-insight" id="ins-grasa">Grasa corporal 29.4% (+1.70pp vs baseline 27.7%). Ratio ganancia muscular/grasa: 0.37 kg SM por kg de peso ganado — aceptable para ciclo de volumen. Controlar sodio esta semana para reducir retención.</div></div>
-      <div class="card"><div class="card-header"><span class="card-title">Agua %</span><span class="card-badge" id="cbAgua"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-agua"></canvas></div><div class="chart-insight" id="ins-agua">Agua corporal 51.0%. Retención hídrica explica la mayor parte de la oscilación de peso reciente (90.8→93.0 kg). Reducir sodio antes de la última inyección (6 jul) para entrar al washout en rango más limpio.</div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Grasa corporal</span><span class="card-badge" id="cbGrasa"></span></div><div class="card-header" style="margin-top:-6px;margin-bottom:0"><span style="font-size:10px;color:var(--text3)"><span style="color:#c94a30">—</span> total &nbsp;<span style="color:rgba(154,98,0,0.8)">- -</span> subcutánea</span></div><div class="chart-wrap" style="height:160px"><canvas id="c-grasa"></canvas></div><div class="chart-insight" id="ins-grasa">Grasa corporal 29.4% (+1.7pp vs baseline 27.7%). Ratio ganancia muscular/grasa: 0.38 kg SM por kg de peso ganado — aceptable para ciclo de volumen. Controlar sodio esta semana.</div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Agua %</span><span class="card-badge" id="cbAgua"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-agua"></canvas></div><div class="chart-insight" id="ins-agua">Agua corporal 51.0%. La caída del 30 jun (93.0 kg) al 1 jul (90.9 kg) confirma que la oscilación de peso reciente es hídrica. Reducir sodio antes del washout (6 jul).</div></div>
     </div>
     <div class="card" style="margin-top:0">
       <div class="card-header"><span class="card-title">Grasa visceral (índice)</span><span class="card-badge" id="cbVisceral"></span></div>
       <div class="chart-wrap" style="height:110px"><canvas id="c-visceral"></canvas></div>
-      <div class="chart-insight" id="ins-visceral">Grasa visceral 11 (+2 vs baseline 9). Lleva semanas estable en 11 — sin deterioro reciente. Controlar ultraprocesados y sodio durante washout y PCT para evitar nueva subida sin anabolizantes.</div>
+      <div class="chart-insight" id="ins-visceral">Grasa visceral 11, estable desde hace semanas (subió a 12 puntualmente el 30 jun, ya de vuelta a 11). Controlar ultraprocesados y sodio durante washout y PCT.</div>
     </div>
     <div class="card" style="margin-top:0">
       <div class="card-header">
@@ -260,7 +260,7 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       <div id="bpStatus" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--amber);margin-bottom:8px;display:none"></div>
       <div class="chart-wrap" style="height:180px"><canvas id="c-bp"></canvas></div>
       <p id="bpNote" style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:8px"></p>
-      <div class="chart-insight" id="ins-bp">Última lectura sin café (24 jun): 127/83. PP medio ciclo 41.4 mmHg — dentro del rango aceptable (<55). PP máximo registrado: 58 mmHg. Tendencia PP: 34→41 mmHg (subida moderada, consistente con sem 14). Tomar lectura el 3–4 jul; si PP >50 o sistólica >130, anotar para analítica de octubre.</div>
+      <div class="chart-insight" id="ins-bp">Última lectura sin café (1 jul): 130/81, PP=49. PP medio ciclo 41.4 mmHg — dentro de rango (<55). PP máximo registrado: 58 mmHg (8 jun), sin alcanzar umbral de consulta (60). Sin alerta activa.</div>
     </div>
   </div>
 
@@ -276,7 +276,7 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       <div class="card"><div class="card-header"><span class="card-title">Volumen por sesión — ciclo</span><span class="card-badge" id="volBadge"></span></div><div class="chart-wrap" style="height:180px"><canvas id="c-vol"></canvas></div></div>
       <div class="card"><div class="card-header"><span class="card-title">Frecuencia mensual</span><span class="card-badge" id="freqBadge"></span></div><div class="chart-wrap" style="height:180px"><canvas id="c-freq"></canvas></div><div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:10px;font-family:'DM Mono',monospace;color:#6b6d70;align-items:center;"><span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(13,138,82,0.65);display:inline-block;"></span>≥ 8 ses</span><span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(37,99,190,0.45);display:inline-block;"></span>5–7 ses</span><span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(201,74,48,0.45);display:inline-block;"></span>&lt; 5 ses</span><span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(150,160,170,0.35);border:1px solid rgba(150,160,170,0.6);display:inline-block;"></span>proyectado</span></div></div>
     </div>
-    <div class="chart-insight" id="ins-training">19 sesiones ciclo total. Junio: 17 sesiones, 113.3 t — mejor mes del ciclo. Últimos 14d: 9 sesiones, frecuencia al alza. Énfasis reciente en espalda (lats+upper back 46 sets) vs pecho+quad en período anterior. Cuádriceps/isquios en déficit relativo — incluir sesión pierna antes del 6 jul.</div>
+    <div class="chart-insight" id="ins-training">19 sesiones ciclo total. Junio: 17 sesiones, 113.3 t — mejor mes del ciclo. Frecuencia consistente con split PPL durante todo junio, sin semanas en blanco.</div>
     <div class="two-col" id="radarCard">
       <div class="card" style="margin-bottom:0">
         <div class="card-header">
@@ -297,21 +297,21 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       <div class="card-header">
         <span class="card-title">Análisis por Claude</span>
         <button id="btnAnalizar" onclick="runAnalysis()" style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.08em;padding:4px 12px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s;margin-left:8px">✦ Analizar</button>
-        <span class="card-badge" id="claudeAnalysisDate" style="color:var(--text3)">30 jun 2026</span>
+        <span class="card-badge" id="claudeAnalysisDate" style="color:var(--text3)">2 jul 2026</span>
       </div>
       <p style="font-size:11px;color:var(--text3);margin:0 0 10px 0;line-height:1.5">El análisis se genera bajo demanda. Pulsa el botón para llamar a la API de Claude con los datos actuales.</p>
       <div id="claudeAnalysisBody" style="font-size:12px;color:var(--text2);line-height:1.65;font-family:'DM Sans',sans-serif"><p><strong style="display:block;border-bottom:1px solid var(--border,#333);padding-bottom:4px;margin-bottom:6px">Composición corporal</strong>
-Peso 93.0 kg (+6.8 kg vs. baseline de ciclo 86.20 kg). Músculo esquelético 61.75 kg (+2.53 kg). Grasa corporal 30.1% (+2.4pp vs. 27.7% baseline). Grasa visceral subió de 11 a 12.<br>
-Salto de 90.8 → 93.0 kg en 3 días (27-30 jun), con grasa subiendo 0.8pp y agua bajando de 51.0% a 50.5% — inconsistente con retención pura de agua. Confirmar con medición en ayunas antes de asumir causa.</p>
+Peso 90.9 kg (+4.7 kg vs. baseline de ciclo 86.20 kg). Músculo esquelético 60.99 kg (+1.77 kg). Grasa corporal 29.4% (+1.7pp vs. 27.7% baseline). Grasa visceral en 11.<br>
+El pico de 93.0 kg del 30 jun se corrigió a 90.9 kg al día siguiente — confirma que fue retención de agua/sodio y no ganancia real de tejido. Ratio músculo/peso ganado en el ciclo: 0.38 kg SM por kg de peso, aceptable para volumen.</p>
 <p><strong style="display:block;border-bottom:1px solid var(--border,#333);padding-bottom:4px;margin-bottom:6px;margin-top:10px">Tensión arterial (PP)</strong>
-19 lecturas sin café desde 19 may. PP medio 41.4, máximo 58 (8 jun), por debajo del umbral de alerta (60) pero cruzó el aviso (55) en dos ocasiones, coincidiendo con la última semana de Masterona. Desde 10 jun estabilizado en 37-44 (última: 24 jun, PP=44). Sin alerta activa.</p>
+21 lecturas sin café desde 19 may. PP medio 41.4 mmHg, máximo 58 (8 jun) — nunca alcanzó el umbral de consulta médica (60) pero cruzó el aviso (55) en dos lecturas puntuales de la última semana de Masterona. Desde el 10 jun estable en 37-49, última lectura (1 jul) en 49. Sin alerta activa.</p>
 <p><strong style="display:block;border-bottom:1px solid var(--border,#333);padding-bottom:4px;margin-bottom:6px;margin-top:10px">Entrenamiento</strong>
-19 sesiones desde 25 may. Últimos 9 días: Pull, gimnasio edificio, Push, Leg, Push, Pull — 6 sesiones, frecuencia sólida y consistente con el split PPL.</p>
+19 sesiones registradas (25 may-30 jun). Junio: 17 sesiones, 113.3 t de volumen — mejor mes del ciclo, frente a mayo con datos parciales. Frecuencia consistente con el split PPL, sin semanas en blanco desde principios de junio.</p>
 <p><strong style="display:block;border-bottom:1px solid var(--border,#333);padding-bottom:4px;margin-bottom:6px;margin-top:10px">Recomendaciones</strong>
-1. Repetir Renpho en ayunas en 1-2 días para confirmar si el salto de peso es retención de sodio o cambio real.<br>
-2. Mantener vigilancia TA/PP cerca de la última inyección de Testo (6 jul) antes del lavado.<br>
-3. Sin cambios de protocolo: última Testo lunes 6 jul, lavado 14 días, PCT (HCG) inicia 20 jul.<br>
-4. Seguir registrando nutrición vía Nutrition MCP — quedan ~3 semanas para las 4 necesarias antes de integrar panel al dashboard.</p></div>
+1. Controlar sodio esta semana para llegar al washout (desde 6 jul) en un punto de partida más limpio de retención hídrica.<br>
+2. Sin cambios de protocolo: última Testo lunes 6 jul, lavado 14 días, PCT (HCG) inicia 20 jul.<br>
+3. Mantener frecuencia de TA cerca de la última inyección — sin señales de riesgo por ahora.<br>
+4. Seguir registrando nutrición vía Nutrition MCP — objetivo ~20-25 días de log consistente antes de integrar panel al dashboard (hacia el 20 jul).</p></div>
     </div>
   </div>
 
