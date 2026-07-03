@@ -298,7 +298,7 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
         <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:3px;background:#0d8a52;display:inline-block;"></span>Sentadilla</span>
         <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:3px;background:#9a6200;display:inline-block;"></span>Jalón pecho</span>
       </div>
-      <p style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:6px">1RM estimado = peso × (1 + reps/30). Máximo por sesión de series efectivas (sin calentamiento). Solo Hevy (desde 25 may).</p>
+      <p style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:6px">1RM estimado = peso × (1 + reps/30). Máximo semanal (ISO) de series efectivas (sin calentamiento), interpolado en semanas sin sesión. Solo Hevy (desde 25 may).</p>
     </div>
     <div class="card" style="margin-top:12px">
       <div class="card-header">
@@ -1116,14 +1116,37 @@ function renderBP(){
 // ═══════════════════════════════════════════════════════════════════════════
 // Levantamientos clave, uno por patrón de movimiento. Títulos exactos de las plantillas Hevy.
 const E1RM_LIFTS=['Press de Pecho (Máquina)','Press de Hombros Sentado (Máquina)','Sentadilla (Máquina)','Jalón al Pecho (Máquina)'];
+function isoWeekInfo(date){
+  const d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()));
+  const dayNum=(d.getUTCDay()+6)%7;
+  d.setUTCDate(d.getUTCDate()-dayNum+3);
+  const firstThursday=new Date(Date.UTC(d.getUTCFullYear(),0,4));
+  const week=1+Math.round(((d-firstThursday)/86400000-3+((firstThursday.getUTCDay()+6)%7))/7);
+  return {year:d.getUTCFullYear(),week};
+}
+function weekKey(date){ const {year,week}=isoWeekInfo(date); return `${year}-W${String(week).padStart(2,'0')}`; }
+function nextWeekKey(key){ const [y,w]=key.split('-W').map(Number); const d=new Date(Date.UTC(y,0,4+(w-1)*7)); d.setUTCDate(d.getUTCDate()+7); return weekKey(d); }
+function linearInterp(arr){
+  const out=[...arr]; let i=0;
+  while(i<out.length){
+    if(out[i]===null){
+      let j=i; while(j<out.length&&out[j]===null)j++;
+      if(i>0&&j<out.length){
+        const a=out[i-1],b=out[j],span=j-(i-1);
+        for(let k=i;k<j;k++) out[k]=+(a+(b-a)*(k-(i-1))/span).toFixed(1);
+      }
+      i=j;
+    } else i++;
+  }
+  return out;
+}
 function renderStrength(){
   if(!hevyRaw||!hevyRaw.length)return;
   const ws=[...hevyRaw].sort((a,b)=>new Date(a.start_time)-new Date(b.start_time));
-  // Fechas únicas (label día) donde aparece al menos uno de los levantamientos clave
-  const dayLabels=[]; const dayKeys=[];
-  const perDay={}; // key ISO -> {lift: e1rm max}
+  const perWeek={};
   ws.forEach(w=>{
-    const key=(w.start_time||'').slice(0,10); if(!key)return;
+    const dt=w.start_time?new Date(w.start_time):null; if(!dt)return;
+    const key=weekKey(dt);
     (w.exercises||[]).forEach(ex=>{
       const t=ex.title||''; if(!E1RM_LIFTS.includes(t))return;
       (ex.sets||[]).forEach(s=>{
@@ -1131,19 +1154,21 @@ function renderStrength(){
         const wt=s.weight_kg||0, r=s.reps||0;
         if(wt>0&&r>0){
           const e=wt*(1+r/30);
-          if(!perDay[key])perDay[key]={};
-          if(e>(perDay[key][t]||0))perDay[key][t]=e;
+          if(!perWeek[key])perWeek[key]={};
+          if(e>(perWeek[key][t]||0))perWeek[key][t]=e;
         }
       });
     });
   });
-  const keys=Object.keys(perDay).sort();
-  keys.forEach(k=>{ const[y,m,d]=k.split('-'); dayLabels.push(fmtLabel(new Date(+y,+m-1,+d))); });
-  chartE1RM.data.labels=dayLabels;
+  const dataKeys=Object.keys(perWeek).sort();
+  if(!dataKeys.length){ chartE1RM.data.labels=[]; E1RM_LIFTS.forEach((_,i)=>chartE1RM.data.datasets[i].data=[]); chartE1RM.update('none'); return; }
+  const weeks=[]; let cur=dataKeys[0]; const last=dataKeys[dataKeys.length-1];
+  while(cur<=last){ weeks.push(cur); cur=nextWeekKey(cur); if(weeks.length>200)break; }
+  chartE1RM.data.labels=weeks.map(k=>'S'+k.split('-W')[1]);
   E1RM_LIFTS.forEach((lift,i)=>{
-    chartE1RM.data.datasets[i].data=keys.map(k=>perDay[k][lift]!==undefined?+perDay[k][lift].toFixed(1):null);
+    const raw=weeks.map(k=>perWeek[k]&&perWeek[k][lift]!==undefined?+perWeek[k][lift].toFixed(1):null);
+    chartE1RM.data.datasets[i].data=linearInterp(raw);
   });
-  // Badge: mejor e1RM absoluto del ciclo (mayor progreso relativo lo cuenta el usuario en tooltip)
   let bestLift='',bestVal=0;
   E1RM_LIFTS.forEach((lift,i)=>{
     const vals=chartE1RM.data.datasets[i].data.filter(v=>v!==null);
