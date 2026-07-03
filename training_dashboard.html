@@ -640,7 +640,7 @@ const chartE1RM=new Chart(document.getElementById('c-e1rm'),{type:'line',data:{l
   {label:'Press pecho',data:[],borderColor:'#c94a30',backgroundColor:'transparent',borderWidth:2,pointRadius:3,fill:false,tension:0.3,spanGaps:true},
   {label:'Press hombro',data:[],borderColor:'#2563be',backgroundColor:'transparent',borderWidth:2,pointRadius:3,fill:false,tension:0.3,spanGaps:true},
   {label:'Sentadilla',data:[],borderColor:'#0d8a52',backgroundColor:'transparent',borderWidth:2,pointRadius:3,fill:false,tension:0.3,spanGaps:true},
-  {label:'Jalón pecho',data:[],borderColor:'#9a6200',backgroundColor:'transparent',borderWidth:2,pointRadius:3,fill:false,tension:0.3,spanGaps:true},
+  {label:'Remo mancuerna',data:[],borderColor:'#9a6200',backgroundColor:'transparent',borderWidth:2,pointRadius:3,fill:false,tension:0.3,spanGaps:true},
 ]},options:{responsive:true,maintainAspectRatio:false,spanGaps:true,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#6b6d70',bodyColor:'#1a1a18',borderColor:'rgba(0,0,0,0.1)',borderWidth:1,callbacks:{label:ctx=>ctx.raw!==null?`${ctx.dataset.label}: ${ctx.raw} kg`:null}}},scales:{x:{ticks:{font:{family:'DM Mono',size:8},color:'#a8aab0',maxRotation:45,autoSkip:true},grid:{display:false},border:{display:false}},y:{ticks:{font:{size:8},color:'#a8aab0',callback:v=>v+' kg'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}});
 
 const chartSets=new Chart(document.getElementById('c-sets'),{type:'bar',data:{labels:[],datasets:[
@@ -1115,7 +1115,7 @@ function renderBP(){
 // RENDER STRENGTH (1RM estimado — Epley)
 // ═══════════════════════════════════════════════════════════════════════════
 // Levantamientos clave, uno por patrón de movimiento. Títulos exactos de las plantillas Hevy.
-const E1RM_LIFTS=['Press de Pecho (Máquina)','Press de Hombros Sentado (Máquina)','Sentadilla (Máquina)','Jalón al Pecho (Máquina)'];
+const E1RM_LIFTS=['Press de Pecho (Máquina)','Press de Hombros Sentado (Máquina)','Sentadilla (Máquina)','Remo con Mancuerna'];
 function isoWeekInfo(date){
   const d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()));
   const dayNum=(d.getUTCDay()+6)%7;
