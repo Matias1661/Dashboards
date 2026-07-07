@@ -218,8 +218,8 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       </div>
     </div>
     <div class="two-col">
-      <div class="card"><div class="card-header"><span class="card-title">Peso</span><span class="card-badge" id="cbPeso"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-peso"></canvas></div><div class="chart-insight" id="ins-peso">90.85 kg (+4.65 vs baseline). Últimos 14d con oscilación 89-93 kg; pico del 30-jun ya corregido. Última inyección de testo hoy (sem 15): esperar tendencia a la baja en washout/PCT.</div></div>
-      <div class="card"><div class="card-header"><span class="card-title">Masa muscular</span><span class="card-badge" id="cbMusc"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-musc"></canvas></div><div class="chart-insight" id="ins-musc">60.96 kg (+1.74 vs baseline). Estable en las últimas 3 semanas (~61 kg). Prioridad en PCT: mantener cargas y frecuencia para retener esta ganancia.</div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Peso</span><span class="card-badge" id="cbPeso"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-peso"></canvas></div><div class="chart-insight" id="ins-peso">90.85 kg (+4.65 vs baseline). Bajando desde el pico del 30-jun (93.0 kg). Última inyección de testo el 6-jul (sem 15); esperar tendencia a la baja en washout/PCT.</div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Masa muscular</span><span class="card-badge" id="cbMusc"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-musc"></canvas></div><div class="chart-insight" id="ins-musc">60.96 kg (+1.74 vs baseline). Estable en las últimas semanas (~61 kg). Prioridad en PCT: mantener cargas y frecuencia para retener esta ganancia.</div></div>
     </div>
     <div class="two-col">
       <div class="card"><div class="card-header"><span class="card-title">Grasa corporal</span><span class="card-badge" id="cbGrasa"></span></div><div class="card-header" style="margin-top:-6px;margin-bottom:0"><span style="font-size:10px;color:var(--text3)"><span style="color:#c94a30">—</span> total &nbsp;<span style="color:rgba(154,98,0,0.8)">- -</span> subcutánea</span></div><div class="chart-wrap" style="height:160px"><canvas id="c-grasa"></canvas></div><div class="chart-insight" id="ins-grasa">29.4% (+1.7pp vs baseline). Tendencia al alza sostenida desde inicio de ciclo. Vigilar de cerca en washout/PCT; considerar ajuste calórico moderado.</div></div>
@@ -228,7 +228,7 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
     <div class="card" style="margin-top:0">
       <div class="card-header"><span class="card-title">Grasa visceral (índice)</span><span class="card-badge" id="cbVisceral"></span></div>
       <div class="chart-wrap" style="height:110px"><canvas id="c-visceral"></canvas></div>
-      <div class="chart-insight" id="ins-visceral">De 9 a 11 desde baseline, con un pico puntual a 12 el 30-jun ya corregido. Sin señal de riesgo agudo, pero acompaña la tendencia de grasa corporal.</div>
+      <div class="chart-insight" id="ins-visceral">De 9 a 11 desde baseline, con un pico puntual a 12 el 30-jun ya corregido. Sin señal de riesgo agudo, acompaña la tendencia de grasa corporal.</div>
     </div>
     <div class="card" style="margin-top:0">
       <div class="card-header">
@@ -269,7 +269,7 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       <div class="card-header" style="margin-top:10px;margin-bottom:4px"><span class="card-title" style="font-size:11px">Pulso en reposo · <span style="color:var(--purple)">■</span> lpm</span><span class="card-badge" id="pulseBadge"></span></div>
       <div class="chart-wrap" style="height:110px"><canvas id="c-pulse"></canvas></div>
       <p id="bpNote" style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:8px"></p>
-      <div class="chart-insight" id="ins-bp">Dos avisos de PP (55 y 58) el 4 y 8 de junio, ya resueltos. Última lectura (1-jul): 130/81, PP=49, dentro de rango normal. Sin alertas activas.</div>
+      <div class="chart-insight" id="ins-bp">PP en las últimas 6 lecturas sin café: 44, 42, 37, 44, 49, 39. Última lectura (7-jul): 104/65, PP=39. Sin alertas activas.</div>
     </div>
   </div>
 
@@ -285,7 +285,7 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       <div class="card"><div class="card-header"><span class="card-title">Volumen por sesión — ciclo</span><span class="card-badge" id="volBadge"></span></div><div class="chart-wrap" style="height:180px"><canvas id="c-vol"></canvas></div></div>
       <div class="card"><div class="card-header"><span class="card-title">Frecuencia mensual</span><span class="card-badge" id="freqBadge"></span></div><div class="chart-wrap" style="height:180px"><canvas id="c-freq"></canvas></div><div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:10px;font-family:'DM Mono',monospace;color:#6b6d70;align-items:center;"><span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(13,138,82,0.65);display:inline-block;"></span>≥ 8 ses</span><span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(37,99,190,0.45);display:inline-block;"></span>5–7 ses</span><span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(201,74,48,0.45);display:inline-block;"></span>&lt; 5 ses</span><span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(150,160,170,0.35);border:1px solid rgba(150,160,170,0.6);display:inline-block;"></span>proyectado</span></div></div>
     </div>
-    <div class="chart-insight" id="ins-training">8 sesiones en los últimos 14 días, 17 en los últimos 30. Buena adherencia al split V Taper/Leg/Pull/Push, ya cumple el mínimo mensual para el próximo ciclo.</div>
+    <div class="chart-insight" id="ins-training">Junio: 17 sesiones, volumen 113,284 kg. Julio (hasta el 7): 2 sesiones, 15,025 kg — arranque normal de mes. Buena adherencia al split V Taper/Leg/Pull/Push.</div>
     <div class="card" style="margin-top:12px">
       <div class="card-header">
         <span class="card-title">Series semanales por grupo muscular</span>
@@ -319,17 +319,17 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       <div class="card-header">
         <span class="card-title">Análisis por Claude</span>
         <button id="btnAnalizar" onclick="runAnalysis()" style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.08em;padding:4px 12px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s;margin-left:8px">✦ Analizar</button>
-        <span class="card-badge" id="claudeAnalysisDate" style="color:var(--text3)">6 de julio de 2026 · Claude Sonnet</div>
+        <span class="card-badge" id="claudeAnalysisDate" style="color:var(--text3)">7 de julio de 2026 · Claude Sonnet</div>
       <p style="font-size:11px;color:var(--text3);margin:0 0 10px 0;line-height:1.5">El análisis se genera bajo demanda. Pulsa el botón para llamar a la API de Claude con los datos actuales.</p>
       <div id="claudeAnalysisBody" style="font-size:12px;color:var(--text2);line-height:1.65;font-family:'DM Sans',sans-serif"><h4>Análisis del Ciclo — Semana 15</h4>
-<p><strong>Composición Corporal:</strong> Peso 90.85 kg (+4.65 kg vs baseline), músculo esquelético 60.96 kg (+1.74 kg), grasa corporal 29.4% (+1.7pp). Tendencia de grasa al alza sostenida desde inicio de ciclo; agua corporal en ligero descenso (51.0%). Visceral estable en 11.</p>
-<p><strong>Entrenamiento:</strong> 8 sesiones en últimos 14 días, 17 en últimos 30. Frecuencia consistente con el split V Taper/Leg/Pull/Push, cumple el mínimo mensual requerido para el próximo ciclo.</p>
-<p><strong>Tensión Arterial:</strong> Dos avisos de PP (4 y 8 jun) ya resueltos. Última lectura 130/81, PP=49, sin alertas activas.</p>
+<p><strong>Composición Corporal:</strong> Peso 90.85 kg (+4.65 kg vs baseline), músculo esquelético 60.96 kg (+1.74 kg), grasa corporal 29.4% (+1.7pp). Peso bajando desde el pico del 30-jun (93.0 kg). Tendencia de grasa al alza sostenida desde inicio de ciclo; agua corporal en ligero descenso (51.0%). Visceral estable en 11.</p>
+<p><strong>Entrenamiento:</strong> Junio: 17 sesiones, volumen 113,284 kg. Julio (hasta el 7): 2 sesiones, 15,025 kg. Buena adherencia al split V Taper/Leg/Pull/Push.</p>
+<p><strong>Tensión Arterial:</strong> PP en las últimas 6 lecturas sin café: 44, 42, 37, 44, 49, 39, todas por debajo del umbral de alerta (55). Última lectura (7-jul): 104/65, PP=39. Sin alertas activas.</p>
 <p><strong>Recomendaciones:</strong></p>
 <ol>
-<li>Hoy es la última inyección de testosterona (sem 15); inicia washout de 14 días.</li>
-<li>Ajustar a un déficit calórico moderado antes de PCT (20 jul) dada la tendencia ascendente de grasa corporal.</li>
-<li>Mantener la frecuencia de entrenamiento actual durante washout/PCT.</li>
+<li>Última inyección de testosterona aplicada el 6-jul (sem 15); washout de 14 días en curso.</li>
+<li>Vigilar % de grasa semanalmente durante washout/PCT; ajustar calorías si sigue al alza antes de la analítica de octubre.</li>
+<li>Mantener el volumen de entrenamiento actual para conservar el músculo ganado.</li>
 <li>Sin acción requerida en tensión arterial; seguir monitoreo habitual.</li>
 </ol></div>
     </div>
