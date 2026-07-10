@@ -624,7 +624,7 @@ let chartRadarMonth=null;
 // ═══════════════════════════════════════════════════════════════════════════
 // GLOBAL STATE
 // ═══════════════════════════════════════════════════════════════════════════
-let allData=[]; let allDataFull=[]; let allSessions=[]; let bpReadings=[]; let hevyRaw=[];
+let allData=[]; let allDataFull=[]; let allSessions=[]; let bpReadings=[];
 let currentRange=12;
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1386,7 +1386,6 @@ async function loadAll(){
       fetch(BP_URL+'?t='+t,fetchOpts).then(r=>{if(!r.ok)throw new Error('bp '+r.status);return r.json();}).catch(e=>{console.warn('bp fetch:',e);return {readings:[]};}),
     ]);
     processRenpho(rJson);
-    hevyRaw=hJson.workouts||[];
     const hevySessions=parseWorkouts(hJson.workouts||[],'Hevy');
     const jeitRaw=Array.isArray(jJson)?jJson:(jJson.workouts||[]);
     const jeitSessions=parseWorkouts(jeitRaw,'Jefit');
@@ -1520,12 +1519,26 @@ async function runAnalysis(){
   const months = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
   const today = now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear();
 
+  // Mejora nº5 (auditoría 9-jul): la semana del ciclo y los deltas vs baseline se
+  // calculan aquí en JS y se inyectan ya resueltos en el prompt. El modelo no debe
+  // recalcular fechas ni referencias — solo interpretar los datos ya calculados.
+  const currentWeek = getCurrentWeek();
+  const officialBaseline = { date:'2026-03-11', weight:86.20, muscle:59.22, bodyfat:27.7 };
+  const latestRenpho = last8renpho.length ? last8renpho[last8renpho.length-1] : null;
+  const deltaWeight = latestRenpho ? Math.round((latestRenpho.weight - officialBaseline.weight)*100)/100 : null;
+  const deltaMuscle = latestRenpho ? Math.round((latestRenpho.skeletal_muscle - officialBaseline.muscle)*100)/100 : null;
+  const deltaBodyfat = latestRenpho ? Math.round((latestRenpho.body_fat - officialBaseline.bodyfat)*100)/100 : null;
+
   const prompt =
     'Eres el agente de analisis del '+ACTIVE_CYCLE_LABEL+' (21 semanas), iniciado el '+cycleStart+'.\n\n'+
     'PROTOCOLO ACTIVO: Sem 11+: Testo 3cm/sem + Masteron finalizado sem 11 (ultima dosis 10 jun). '+
     'Sem 14-15: Testo 2cm/sem (1+1). Sem 16-17: Testo 1cm/sem, ultima inyeccion 6 jul (sem 16). PCT Sem 18-20: HCG + SERMs.\n'+
-    'Tamoxifeno iniciado: '+tamoStart+'\n'+
-    'Baseline ciclo: peso 86.20 kg / musculo 59.22 kg / GC 27.7%\n\n'+
+    'Tamoxifeno iniciado: '+tamoStart+'\n\n'+
+    'DATOS YA CALCULADOS — usalos tal cual, NO recalcules semana, baseline ni deltas:\n'+
+    '- Semana actual del ciclo: '+currentWeek+'\n'+
+    '- Baseline oficial (ultima medicion antes de inicio de ciclo, '+officialBaseline.date+'): peso '+officialBaseline.weight+' kg / musculo '+officialBaseline.muscle+' kg / GC '+officialBaseline.bodyfat+'%\n'+
+    '- Ultima medicion disponible: '+(latestRenpho?latestRenpho.date:'sin datos')+' — peso '+(latestRenpho?latestRenpho.weight:'—')+' kg / musculo '+(latestRenpho?latestRenpho.skeletal_muscle:'—')+' kg / GC '+(latestRenpho?latestRenpho.body_fat:'—')+'%\n'+
+    '- Deltas vs baseline (usar EXACTAMENTE estos valores en el analysis y en los comments): peso '+(deltaWeight>=0?'+':'')+deltaWeight+' kg / musculo '+(deltaMuscle>=0?'+':'')+deltaMuscle+' kg / GC '+(deltaBodyfat>=0?'+':'')+deltaBodyfat+'pp\n\n'+
     'DATOS RENPHO (ultimas mediciones):\n'+JSON.stringify(last8renpho)+'\n\n'+
     'DATOS HEVY (ultimas sesiones, volumen excluye warmup):\n'+JSON.stringify(last8hevy)+'\n\n'+
     'TENSION ARTERIAL nocafe (ultimas lecturas, incluye PP=sist-diast):\n'+JSON.stringify(bpNocafe)+'\n'+
@@ -1545,9 +1558,9 @@ async function runAnalysis(){
     '  }\n'+
     '}\n\n'+
     'Para el campo \"analysis\", usa HTML puro (sin etiquetas html/body/head). Estructura exacta:\n'+
-    '<p style=\"font-weight:600;color:var(--text);margin-bottom:10px\">Semana XX - '+today+'</p>\n\n'+
+    '<p style=\"font-weight:600;color:var(--text);margin-bottom:10px\">Semana '+currentWeek+' - '+today+'</p>\n\n'+
     '<p style=\"margin-bottom:10px\"><span style=\"font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px\">Composicion corporal</span><br>\n'+
-    '[analisis composicion: ultimas metricas, deltas vs baseline, tendencia]</p>\n\n'+
+    '[analisis composicion: ultimas metricas, deltas vs baseline ya calculados arriba, tendencia]</p>\n\n'+
     '<p style=\"margin-bottom:10px\"><span style=\"font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px\">Entrenamiento</span><br>\n'+
     '[analisis entrenamiento: volumen, frecuencia, tendencia]</p>\n\n'+
     '<p style=\"margin-bottom:10px\"><span style=\"font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px\">Tension arterial</span><br>\n'+
@@ -1555,9 +1568,9 @@ async function runAnalysis(){
     '<p style=\"margin-bottom:6px\"><span style=\"font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px\">Recomendaciones</span><br>\n'+
     '1. [accion concreta]<br>\n2. [accion concreta]<br>\n3. [accion concreta]<br>\n4. [accion concreta]</p>\n\n'+
     'Reglas generales:\n- Datos concretos (cifras, fechas)\n'+
-    '- Calcula semana del ciclo desde '+cycleStart+' hasta hoy\n'+
-    '- Deltas vs baseline indicado arriba\n- Tono directo, sin emojis\n'+
-    '- Los \"trend\" y \"advice\" de comments deben ser coherentes con el \"analysis\" — mismos datos y misma interpretacion';
+    '- Usa la semana y los deltas ya calculados arriba, no los recalcules\n'+
+    '- Tono directo, sin emojis\n'+
+    '- Los \"trend\" y \"advice\" de comments deben ser coherentes con el \"analysis\" y con los deltas ya calculados — mismos numeros en ambos sitios';
 
   try {
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
