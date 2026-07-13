@@ -210,6 +210,13 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
         <div class="kpi-delta" id="kRatioDelta">—</div>
         <div class="kpi-delta" id="kRatioCycleDelta">—</div>
       </div>
+      <div class="kpi" id="kpiRetencion" style="display:none">
+        <div class="kpi-label">Retención muscular</div>
+        <div class="kpi-val" id="kRetencion">—</div>
+        <div class="kpi-date" id="kRetencionDate"></div>
+        <div class="kpi-delta" id="kRetencionDelta">—</div>
+        <div class="kpi-delta" id="kRetencionCycleDelta">—</div>
+      </div>
     </div>
     <div class="key-insights" id="keyInsightsBox">
       <div class="key-insights-title">Resumen — 3 puntos clave</div>
@@ -857,6 +864,30 @@ function updateBodyKPIs(){
   document.getElementById('kRatioDelta').textContent = `${fmt2d(dMuscCycle)} kg músculo / ${fmt2d(dPesoCycle)} kg peso`;
   document.getElementById('kRatioCycleDelta').textContent = ratio===null ? 'sin peso ganado vs inicio ciclo' : (ratio>=0.5?'proporción alta de músculo':ratio>=0.3?'proporción aceptable (volumen)':'revisar grasa/sodio');
   document.getElementById('kpiRatio').className='kpi '+(ratio===null?'trend-neutral':ratio>=0.5?'trend-up':ratio>=0.3?'trend-neutral':'trend-down');
+
+  // Retención muscular post-ciclo (mejora #10, orden 10)
+  // Baseline pre-ciclo: 59.22 kg (11/03/2026). Pico = máximo músculo esquelético
+  // en renpho_data.json entre CYCLE_START y fin de ciclo (última Testo, 6 jul 2026).
+  const CYCLE_END = new Date('2026-07-06');
+  const kpiRetEl = document.getElementById('kpiRetencion');
+  if(new Date() > CYCLE_END){
+    const MUSC_BASELINE = 59.22;
+    const cycleWindow = allData.filter(r=>r._date>=CYCLE_START && r._date<=CYCLE_END && r.agua>0);
+    const peakMusc = cycleWindow.length ? Math.max(...cycleWindow.map(r=>r.musc)) : null;
+    if(peakMusc!==null && peakMusc>MUSC_BASELINE){
+      const retencion = (latest.musc - MUSC_BASELINE) / (peakMusc - MUSC_BASELINE) * 100;
+      document.getElementById('kRetencion').innerHTML=`${retencion.toFixed(1)} <span class="kpi-unit">%</span>`;
+      document.getElementById('kRetencionDate').textContent=`al ${latestDate}`;
+      document.getElementById('kRetencionDelta').textContent=`pico ${peakMusc.toFixed(2)} kg / actual ${latest.musc.toFixed(2)} kg / baseline ${MUSC_BASELINE.toFixed(2)} kg`;
+      document.getElementById('kRetencionCycleDelta').textContent=retencion>=80?'retención alta':retencion>=60?'retención aceptable':'revisar entrenamiento/nutrición';
+      kpiRetEl.className='kpi '+(retencion>=80?'trend-up':retencion>=60?'trend-neutral':'trend-down');
+      kpiRetEl.style.display='';
+    } else {
+      kpiRetEl.style.display='none';
+    }
+  } else {
+    kpiRetEl.style.display='none';
+  }
 
   // Scatter
   chartScatter.data.datasets[0].data=allData.filter(d=>!d.ciclo).map(d=>({x:d.peso,y:d.grasa,label:d.d}));
@@ -1579,6 +1610,18 @@ async function runAnalysis(){
   const deltaMuscle = latestRenpho ? Math.round((latestRenpho.skeletal_muscle - officialBaseline.muscle)*100)/100 : null;
   const deltaBodyfat = latestRenpho ? Math.round((latestRenpho.body_fat - officialBaseline.bodyfat)*100)/100 : null;
 
+  // Retención muscular post-ciclo (mejora #10) — precalculada, nunca recalcular en el modelo
+  const RET_CYCLE_END = new Date('2026-07-06');
+  let retentionLine = '';
+  if(new Date() > RET_CYCLE_END){
+    const cycleWindowRet = allData.filter(r=>r._date>=CYCLE_START && r._date<=RET_CYCLE_END && r.agua>0);
+    const peakMuscRet = cycleWindowRet.length ? Math.max(...cycleWindowRet.map(r=>r.musc)) : null;
+    if(peakMuscRet!==null && peakMuscRet>officialBaseline.muscle && latest){
+      const retencionPct = Math.round((latest.musc - officialBaseline.muscle) / (peakMuscRet - officialBaseline.muscle) * 1000)/10;
+      retentionLine = '- Retencion muscular post-ciclo: '+retencionPct+'% (pico '+peakMuscRet.toFixed(2)+' kg, baseline '+officialBaseline.muscle+' kg, actual '+latest.musc.toFixed(2)+' kg)\n';
+    }
+  }
+
   const prompt =
     'Eres el agente de analisis del '+ACTIVE_CYCLE_LABEL+' (21 semanas), iniciado el '+cycleStart+'.\n\n'+
     'PROTOCOLO ACTIVO: Sem 11+: Testo 3cm/sem + Masteron finalizado sem 11 (ultima dosis 10 jun). '+
@@ -1588,7 +1631,8 @@ async function runAnalysis(){
     '- Semana actual del ciclo: '+currentWeek+'\n'+
     '- Baseline oficial (ultima medicion antes de inicio de ciclo, '+officialBaseline.date+'): peso '+officialBaseline.weight+' kg / musculo '+officialBaseline.muscle+' kg / GC '+officialBaseline.bodyfat+'%\n'+
     '- Ultima medicion disponible: '+(latestRenpho?latestRenpho.date:'sin datos')+' — peso '+(latestRenpho?latestRenpho.weight:'—')+' kg / musculo '+(latestRenpho?latestRenpho.skeletal_muscle:'—')+' kg / GC '+(latestRenpho?latestRenpho.body_fat:'—')+'%\n'+
-    '- Deltas vs baseline (usar EXACTAMENTE estos valores en el analysis y en los comments): peso '+(deltaWeight>=0?'+':'')+deltaWeight+' kg / musculo '+(deltaMuscle>=0?'+':'')+deltaMuscle+' kg / GC '+(deltaBodyfat>=0?'+':'')+deltaBodyfat+'pp\n\n'+
+    '- Deltas vs baseline (usar EXACTAMENTE estos valores en el analysis y en los comments): peso '+(deltaWeight>=0?'+':'')+deltaWeight+' kg / musculo '+(deltaMuscle>=0?'+':'')+deltaMuscle+' kg / GC '+(deltaBodyfat>=0?'+':'')+deltaBodyfat+'pp\n'+
+    retentionLine+'\n'+
     'DATOS RENPHO (ultimas mediciones):\n'+JSON.stringify(last8renpho)+'\n\n'+
     'DATOS HEVY (ultimas sesiones, volumen excluye warmup):\n'+JSON.stringify(last8hevy)+'\n\n'+
     'TENSION ARTERIAL nocafe (ultimas lecturas, incluye PP=sist-diast):\n'+JSON.stringify(bpNocafe)+'\n'+
