@@ -894,12 +894,16 @@ function applyRange(months){
   PHASE_HISTORY.forEach(p=>{
     if(p.type==='cycle') return; // ciclo ya se sombrea vía activeCicloIdx
     const pStart=new Date(p.start), pEnd=new Date(p.end);
-    let si=buckets.findIndex(b=>b.d>=pStart);
-    if(si<0) return; // fase fuera del rango de datos mostrado
-    let ei=buckets.findIndex(b=>b.d>pEnd);
-    ei=ei<0?buckets.length-1:ei-1;
-    if(ei<si) ei=si;
-    activePhaseShades.push({type:p.type,label:p.label,si,ei});
+    const overlapIdx=[];
+    buckets.forEach((b,i)=>{
+      const bStart=new Date(b.d);
+      let bEnd=new Date(b.d);
+      if(type==='weekly'){ bEnd.setDate(bEnd.getDate()+6); }
+      else { bEnd=new Date(bStart.getFullYear(),bStart.getMonth()+1,0); } // último día del mes
+      if(bEnd>=pStart && bStart<=pEnd) overlapIdx.push(i);
+    });
+    if(!overlapIdx.length) return; // fase fuera del rango de datos mostrado
+    activePhaseShades.push({type:p.type,label:p.label,si:overlapIdx[0],ei:overlapIdx[overlapIdx.length-1]});
   });
   const fl=buckets.map(b=>b.label);
   const fw=k=>buckets.map(b=>b[k]);
