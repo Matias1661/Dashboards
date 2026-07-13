@@ -508,8 +508,11 @@ Chart.register({
       bpPhaseShades.forEach(ph=>{
         const{si,ei}=ph; if(si<0||ei<si) return;
         const col=PHASE_COLORS[ph.type]; if(!col) return;
-        const x1=xs.getPixelForValue(si);
-        const x2=xs.getPixelForValue(ei);
+        // Extiende medio paso a cada lado (si-0.5 / ei+0.5): como las lecturas de fases contiguas
+        // ocupan índices consecutivos en `readings`, esto hace que el final de una fase coincida
+        // exactamente con el inicio de la siguiente, sin dejar hueco entre los puntos centrales.
+        const x1=xs.getPixelForValue(si-0.5);
+        const x2=xs.getPixelForValue(ei+0.5);
         if(x2<=x1) return;
         ctx.save();
         ctx.fillStyle=col.fill;
