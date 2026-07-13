@@ -474,8 +474,10 @@ function getGroup(t){const tl=t.toLowerCase();for(const{group,kw}of MUSCLE_MAP){
 // ═══════════════════════════════════════════════════════════════════════════
 let activeCicloIdx=-1, activeBPShadeIdx=-1;
 let activePhaseShades=[]; // {type:'washout'|'pct', label, si, ei} — bucket index ranges (solo charts de composición)
+let bpPhaseShades=[]; // {type:'cycle'|'washout', label, si, ei} — índices sobre el array `readings` de TA/pulso (independiente de activePhaseShades)
 const PHASE_SHADE_CHART_IDS=new Set(['c-peso','c-musc','c-grasa','c-agua','c-visceral']);
-const PHASE_COLORS={washout:{fill:'rgba(107,109,112,0.10)',border:'rgba(107,109,112,0.35)',text:'rgba(90,90,90,0.85)'},pct:{fill:'rgba(191,144,0,0.10)',border:'rgba(191,144,0,0.35)',text:'rgba(154,110,0,0.9)'}};
+const BP_PHASE_SHADE_CHART_IDS=new Set(['c-bp','c-pulse']);
+const PHASE_COLORS={cycle:{fill:'rgba(13,138,82,0.07)',border:'rgba(13,138,82,0.3)',text:'rgba(13,138,82,0.85)'},washout:{fill:'rgba(107,109,112,0.10)',border:'rgba(107,109,112,0.35)',text:'rgba(90,90,90,0.85)'},pct:{fill:'rgba(191,144,0,0.10)',border:'rgba(191,144,0,0.35)',text:'rgba(154,110,0,0.9)'}};
 Chart.register({
   id:'annotPlugin',
   beforeDraw(chart){
@@ -501,6 +503,25 @@ Chart.register({
         ctx.fillText('Sem 11+ (1 jun) · Testo 3cm',cx+4,chartArea.top+10);
         ctx.restore();
       }
+    }
+    if(BP_PHASE_SHADE_CHART_IDS.has(chart.canvas.id) && bpPhaseShades.length){
+      bpPhaseShades.forEach(ph=>{
+        const{si,ei}=ph; if(si<0||ei<si) return;
+        const col=PHASE_COLORS[ph.type]; if(!col) return;
+        const x1=xs.getPixelForValue(si);
+        const x2=xs.getPixelForValue(ei);
+        if(x2<=x1) return;
+        ctx.save();
+        ctx.fillStyle=col.fill;
+        ctx.fillRect(x1,chartArea.top,x2-x1,chartArea.bottom-chartArea.top);
+        ctx.strokeStyle=col.border;ctx.lineWidth=1;ctx.setLineDash([3,3]);
+        ctx.beginPath();ctx.moveTo(x1,chartArea.top);ctx.lineTo(x1,chartArea.bottom);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(x2,chartArea.top);ctx.lineTo(x2,chartArea.bottom);ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle=col.text;ctx.font='8px DM Mono,monospace';
+        ctx.fillText(ph.label,x1+4,chartArea.top+20);
+        ctx.restore();
+      });
     }
     if(!isBPChart && PHASE_SHADE_CHART_IDS.has(chart.canvas.id) && activePhaseShades.length){
       activePhaseShades.forEach(ph=>{
@@ -1104,6 +1125,17 @@ function renderBP(){
   const diastData=readings.map(r=>r.diast);
   const bgColors=readings.map(r=>BP_TIPO_COLOR[r.tipo]||BP_TIPO_COLOR.nocafe);
   const borderColors=readings.map(r=>BP_TIPO_BORDER[r.tipo]||BP_TIPO_BORDER.nocafe);
+
+  // Sombreado de fases (ciclo/washout) para TA y pulso — índices propios sobre `readings`, no reutiliza activePhaseShades
+  // (esos índices pertenecen a los buckets de composición corporal y no son transferibles a este array; ver fix 13 jul 2026).
+  bpPhaseShades=['cycle','washout'].map(type=>{
+    const p=PHASE_HISTORY.find(ph=>ph.type===type); if(!p) return null;
+    const pStart=new Date(p.start), pEnd=new Date(p.end);
+    const idxs=[];
+    readings.forEach((r,i)=>{ const d=bpDateOf(r); if(d&&d>=pStart&&d<=pEnd) idxs.push(i); });
+    if(!idxs.length) return null;
+    return {type:p.type,label:p.label,si:idxs[0],ei:idxs[idxs.length-1]};
+  }).filter(Boolean);
 
   chartBP.data.labels=labels;
   chartBP.data.datasets[0].data=sistData;
