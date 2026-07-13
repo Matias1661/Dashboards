@@ -435,7 +435,7 @@ function fmtLabel(d){ return d.getDate()+' '+MESES_CAP[d.getMonth()]+' '+String(
 function fmtMonth(d){ return MESES_ES[d.getMonth()]+' '+String(d.getFullYear()).slice(2); }
 function fmtWeek(d){ return d.getDate()+' '+MESES_ES[d.getMonth()]; }
 function getMonday(d){const r=new Date(d);const day=r.getDay();r.setDate(r.getDate()-(day===0?6:day-1));r.setHours(0,0,0,0);return r;}
-function getCurrentWeek(){ return Math.max(1,Math.ceil((new Date()-CYCLE_START)/(7*864e5))); }
+function getCurrentWeek(){ const today=new Date(); today.setHours(0,0,0,0); const start=new Date(CYCLE_START); start.setHours(0,0,0,0); const diffDays=Math.round((today-start)/864e5); return Math.max(1,Math.floor((diffDays-1)/7)+1); }
 function getProtocolForWeek(w){ return PROTOCOL.find(p=>w>=p.from&&w<=p.to)||null; }
 function getNextChange(w){
   for(const p of PROTOCOL){ if(p.from>w){
