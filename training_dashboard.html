@@ -368,6 +368,12 @@ const CYCLE_HISTORY = [
 // Etiqueta del ciclo activo — se deriva de CYCLE_HISTORY buscando la entrada cuyo start coincide con CYCLE_START.
 // Al añadir un ciclo nuevo a CYCLE_HISTORY y actualizar CYCLE_START, esta etiqueta se actualiza sola.
 const ACTIVE_CYCLE_LABEL = (CYCLE_HISTORY.find(c=>new Date(c.start).getTime()===CYCLE_START.getTime()) || CYCLE_HISTORY[CYCLE_HISTORY.length-1]).label;
+// Fases del ciclo activo para sombreado en gráficos (solo renderizado, no afecta cálculos existentes basados en CYCLE_HISTORY).
+const PHASE_HISTORY = [
+  {start:'2026-03-23', end:'2026-07-06', label:'Ciclo', type:'cycle'},
+  {start:'2026-07-07', end:'2026-07-19', label:'Washout', type:'washout'},
+  {start:'2026-07-20', end:'2026-08-16', label:'PCT', type:'pct'},
+];
 const CYCLE_WEEKS = 21;
 const BASELINE    = { peso: 86.20, musc: 59.22, grasa: 27.7 };
 
@@ -461,6 +467,8 @@ function getGroup(t){const tl=t.toLowerCase();for(const{group,kw}of MUSCLE_MAP){
 // CHART PLUGIN: ciclo shading + Tamoxifen line
 // ═══════════════════════════════════════════════════════════════════════════
 let activeCicloIdx=-1, activeTamoIdx=-1, activeTamoFrac=0.5, activeBPShadeIdx=-1, activeBPTamoIdx=-1, activeBPTamoFrac=0;
+let activePhaseShades=[]; // {type:'washout'|'pct', label, si, ei} — bucket index ranges for composition charts
+const PHASE_COLORS={washout:{fill:'rgba(107,109,112,0.10)',border:'rgba(107,109,112,0.35)',text:'rgba(90,90,90,0.85)'},pct:{fill:'rgba(191,144,0,0.10)',border:'rgba(191,144,0,0.35)',text:'rgba(154,110,0,0.9)'}};
 Chart.register({
   id:'annotPlugin',
   beforeDraw(chart){
@@ -487,6 +495,25 @@ Chart.register({
         ctx.restore();
       }
     }
+    if(!isBPChart && activePhaseShades.length){
+      activePhaseShades.forEach(ph=>{
+        const{si,ei}=ph; if(si<0||ei<si) return;
+        const col=PHASE_COLORS[ph.type]; if(!col) return;
+        const x1=xs.getPixelForValue(si);
+        const x2=xs.getPixelForValue(Math.min(ei+1,xs.max));
+        if(x2<=x1) return;
+        ctx.save();
+        ctx.fillStyle=col.fill;
+        ctx.fillRect(x1,chartArea.top,x2-x1,chartArea.bottom-chartArea.top);
+        ctx.strokeStyle=col.border;ctx.lineWidth=1;ctx.setLineDash([3,3]);
+        ctx.beginPath();ctx.moveTo(x1,chartArea.top);ctx.lineTo(x1,chartArea.bottom);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(x2,chartArea.top);ctx.lineTo(x2,chartArea.bottom);ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle=col.text;ctx.font='8px DM Mono,monospace';
+        ctx.fillText(ph.label,x1+4,chartArea.top+10);
+        ctx.restore();
+      });
+    }
     const tamoI  = isBPChart ? activeBPTamoIdx  : activeTamoIdx;
     const tamoFr = isBPChart ? activeBPTamoFrac : activeTamoFrac;
     if(tamoI>=0&&tamoI+1<=xs.max){
@@ -500,7 +527,27 @@ Chart.register({
     } // end else (non c-hist charts)
     // Sombreado ciclos en gráfico histórico (c-hist)
     if(chart.canvas&&chart.canvas.id==='c-hist'&&chart._cyclePlugin){
-      const{cycleStats,offStats,fmt1,fmtR}=chart._cyclePlugin;
+      const{cycleStats,offStats,fmt1,fmtR,histPhases}=chart._cyclePlugin;
+
+      if(histPhases&&histPhases.length){
+        histPhases.forEach(ph=>{
+          const{si,ei}=ph; if(si<0||ei<si) return;
+          const col=PHASE_COLORS[ph.type]; if(!col) return;
+          const x1=xs.getPixelForValue(si);
+          const x2=xs.getPixelForValue(Math.min(ei+1,xs.max));
+          if(x2<=x1) return;
+          ctx.save();
+          ctx.fillStyle=col.fill;
+          ctx.fillRect(x1,chartArea.top,x2-x1,chartArea.bottom-chartArea.top);
+          ctx.strokeStyle=col.border;ctx.lineWidth=1;ctx.setLineDash([3,3]);
+          ctx.beginPath();ctx.moveTo(x1,chartArea.top);ctx.lineTo(x1,chartArea.bottom);ctx.stroke();
+          ctx.beginPath();ctx.moveTo(x2,chartArea.top);ctx.lineTo(x2,chartArea.bottom);ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillStyle=col.text;ctx.font='8px DM Mono,monospace';
+          ctx.fillText(ph.label,x1+3,chartArea.top+10);
+          ctx.restore();
+        });
+      }
 
       function drawLabel(blocks, isOff){
         blocks.forEach(cy=>{
@@ -843,6 +890,17 @@ function applyRange(months){
     const bucketStart=buckets[i].d; const bucketEnd=nd;
     const span=bucketEnd-bucketStart; activeTamoFrac=span>0?Math.min(1,(TAMO_DATE-bucketStart)/span):0.5;
     break;}}
+  activePhaseShades=[];
+  PHASE_HISTORY.forEach(p=>{
+    if(p.type==='cycle') return; // ciclo ya se sombrea vía activeCicloIdx
+    const pStart=new Date(p.start), pEnd=new Date(p.end);
+    let si=buckets.findIndex(b=>b.d>=pStart);
+    if(si<0) return; // fase fuera del rango de datos mostrado
+    let ei=buckets.findIndex(b=>b.d>pEnd);
+    ei=ei<0?buckets.length-1:ei-1;
+    if(ei<si) ei=si;
+    activePhaseShades.push({type:p.type,label:p.label,si,ei});
+  });
   const fl=buckets.map(b=>b.label);
   const fw=k=>buckets.map(b=>b[k]);
   const ptC=a=>buckets.map(b=>b.interp?'rgba(255,255,255,0)':b.ciclo?`rgba(13,138,82,${a})`:`rgba(37,99,190,${a})`);
@@ -983,7 +1041,19 @@ function renderHist(){
     });
   });
 
-  chartHist._cyclePlugin={cycles:CYCLES,months:fixedMonths,cycleStats,offStats,fmt1,fmtR};
+  // Fases washout/PCT a nivel mensual para el histórico (aproximado: el mes que contiene la fase se sombrea completo)
+  const histPhases=[];
+  PHASE_HISTORY.forEach(p=>{
+    if(p.type==='cycle') return;
+    const pStart=new Date(p.start), pEnd=new Date(p.end);
+    const startStr=pStart.getFullYear()+'-'+String(pStart.getMonth()+1).padStart(2,'0');
+    const endStr  =pEnd.getFullYear()  +'-'+String(pEnd.getMonth()+1).padStart(2,'0');
+    let si=fixedMonths.indexOf(startStr); if(si<0) si=fixedMonths.findIndex(m=>m>=startStr);
+    let ei=fixedMonths.indexOf(endStr);   if(ei<0){ei=fixedMonths.findIndex(m=>m>endStr); ei=ei<0?fixedMonths.length-1:ei-1;}
+    if(si<0) return; if(ei<si) ei=si;
+    histPhases.push({type:p.type,label:p.label,si,ei});
+  });
+  chartHist._cyclePlugin={cycles:CYCLES,months:fixedMonths,cycleStats,offStats,fmt1,fmtR,histPhases};
   chartHist.update('none');
   const n=allDataFull.length;
   document.getElementById('histBadge').textContent=`${n} mediciones · ${labels[0]} → ${labels[labels.length-1]}`;
