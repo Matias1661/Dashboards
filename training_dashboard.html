@@ -273,6 +273,7 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       </div>
       <div id="bpStatus" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--amber);margin-bottom:8px;display:none"></div>
       <div class="chart-wrap" style="height:180px"><canvas id="c-bp"></canvas></div>
+      <div id="bpPhaseLegend" style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:4px;display:flex;gap:14px;flex-wrap:wrap"></div>
       <div class="card-header" style="margin-top:10px;margin-bottom:4px"><span class="card-title" style="font-size:11px">Pulso en reposo · <span style="color:var(--purple)">■</span> lpm</span><span class="card-badge" id="pulseBadge"></span></div>
       <div class="chart-wrap" style="height:110px"><canvas id="c-pulse"></canvas></div>
       <p id="bpNote" style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:8px"></p>
@@ -473,7 +474,7 @@ function getGroup(t){const tl=t.toLowerCase();for(const{group,kw}of MUSCLE_MAP){
 // ═══════════════════════════════════════════════════════════════════════════
 // CHART PLUGIN: ciclo shading + Tamoxifen line
 // ═══════════════════════════════════════════════════════════════════════════
-let activeCicloIdx=-1, activeBPShadeIdx=-1;
+let activeCicloIdx=-1;
 let activePhaseShades=[]; // {type:'washout'|'pct', label, si, ei} — bucket index ranges (solo charts de composición)
 let bpPhaseShades=[]; // {type:'cycle'|'washout', label, si, ei} — índices sobre el array `readings` de TA/pulso (independiente de activePhaseShades)
 const PHASE_SHADE_CHART_IDS=new Set(['c-peso','c-musc','c-grasa','c-agua','c-visceral']);
@@ -489,21 +490,15 @@ Chart.register({
     if(chart.canvas&&chart.canvas.id==='c-hist'){// handled separately below
     } else {
     const isBPChart=chart.canvas&&chart.canvas.id==='c-bp';
-    const shadeIdx=isBPChart?activeBPShadeIdx:activeCicloIdx;
-    if(shadeIdx>=0){
-      const cx=xs.getPixelForValue(shadeIdx);
+    // Nota: activeBPShadeIdx ("Sem 11+") se eliminó el 15 jul 2026 por solaparse con
+    // bpPhaseShades (Ciclo/Washout), que ya cubre ese mismo rango con su propia etiqueta.
+    if(!isBPChart && activeCicloIdx>=0){
+      const cx=xs.getPixelForValue(activeCicloIdx);
       ctx.save();ctx.fillStyle='rgba(13,138,82,0.05)';
       ctx.fillRect(cx,chartArea.top,chartArea.right-cx,chartArea.bottom-chartArea.top);
       ctx.strokeStyle='rgba(13,138,82,0.25)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
       ctx.beginPath();ctx.moveTo(cx,chartArea.top);ctx.lineTo(cx,chartArea.bottom);ctx.stroke();
       ctx.restore();
-      if(isBPChart){
-        ctx.save();
-        ctx.fillStyle='rgba(13,138,82,0.75)';
-        ctx.font='8px DM Mono,monospace';
-        ctx.fillText('Sem 11+ (1 jun) · Testo 3cm',cx+4,chartArea.top+10);
-        ctx.restore();
-      }
     }
     if(BP_PHASE_SHADE_CHART_IDS.has(chart.canvas.id) && bpPhaseShades.length){
       bpPhaseShades.forEach(ph=>{
@@ -1160,10 +1155,18 @@ function renderBP(){
       return `${ctx.datasetIndex===0?'Sistólica':'Diastólica'}: ${ctx.raw} mmHg`;
     }
   };
-  // Sombreado sem 11: a partir del lunes 1 jun 2026
-  const SEM11_DATE = new Date('2026-06-01');
-  activeBPShadeIdx = readings.findIndex(r => { const d=bpDateOf(r); return d&&d>=SEM11_DATE; });
   chartBP.update('none'); // 'none' skips animation for cleaner update
+
+  // Leyenda visible de fases (Ciclo/Washout) — evita depender solo del texto dentro del canvas
+  const legendEl=document.getElementById('bpPhaseLegend');
+  if(legendEl){
+    legendEl.innerHTML=bpPhaseShades.map(ph=>{
+      const col=PHASE_COLORS[ph.type];
+      const startLabel=readings[ph.si]?readings[ph.si].d:'';
+      const endLabel=readings[ph.ei]?readings[ph.ei].d:'';
+      return `<span><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:${col.border};margin-right:4px;vertical-align:middle"></span>${ph.label} (${startLabel}\u2013${endLabel})</span>`;
+    }).join('');
+  }
 
   // Pulso en reposo: solo lecturas con pulso registrado, orden cronológico (mismo readings ya ordenado)
   const pulseData=readings.map(r=>(r.pulso!==null&&r.pulso!==undefined)?r.pulso:null);
