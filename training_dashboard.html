@@ -1129,7 +1129,7 @@ function renderBP(){
   // (esos índices pertenecen a los buckets de composición corporal y no son transferibles a este array; ver fix 13 jul 2026).
   bpPhaseShades=['cycle','washout'].map(type=>{
     const p=PHASE_HISTORY.find(ph=>ph.type===type); if(!p) return null;
-    const pStart=new Date(p.start), pEnd=new Date(p.end);
+    const pStart=parseDateISO(p.start), pEnd=parseDateISO(p.end);
     const idxs=[];
     readings.forEach((r,i)=>{ const d=bpDateOf(r); if(d&&d>=pStart&&d<=pEnd) idxs.push(i); });
     if(!idxs.length) return null;
