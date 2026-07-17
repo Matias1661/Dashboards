@@ -25,10 +25,6 @@ header{background:var(--surface);border-bottom:1px solid var(--border2);padding:
 .logo{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;letter-spacing:0.08em;color:var(--text)}
 .week-badge{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;padding:3px 9px;border-radius:20px;background:var(--green-dim);color:var(--green);border:0.5px solid rgba(13,138,82,0.25)}
 .spacer{flex:1}
-#btnRefresh{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.08em;padding:5px 14px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s}
-#btnRefresh:hover{background:var(--surface2)}
-#btnRefresh.loading{color:var(--amber);border-color:var(--amber)}
-#refreshMsg{font-family:'DM Mono',monospace;font-size:10px;color:var(--amber);display:none}
 .section{margin-top:28px}
 .section-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3);padding-bottom:8px;border-bottom:0.5px solid var(--border2);margin-bottom:14px}
 .card{background:var(--surface);border:0.5px solid var(--border2);border-radius:10px;padding:16px;margin-bottom:12px}
@@ -133,8 +129,6 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
     <span class="logo">DASHBOARD DE ENTRENAMIENTO</span>
     <span class="week-badge" id="weekBadge">cargando…</span>
     <span class="spacer"></span>
-    <span id="refreshMsg" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--amber);display:none">Actualizando…</span>
-    <button id="btnRefresh" onclick="triggerRefresh()">↻ Actualizar</button>
   </div>
 </header>
 
@@ -313,9 +307,8 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
     <div class="card" style="margin-top:12px">
       <div class="card-header">
         <span class="card-title">Análisis por Claude</span>
-        <button id="btnAnalizar" onclick="runAnalysis()" style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.08em;padding:4px 12px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s;margin-left:8px">✦ Analizar</button>
         <span class="card-badge" id="claudeAnalysisDate" style="color:var(--text3)">17 de julio de 2026 · Claude Sonnet 5</span></div>
-      <p style="font-size:11px;color:var(--text3);margin:0 0 10px 0;line-height:1.5">El análisis se genera bajo demanda. Pulsa el botón para llamar a la API de Claude con los datos actuales.</p>
+      <p style="font-size:11px;color:var(--text3);margin:0 0 10px 0;line-height:1.5">El análisis se genera vía chat con Claude y se inyecta en el dashboard.</p>
       <div id="claudeAnalysisBody" style="font-size:12px;color:var(--text2);line-height:1.65;font-family:'DM Sans',sans-serif"><h4>Análisis del Ciclo — Semana 17, washout día 11/14 (17 julio 2026)</h4>
 <p><strong>Fase:</strong> Washout post-última inyección (6 jul), termina el 20 de julio. HCG comienza ese mismo día (20/22/24), junto con Tamoxifeno 40mg + Clomid 50mg. Última toma de Tamoxifeno del protocolo actual: 19 de julio.</p>
 <p><strong>Composición corporal:</strong> 89.45 kg (+3.25 vs baseline de 86.20), músculo esquelético 60.38 kg (+1.16), grasa 28.9% (+1.2pp), visceral 10 (+1.0, bajó de 11). En la semana el peso sigue bajando (90.4 → 89.45) con ligera pérdida muscular, patrón esperable del washout. La grasa visceral cayó por primera vez en meses tras estar estancada en 11 — señal positiva a confirmar en próximas mediciones. El objetivo en PCT es minimizar pérdida muscular con entrenamiento constante y proteína alta.</p>
@@ -382,10 +375,6 @@ const PHASE_HISTORY = [
 const CYCLE_WEEKS = 21;
 const BASELINE    = { peso: 86.20, musc: 59.22, grasa: 27.7 };
 
-// Token GitHub — dividido para evitar detección del escáner de secretos de GitHub.
-const GH_TOKEN = 'ghp_mwdGMZMC6lun'+'Vud1n9EGxOl12dtYS52cpX1C';
-const ANTHROPIC_KEY = 'sk-ant-api03-8e-jaB3_2X6b_aVCp'+'Vh8seHeHaL72QiuStOOZfG4JXz1uKeYM2lCnx5d5Wdpim4BAQzmL255JNTiBIiP7oEbXw-JZ-XkgAA';
-
 // FUENTE ÚNICA DE PROTOCOLO — editar solo aquí.
 // label: texto del badge. note: nota del tooltip. dose: desglose para tooltip.
 const PROTOCOL = [
@@ -417,8 +406,6 @@ const RENPHO_URL = 'https://raw.githubusercontent.com/Matias1661/Dashboards/main
 const HEVY_URL   = 'https://raw.githubusercontent.com/Matias1661/Dashboards/main/hevy_data.json';
 const JEFIT_URL  = 'https://raw.githubusercontent.com/Matias1661/Dashboards/main/jefit_data.json';
 const BP_URL     = 'https://raw.githubusercontent.com/Matias1661/Dashboards/main/bp_data.json';
-const GH_REPO    = 'Matias1661/Dashboards';
-const GH_WF      = ['fetch_renpho.yml','fetch_hevy.yml','fetch_bp.yml'];
 
 const MESES_ES  = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 const MESES_CAP = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
@@ -1540,233 +1527,12 @@ async function loadAll(){
   finally{document.getElementById('loadBar').classList.remove('active');}
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// REFRESH
-// ═══════════════════════════════════════════════════════════════════════════
-async function triggerRefresh(){
-  const token=GH_TOKEN;
-  const btn=document.getElementById('btnRefresh');
-  const msg=document.getElementById('refreshMsg');
-  btn.classList.add('loading');
-  btn.textContent='↻ Enviando…';
-  msg.style.display='inline';
-  let ok=0;
-  for(const wf of GH_WF){
-    try{
-      const r=await fetch(`https://api.github.com/repos/${GH_REPO}/actions/workflows/${wf}/dispatches`,{
-        method:'POST',headers:{'Authorization':`token ${token}`,'Content-Type':'application/json'},
-        body:JSON.stringify({ref:'main'})
-      });
-      if(r.status===204)ok++;
-      else console.warn(`Workflow ${wf} dispatch returned ${r.status}`);
-    }catch(e){console.warn(`Workflow ${wf} error:`,e);}
-  }
-  if(ok===GH_WF.length){
-    btn.textContent='↻ Lanzado';
-    let _secs=90;
-    msg.textContent=`Actions disparados · recargando en ${_secs}s`;
-    const _cd=setInterval(()=>{_secs--;msg.textContent=`Actions disparados · recargando en ${_secs}s`;if(_secs<=0)clearInterval(_cd);},1000);
-    setTimeout(()=>{location.reload();},90000);
-    setTimeout(()=>{btn.textContent='↻ Actualizar';btn.classList.remove('loading');},5000);
-  }else{
-    btn.textContent='↻ Error';
-    msg.textContent=`Token caducado o sin permisos (${ok}/${GH_WF.length} OK). Actualiza GH_TOKEN en el código.`;
-    btn.classList.remove('loading');
-    setTimeout(()=>{btn.textContent='↻ Actualizar';msg.style.display='none';},8000);
-  }
-}
-
-
-// ═══════════════════════════════════════════════════════════════════════════
-// CLAUDE ANALYSIS (on-demand)
-// ═══════════════════════════════════════════════════════════════════════════
-async function runAnalysis(){
-  const btn = document.getElementById('btnAnalizar');
-  const body = document.getElementById('claudeAnalysisBody');
-  const dateEl = document.getElementById('claudeAnalysisDate');
-  btn.textContent = '✦ Analizando…';
-  btn.disabled = true;
-  btn.style.color = 'var(--amber)';
-  btn.style.borderColor = 'var(--amber)';
-
-  // Re-fetch fresh data at analysis time (bypasses stale in-memory arrays)
-  const t = Date.now();
-  const fetchOpts = {cache:'no-store'};
-  const [freshRenpho, freshHevy, freshBP] = await Promise.all([
-    fetch(RENPHO_URL+'?t='+t, fetchOpts).then(r=>r.json()).catch(()=>null),
-    fetch(HEVY_URL+'?t='+t, fetchOpts).then(r=>r.json()).catch(()=>null),
-    fetch(BP_URL+'?t='+t, fetchOpts).then(r=>r.json()).catch(()=>null),
-  ]);
-
-  const renphoRows = freshRenpho
-    ? (Array.isArray(freshRenpho)?freshRenpho:(freshRenpho.measurements||[]))
-        .sort((a,b)=>a.date>b.date?1:-1)
-    : [];
-  const last8renpho = renphoRows.slice(-8).map(r=>({
-    date: r.date,
-    weight: +r.weight,
-    skeletal_muscle: Math.round(+(r.skeletal_muscle||0)*100)/100,
-    body_fat: +r.body_fat,
-    visceral_fat: +r.visceral_fat
-  }));
-
-  const hevyWorkouts = freshHevy ? parseWorkouts(freshHevy.workouts||[], 'Hevy') : allSessions;
-  const last8hevy = hevyWorkouts.slice(-8).map(s=>({
-    date: s.dateStr,
-    title: s.title||'',
-    volume_kg: s.vol,
-    exercises: s.exerciseCount,
-    duration_min: s.durationMin,
-    muscle_groups: Object.keys(s.groupSets||{})
-  }));
-
-  const freshBPReadings = freshBP ? (freshBP.readings||[]) : bpReadings;
-  const bpNocafe = freshBPReadings.filter(r=>r.tipo==='nocafe').slice(-10).map(r=>({
-    d:r.d, sist:r.sist, diast:r.diast, pp:r.sist-r.diast
-  }));
-  const ppValues = bpNocafe.map(r=>r.pp);
-  const ppAvg = ppValues.length ? Math.round(ppValues.reduce((a,b)=>a+b,0)/ppValues.length) : null;
-  const ppMax = ppValues.length ? Math.max(...ppValues) : null;
-  const ppTrend = ppValues.length>=3 ? (ppValues.slice(-3).reduce((a,b)=>a+b,0)/3 - ppValues.slice(0,3).reduce((a,b)=>a+b,0)/3).toFixed(1) : null;
-  const ppAlert = ppMax>=60 ? 'ALERTA: PP maxima '+ppMax+' mmHg (umbral critico 60)' : ppAvg>=55 ? 'AVISO: PP media '+ppAvg+' mmHg (cerca del umbral 60)' : 'PP en rango normal';
-
-  const cycleStart = '2026-03-23';
-  const tamoStart  = '2026-05-14';
-  const now = new Date();
-  const months = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-  const today = now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear();
-
-  // Mejora nº5 (auditoría 9-jul): la semana del ciclo y los deltas vs baseline se
-  // calculan aquí en JS y se inyectan ya resueltos en el prompt. El modelo no debe
-  // recalcular fechas ni referencias — solo interpretar los datos ya calculados.
-  const currentWeek = getCurrentWeek();
-  const officialBaseline = { date:'2026-03-11', weight:86.20, muscle:59.22, bodyfat:27.7 };
-  const latestRenpho = last8renpho.length ? last8renpho[last8renpho.length-1] : null;
-  const deltaWeight = latestRenpho ? Math.round((latestRenpho.weight - officialBaseline.weight)*100)/100 : null;
-  const deltaMuscle = latestRenpho ? Math.round((latestRenpho.skeletal_muscle - officialBaseline.muscle)*100)/100 : null;
-  const deltaBodyfat = latestRenpho ? Math.round((latestRenpho.body_fat - officialBaseline.bodyfat)*100)/100 : null;
-
-  // Retención muscular post-ciclo (mejora #10) — precalculada, nunca recalcular en el modelo
-  const RET_CYCLE_END = new Date('2026-07-06');
-  let retentionLine = '';
-  if(new Date() > RET_CYCLE_END){
-    const cycleWindowRet = allData.filter(r=>r._date>=CYCLE_START && r._date<=RET_CYCLE_END && r.agua>0);
-    const peakMuscRet = cycleWindowRet.length ? Math.max(...cycleWindowRet.map(r=>r.musc)) : null;
-    if(peakMuscRet!==null && peakMuscRet>officialBaseline.muscle && latest){
-      const retencionPct = Math.round((latest.musc - officialBaseline.muscle) / (peakMuscRet - officialBaseline.muscle) * 1000)/10;
-      retentionLine = '- Retencion muscular post-ciclo: '+retencionPct+'% (pico '+peakMuscRet.toFixed(2)+' kg, baseline '+officialBaseline.muscle+' kg, actual '+latest.musc.toFixed(2)+' kg)\n';
-    }
-  }
-
-  const prompt =
-    'Eres el agente de analisis del '+ACTIVE_CYCLE_LABEL+' (21 semanas), iniciado el '+cycleStart+'.\n\n'+
-    'PROTOCOLO ACTIVO: Sem 11+: Testo 3cm/sem + Masteron finalizado sem 11 (ultima dosis 10 jun). '+
-    'Sem 14-15: Testo 2cm/sem (1+1). Sem 16-17: Testo 1cm/sem, ultima inyeccion 6 jul (sem 16). PCT Sem 18-20: HCG + SERMs.\n'+
-    'Tamoxifeno iniciado: '+tamoStart+'\n\n'+
-    'DATOS YA CALCULADOS — usalos tal cual, NO recalcules semana, baseline ni deltas:\n'+
-    '- Semana actual del ciclo: '+currentWeek+'\n'+
-    '- Baseline oficial (ultima medicion antes de inicio de ciclo, '+officialBaseline.date+'): peso '+officialBaseline.weight+' kg / musculo '+officialBaseline.muscle+' kg / GC '+officialBaseline.bodyfat+'%\n'+
-    '- Ultima medicion disponible: '+(latestRenpho?latestRenpho.date:'sin datos')+' — peso '+(latestRenpho?latestRenpho.weight:'—')+' kg / musculo '+(latestRenpho?latestRenpho.skeletal_muscle:'—')+' kg / GC '+(latestRenpho?latestRenpho.body_fat:'—')+'%\n'+
-    '- Deltas vs baseline (usar EXACTAMENTE estos valores en el analysis y en los comments): peso '+(deltaWeight>=0?'+':'')+deltaWeight+' kg / musculo '+(deltaMuscle>=0?'+':'')+deltaMuscle+' kg / GC '+(deltaBodyfat>=0?'+':'')+deltaBodyfat+'pp\n'+
-    retentionLine+'\n'+
-    'DATOS RENPHO (ultimas mediciones):\n'+JSON.stringify(last8renpho)+'\n\n'+
-    'DATOS HEVY (ultimas sesiones, volumen excluye warmup):\n'+JSON.stringify(last8hevy)+'\n\n'+
-    'TENSION ARTERIAL nocafe (ultimas lecturas, incluye PP=sist-diast):\n'+JSON.stringify(bpNocafe)+'\n'+
-    'PP resumen: media='+ppAvg+' mmHg | max='+ppMax+' mmHg | tendencia 3u='+ppTrend+' mmHg | '+ppAlert+'\n\n'+
-    'Responde EXCLUSIVAMENTE con un objeto JSON valido (sin backticks, sin texto antes ni despues).'+
-    'Estructura del JSON:\n'+
-    '{\n'+
-    '  \"analysis\": \"<HTML del analisis principal>\",\n'+
-    '  \"comments\": {\n'+
-    '    \"peso\": {\"cls\":\"ok|warn|info\", \"trend\":\"frase corta con dato concreto\", \"advice\":\"accion especifica\"},\n'+
-    '    \"musc\": {\"cls\":\"ok|warn|info\", \"trend\":\"...\", \"advice\":\"...\"},\n'+
-    '    \"grasa\": {\"cls\":\"ok|warn|info\", \"trend\":\"...\", \"advice\":\"...\"},\n'+
-    '    \"agua\": {\"cls\":\"ok|warn|info\", \"trend\":\"...\", \"advice\":\"...\"},\n'+
-    '    \"visceral\": {\"cls\":\"ok|warn|info\", \"trend\":\"...\", \"advice\":\"...\"},\n'+
-    '    \"bp\": {\"cls\":\"ok|warn|info\", \"trend\":\"...\", \"advice\":\"...\"},\n'+
-    '    \"training\": {\"cls\":\"ok|warn|info\", \"trend\":\"...\", \"advice\":\"...\"}\n'+
-    '  }\n'+
-    '}\n\n'+
-    'Para el campo \"analysis\", usa HTML puro (sin etiquetas html/body/head). Estructura exacta:\n'+
-    '<p style=\"font-weight:600;color:var(--text);margin-bottom:10px\">Semana '+currentWeek+' - '+today+'</p>\n\n'+
-    '<p style=\"margin-bottom:10px\"><span style=\"font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px\">Composicion corporal</span><br>\n'+
-    '[analisis composicion: ultimas metricas, deltas vs baseline ya calculados arriba, tendencia]</p>\n\n'+
-    '<p style=\"margin-bottom:10px\"><span style=\"font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px\">Entrenamiento</span><br>\n'+
-    '[analisis entrenamiento: volumen, frecuencia, tendencia]</p>\n\n'+
-    '<p style=\"margin-bottom:10px\"><span style=\"font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px\">Tension arterial</span><br>\n'+
-    '[analisis TA: media reciente, tendencia, alertas si sistolica nocafe >130 sostenida. INCLUIR analisis de Presion de Pulso (PP=sist-diast): valor medio, tendencia reciente, y ALERTA EXPLICITA si PP>=60 indicando riesgo de rigidez arterial y recomendando consulta medica]</p>\n\n'+
-    '<p style=\"margin-bottom:6px\"><span style=\"font-weight:600;color:var(--text);border-bottom:1px solid var(--border2);display:inline-block;margin-bottom:3px\">Recomendaciones</span><br>\n'+
-    '1. [accion concreta]<br>\n2. [accion concreta]<br>\n3. [accion concreta]<br>\n4. [accion concreta]</p>\n\n'+
-    'Reglas generales:\n- Datos concretos (cifras, fechas)\n'+
-    '- Usa la semana y los deltas ya calculados arriba, no los recalcules\n'+
-    '- Tono directo, sin emojis\n'+
-    '- Los \"trend\" y \"advice\" de comments deben ser coherentes con el \"analysis\" y con los deltas ya calculados — mismos numeros en ambos sitios';
-
-  try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': ANTHROPIC_KEY,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 2000,
-        messages: [{role:'user', content: prompt}]
-      })
-    });
-    if(!resp.ok){
-      const err = await resp.text();
-      throw new Error('API '+resp.status+': '+err.slice(0,200));
-    }
-    const data = await resp.json();
-    const raw = data.content[0].text.trim().replace(/^```[a-z]*\s*/i,'').replace(/```\s*$/,'');
-    let parsed;
-    try { parsed = JSON.parse(raw); } catch(e) {
-      // fallback: treat entire response as HTML analysis (backward compat)
-      parsed = { analysis: raw, comments: {} };
-    }
-
-    // Inject main analysis
-    body.innerHTML = parsed.analysis || raw;
-    dateEl.textContent = 'Actualizado: '+today;
-
-    // Inject chart comments if present
-    const comments = parsed.comments || {};
-    const commentIds = ['peso','musc','grasa','agua','visceral','bp','training'];
-    commentIds.forEach(function(key) {
-      const el = document.getElementById('ins-'+key);
-      if(!el) return;
-      const c = comments[key];
-      if(!c) return;
-      const cls = (c.cls==='ok'||c.cls==='warn'||c.cls==='info') ? c.cls : 'info';
-      el.className = 'chart-insight '+cls;
-      el.innerHTML = '<span class="ins-trend">'+c.trend+'</span><span class="ins-advice"> — '+c.advice+'</span>';
-      el.style.display = '';
-    });
-
-    btn.textContent = '✦ Analizar';
-    btn.style.color = '';
-    btn.style.borderColor = '';
-    btn.disabled = false;
-  } catch(e) {
-    body.innerHTML = '<p style="color:var(--red)">Error: '+e.message+'</p>';
-    btn.textContent = '✦ Error';
-    btn.style.color = 'var(--red)';
-    btn.style.borderColor = 'var(--red)';
-    setTimeout(()=>{btn.textContent='✦ Analizar';btn.style.color='';btn.style.borderColor='';btn.disabled=false;},5000);
-  }
-}
-
 function openSettings(){
   document.getElementById('modalStatus').innerHTML=`
-    <strong>Token GitHub:</strong> ${GH_TOKEN.slice(0,12)}… (hardcodeado en el HTML)<br><br>
     <strong>BP data:</strong> ${bpReadings.length} lecturas cargadas<br>
     <strong>Renpho data:</strong> ${allData.length} mediciones<br>
     <strong>Sesiones:</strong> ${allSessions.length} (${allSessions.filter(s=>s.inCycle).length} en ciclo)<br><br>
-    Para actualizar el token, editar <code>GH_TOKEN</code> en el código fuente del dashboard.
+    Los datos se actualizan automáticamente vía GitHub Actions (05:00–06:00 UTC).
   `;
   document.getElementById('modalBg').classList.add('open');
 }
