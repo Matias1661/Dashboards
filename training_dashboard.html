@@ -574,6 +574,11 @@ Chart.register({
       });
     }
     if(!isBPChart && PHASE_SHADE_CHART_IDS.has(chart.canvas.id) && activePhaseShades.length){
+      // Con buckets mensuales (rango 12/24m), Washout y PCT a veces caen dentro del mismo mes
+      // (jul 26 contiene ambos: Washout 7-19 jul, PCT arranca 20 jul) — sus cajas quedan en el
+      // mismo rango de píxeles y las etiquetas se dibujaban una encima de la otra, ilegibles.
+      // Si la caja actual se solapa en X con la anterior, se apila su etiqueta debajo.
+      let labelPrevX2=-Infinity, labelPrevY=chartArea.top+10;
       activePhaseShades.forEach(ph=>{
         const{si,ei}=ph; if(si<0||ei<si) return;
         const col=PHASE_COLORS[ph.type]; if(!col) return;
@@ -590,7 +595,9 @@ Chart.register({
         ctx.beginPath();ctx.moveTo(x2,chartArea.top);ctx.lineTo(x2,chartArea.bottom);ctx.stroke();
         ctx.setLineDash([]);
         ctx.fillStyle=col.text;ctx.font='8px DM Mono,monospace';
-        ctx.fillText(ph.label,x1+4,chartArea.top+10);
+        const labelY = x1 < labelPrevX2 ? labelPrevY+10 : chartArea.top+10;
+        ctx.fillText(ph.label,x1+4,labelY);
+        labelPrevX2=x2; labelPrevY=labelY;
         ctx.restore();
       });
     }
