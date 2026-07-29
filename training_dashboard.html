@@ -234,17 +234,17 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       </div>
     </div>
     <div class="two-col">
-      <div class="card"><div class="card-header"><span class="card-title">Peso</span><span class="card-badge" id="cbPeso"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-peso"></canvas></div><div class="chart-insight" id="ins-peso">89.5 kg, +3.30 kg vs baseline pre-ciclo. En los últimos 30 días el peso bajó 1.30 kg, coincidiendo con el inicio de PCT.</div></div>
-      <div class="card"><div class="card-header"><span class="card-title">Masa muscular</span><span class="card-badge" id="cbMusc"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-musc"></canvas></div><div class="chart-insight" id="ins-musc">60.41 kg de músculo esquelético, +1.19 kg vs baseline. KPI de retención muscular en 63.7% (zona ámbar, 60-80%), reflejando la caída moderada desde el pico del ciclo (61.10 kg) durante washout y PCT. A vigilar en la analítica de octubre.</div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Peso</span><span class="card-badge" id="cbPeso"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-peso"></canvas></div><div class="chart-insight" id="ins-peso">88.95 kg, +2.75 kg vs baseline pre-ciclo. En los últimos 30 días el peso bajó 1.85 kg, coincidiendo con el inicio de PCT.</div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Masa muscular</span><span class="card-badge" id="cbMusc"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-musc"></canvas></div><div class="chart-insight" id="ins-musc">60.22 kg de músculo esquelético, +1.00 kg vs baseline. KPI de retención muscular en 53.4% (zona roja, &lt;60%), tras la caída desde el pico del ciclo (61.10 kg, 5 jul) durante el PCT. A vigilar en la analítica de octubre.</div></div>
     </div>
     <div class="two-col">
-      <div class="card"><div class="card-header"><span class="card-title">Grasa corporal</span><span class="card-badge" id="cbGrasa"></span></div><div class="card-header" style="margin-top:-6px;margin-bottom:0"><span style="font-size:10px;color:var(--text3)"><span style="color:#c94a30">—</span> total &nbsp;<span style="color:rgba(154,98,0,0.8)">- -</span> subcutánea</span></div><div class="chart-wrap" style="height:160px"><canvas id="c-grasa"></canvas></div><div class="chart-insight" id="ins-grasa">28.9%, +1.2 puntos vs baseline. Descendió 0.4 puntos en los últimos 30 días, en línea con la ligera pérdida de peso reciente.</div></div>
-      <div class="card"><div class="card-header"><span class="card-title">Agua %</span><span class="card-badge" id="cbAgua"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-agua"></canvas></div><div class="chart-insight" id="ins-agua">51.3%, sin variación relevante en las últimas mediciones; se mantiene estable en el rango habitual.</div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Grasa corporal</span><span class="card-badge" id="cbGrasa"></span></div><div class="card-header" style="margin-top:-6px;margin-bottom:0"><span style="font-size:10px;color:var(--text3)"><span style="color:#c94a30">—</span> total &nbsp;<span style="color:rgba(154,98,0,0.8)">- -</span> subcutánea</span></div><div class="chart-wrap" style="height:160px"><canvas id="c-grasa"></canvas></div><div class="chart-insight" id="ins-grasa">28.7%, +1.0 puntos vs baseline. Descendió 0.6 puntos en los últimos 30 días, en línea con la pérdida de peso reciente.</div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Agua %</span><span class="card-badge" id="cbAgua"></span></div><div class="chart-wrap" style="height:160px"><canvas id="c-agua"></canvas></div><div class="chart-insight" id="ins-agua">51.5%, sin variación relevante en las últimas mediciones; se mantiene estable en el rango habitual.</div></div>
     </div>
     <div class="card" style="margin-top:0">
       <div class="card-header"><span class="card-title">Grasa visceral (índice)</span><span class="card-badge" id="cbVisceral"></span></div>
       <div class="chart-wrap" style="height:110px"><canvas id="c-visceral"></canvas></div>
-      <div class="chart-insight" id="ins-visceral">10, sin cambios significativos respecto a mediciones previas del ciclo.</div>
+      <div class="chart-insight" id="ins-visceral">10, bajó desde 11 hace un mes; sin cambios significativos respecto al resto del ciclo.</div>
     </div>
     <div class="card" style="margin-top:0">
       <div class="card-header">
@@ -286,7 +286,7 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       <div class="card-header" style="margin-top:10px;margin-bottom:4px"><span class="card-title" style="font-size:11px">Pulso en reposo · <span style="color:var(--purple)">■</span> lpm</span><span class="card-badge" id="pulseBadge"></span></div>
       <div class="chart-wrap" style="height:110px"><canvas id="c-pulse"></canvas></div>
       <p id="bpNote" style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:8px"></p>
-      <div class="chart-insight" id="ins-bp">Promedio últimas 5 lecturas sin café: 112/74, PP promedio 38. Ninguna lectura alcanza el umbral de aviso (PP>=55). Última lectura (27 jul): 105/69, la más baja del periodo reciente.</div>
+      <div class="chart-insight" id="ins-bp">Promedio últimas 10 lecturas sin café: PP 39.1 (máx histórico 58). Ninguna lectura alcanza el umbral de aviso (PP≥55). Última lectura (29 jul): 120/80, pulso 66, PP 40.</div>
     </div>
   </div>
 
@@ -296,13 +296,13 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
     <div class="card" style="margin-top:0">
       <div class="card-header">
         <span class="card-title">Análisis por Claude</span>
-        <span class="card-badge" id="claudeAnalysisDate" style="color:var(--text3)">27 de julio de 2026 · Claude Sonnet 4.6</span></div>
+        <span class="card-badge" id="claudeAnalysisDate" style="color:var(--text3)">29 de julio de 2026 · Claude Sonnet 5</span></div>
       <p style="font-size:11px;color:var(--text3);margin:0 0 10px 0;line-height:1.5">El análisis se genera vía chat con Claude y se inyecta en el dashboard.</p>
-      <div id="claudeAnalysisBody" style="font-size:12px;color:var(--text2);line-height:1.65;font-family:'DM Sans',sans-serif"><h4>Análisis del Ciclo — PCT en curso (27 julio 2026)</h4>
-<p><strong>Resumen:</strong> Fase de PCT en curso (semana 3 desde inicio 20 jul). Peso y grasa corporal en corrección leve a la baja en los últimos 30 días, con el músculo esquelético en zona ámbar de retención tras el pico del ciclo. La frecuencia de entrenamiento se mantiene sólida (14 sesiones/30 días) y la tensión arterial permanece estable dentro de rangos normales sin señales de alerta.</p>
-<p><strong>Composición corporal:</strong> peso 89.5 kg (+3.30 vs baseline), músculo esquelético 60.41 kg (+1.19 vs baseline), grasa 28.9% (+1.2pp). Retención muscular post-ciclo: <strong>63.7%</strong> del pico de ciclo (zona ámbar). Nota: se corrigió una medición matutina afectada por cambio de pilas en la báscula (descartada por outlier).</p>
-<p><strong>Entrenamiento:</strong> 14 sesiones en los últimos 30 días (~3.3/semana), con buena distribución entre Leg, Push, Pull y V Taper. Duración y volumen de sets consistentes (10-22 sets/sesión), sin señales de caída en el rendimiento pese a estar en PCT.</p>
-<p><strong>Tensión arterial:</strong> Promedio últimas 5 lecturas sin café: 112/74, PP promedio 38. Ninguna lectura alcanza el umbral de aviso (PP>=55). Última lectura (27 jul): 105/69, la más baja del periodo reciente.</p></div>
+      <div id="claudeAnalysisBody" style="font-size:12px;color:var(--text2);line-height:1.65;font-family:'DM Sans',sans-serif"><h4>Análisis del Ciclo — PCT en curso (29 julio 2026)</h4>
+<p><strong>Resumen:</strong> Fase de PCT en curso (semana 2 desde inicio 20 jul). Peso y grasa corporal continúan en corrección a la baja, con el músculo esquelético entrando en zona roja de retención tras el pico del ciclo. La frecuencia de entrenamiento se mantiene sólida (15 sesiones/30 días) aunque el volumen por grupo muscular está por debajo del rango de hipertrofia. La tensión arterial permanece estable dentro de rangos normales sin señales de alerta.</p>
+<p><strong>Composición corporal:</strong> peso 88.95 kg (+2.75 vs baseline), músculo esquelético 60.22 kg (+1.00 vs baseline), grasa 28.7% (+1.0pp). Retención muscular post-ciclo: <strong>53.4%</strong> del pico de ciclo (zona roja, &lt;60%), tras la caída desde 61.10 kg (5 jul) durante washout y PCT.</p>
+<p><strong>Entrenamiento:</strong> 15 sesiones en los últimos 30 días (~3.5/semana), ya superando el prerequisito de 8-10 sesiones/mes fijado para el próximo ciclo. Todos los grupos musculares están por debajo del rango óptimo de hipertrofia (10-20 sets/semana) en promedio de 30 días — pecho (9.8) y dorsales (9.6) son los más cercanos, glúteos (2.1) el más rezagado. Volumen semanal fluctuante (19.6k-34.3k kg) y duración media de sesión en aumento (54→72 min en las últimas 5).</p>
+<p><strong>Tensión arterial:</strong> Promedio últimas 10 lecturas sin café: PP 39.1 (máximo histórico 58). Ninguna lectura alcanza el umbral de aviso (PP≥55). Última lectura (29 jul): 120/80, pulso 66, PP 40.</p></div>
     </div>
   </div>
 
@@ -322,7 +322,7 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       <div class="card"><div class="card-header"><span class="card-title">Volumen por sesión — ciclo</span><span class="card-badge" id="volBadge"></span></div><div class="chart-wrap" style="height:180px"><canvas id="c-vol"></canvas></div></div>
       <div class="card"><div class="card-header"><span class="card-title">Frecuencia mensual</span><span class="card-badge" id="freqBadge"></span></div><div class="chart-wrap" style="height:180px"><canvas id="c-freq"></canvas></div><div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:10px;font-family:'DM Mono',monospace;color:#6b6d70;align-items:center;"><span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(13,138,82,0.65);display:inline-block;"></span>≥ 8 ses</span><span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(37,99,190,0.45);display:inline-block;"></span>5–7 ses</span><span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(201,74,48,0.45);display:inline-block;"></span>&lt; 5 ses</span><span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(150,160,170,0.35);border:1px solid rgba(150,160,170,0.6);display:inline-block;"></span>proyectado</span></div></div>
     </div>
-    <div class="chart-insight" id="ins-training">14 sesiones en los últimos 30 días (~3.3/semana), con buena distribución entre Leg, Push, Pull y V Taper. Duración y volumen de sets consistentes (10-22 sets/sesión), sin señales de caída en el rendimiento pese a estar en PCT.</div>
+    <div class="chart-insight" id="ins-training">15 sesiones en los últimos 30 días (~3.5/semana), superando el prerequisito de 8-10/mes para el próximo ciclo. Todos los grupos musculares están por debajo del rango óptimo de hipertrofia (10-20 sets/semana); pecho y dorsales son los más cercanos (~9.8 y ~9.6/semana), glúteos el más rezagado (~2.1/semana). Volumen semanal fluctuante (19.6k-34.3k kg) y duración media de sesión en aumento (54→72 min).</div>
     <div class="two-col" id="radarCard">
       <div class="card" style="margin-bottom:0">
         <div class="card-header">
