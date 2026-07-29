@@ -317,6 +317,25 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
     </div>
   </div>
 
+  <!-- MÉTRICAS DE ENTRENAMIENTO -->
+  <div class="section">
+    <div class="section-title">Métricas de Entrenamiento</div>
+    <div class="train-kpi-grid">
+      <div class="kpi"><div class="kpi-label">Vol. semana vs prom. 4 sem</div><div class="kpi-val" id="mVolRatio">—</div><div class="kpi-delta" id="mVolRatioDelta">—</div></div>
+      <div class="kpi"><div class="kpi-label">PRs (30 días)</div><div class="kpi-val" id="mPRCount">—</div><div class="kpi-delta" id="mPRDelta">—</div></div>
+      <div class="kpi"><div class="kpi-label">Balance push/pull</div><div class="kpi-val" id="mBalance">—</div><div class="kpi-delta" id="mBalanceDelta">—</div></div>
+    </div>
+    <div class="two-col">
+      <div class="card"><div class="card-header"><span class="card-title">Volumen por grupo muscular (tonelaje)</span><span class="card-badge" id="muscleVolBadge"></span></div><div class="chart-wrap" style="height:220px"><canvas id="c-vol-muscle"></canvas></div></div>
+      <div class="card"><div class="card-header"><span class="card-title">1RM estimado — progresión</span><span class="card-badge" id="e1rmBadge"></span></div><div class="chart-wrap" style="height:220px"><canvas id="c-1rm"></canvas></div></div>
+    </div>
+    <div class="chart-insight" id="ins-metrics"></div>
+    <div class="card" style="margin-top:12px">
+      <div class="card-header"><span class="card-title">Récords recientes (PRs, 1RM estimado)</span></div>
+      <div id="prTable" style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text2)">—</div>
+    </div>
+  </div>
+
   <!-- RUTINA DIARIA -->
   <div class="section">
     <div class="section-title">Rutina diaria</div>
@@ -667,11 +686,13 @@ const chartFreq=new Chart(document.getElementById('c-freq'),{type:'bar',data:{la
 
 let chartRadar=null;
 let chartRadarMonth=null;
+let chartMuscleVol=null, chart1RM=null;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // GLOBAL STATE
 // ═══════════════════════════════════════════════════════════════════════════
 let allData=[]; let allDataFull=[]; let allSessions=[]; let bpReadings=[];
+let hevyRaw=[];
 let currentRange=12;
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1304,6 +1325,124 @@ function renderTraining(){
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// RENDER METRICS (1RM estimado, volumen por grupo muscular, PRs, balance push/pull)
+// ═══════════════════════════════════════════════════════════════════════════
+const PUSH_GROUPS=new Set(['Pecho','Hombros','Tríceps']);
+const PULL_GROUPS=new Set(['Espalda','Bíceps']);
+const RM_COLORS=['rgba(37,99,190,0.9)','rgba(13,138,82,0.9)','rgba(201,74,48,0.85)','rgba(154,98,0,0.85)','rgba(109,79,194,0.85)'];
+function e1rmCalc(weight,reps){ return reps>0?weight*(1+reps/30):0; }
+
+function renderMetrics(){
+  const insEl=document.getElementById('ins-metrics');
+  if(!hevyRaw.length){ if(insEl)insEl.innerHTML=''; return; }
+
+  // Flatten sets con contexto (solo Hevy: único dataset con peso/reps/grupo por set)
+  const rows=[];
+  hevyRaw.forEach(w=>{
+    const date=new Date(w.start_time);
+    (w.exercises||[]).forEach(ex=>{
+      const group=HEVY_MUSCLE_MAP[ex.primary_muscle_group]||'Otro';
+      (ex.sets||[]).filter(s=>s.type!=='warmup'&&s.weight_kg>0&&s.reps>0).forEach(s=>{
+        rows.push({date,exTitle:ex.title,group,weight:s.weight_kg,reps:s.reps,vol:s.weight_kg*s.reps,e1rm:e1rmCalc(s.weight_kg,s.reps)});
+      });
+    });
+  });
+  if(!rows.length){ if(insEl)insEl.innerHTML=''; return; }
+
+  const now=new Date();
+  const weekStart=getMonday(now);
+  const prevWeekStart=new Date(weekStart); prevWeekStart.setDate(prevWeekStart.getDate()-7);
+  const prevWeekEnd=new Date(weekStart); prevWeekEnd.setTime(prevWeekEnd.getTime()-1);
+  const curWeekRows=rows.filter(r=>r.date>=weekStart);
+  const prevWeekRows=rows.filter(r=>r.date>=prevWeekStart&&r.date<=prevWeekEnd);
+
+  // ── Volumen por grupo muscular (tonelaje): esta semana vs semana anterior ──
+  function tonPerGroup(rs){ const m={}; rs.forEach(r=>{m[r.group]=(m[r.group]||0)+r.vol;}); return RADAR_GROUPS.map(g=>Math.round(m[g]||0)); }
+  const curTon=tonPerGroup(curWeekRows), prevTon=tonPerGroup(prevWeekRows);
+  if(chartMuscleVol)chartMuscleVol.destroy();
+  chartMuscleVol=new Chart(document.getElementById('c-vol-muscle'),{type:'bar',data:{labels:RADAR_GROUPS,datasets:[
+    {label:'Esta semana',data:curTon,backgroundColor:'rgba(37,99,190,0.65)',borderRadius:3,borderSkipped:false},
+    {label:'Semana anterior',data:prevTon,backgroundColor:'rgba(160,160,160,0.35)',borderRadius:3,borderSkipped:false}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{font:{family:'DM Mono',size:9},color:'#6b6d70',boxWidth:8,padding:10}},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.raw} kg`}}},scales:{x:{ticks:{font:{family:'DM Mono',size:9},color:'#a8aab0'},grid:{display:false},border:{display:false}},y:{ticks:{font:{size:8},color:'#a8aab0'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}});
+  document.getElementById('muscleVolBadge').textContent=`${curWeekRows.length} sets esta sem`;
+
+  // ── 1RM estimado — progresión (top ejercicios con más sesiones registradas) ──
+  const byExercise={};
+  rows.forEach(r=>{ (byExercise[r.exTitle]=byExercise[r.exTitle]||[]).push(r); });
+  const perExSessions={};
+  Object.entries(byExercise).forEach(([ex,rs])=>{
+    const byDay=new Map();
+    rs.forEach(r=>{ const day=r.date.toISOString().slice(0,10); const best=byDay.get(day); if(!best||r.e1rm>best.e1rm) byDay.set(day,{day,date:r.date,e1rm:r.e1rm,weight:r.weight,reps:r.reps}); });
+    perExSessions[ex]=[...byDay.values()].sort((a,b)=>a.date-b.date);
+  });
+  const topExercises=Object.entries(perExSessions).filter(([,v])=>v.length>=3).sort((a,b)=>b[1].length-a[1].length).slice(0,5);
+  const allDays=[...new Set(topExercises.flatMap(([,v])=>v.map(p=>p.day)))].sort();
+  if(chart1RM)chart1RM.destroy();
+  chart1RM=new Chart(document.getElementById('c-1rm'),{type:'line',data:{labels:allDays.map(d=>fmtLabel(new Date(d+'T00:00:00'))),datasets:topExercises.map(([ex,pts],i)=>{
+    const map=new Map(pts.map(p=>[p.day,Math.round(p.e1rm)]));
+    return {label:ex,data:allDays.map(d=>map.has(d)?map.get(d):null),spanGaps:true,borderColor:RM_COLORS[i%RM_COLORS.length],backgroundColor:RM_COLORS[i%RM_COLORS.length],pointRadius:3,tension:0.25,borderWidth:1.5};
+  })},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{font:{family:'DM Mono',size:8},color:'#6b6d70',boxWidth:8,padding:8}},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.raw} kg`}}},scales:{x:{ticks:{font:{family:'DM Mono',size:8},color:'#a8aab0',maxRotation:45,autoSkip:true},grid:{display:false},border:{display:false}},y:{ticks:{font:{size:8},color:'#a8aab0'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}});
+  document.getElementById('e1rmBadge').textContent=topExercises.length?`fórmula Epley · top ${topExercises.length} ejercicios`:'sin datos suficientes (mín. 3 sesiones)';
+
+  // ── PRs recientes (30 días) ──
+  const prs=[];
+  Object.entries(perExSessions).forEach(([ex,pts])=>{
+    let best=-Infinity;
+    pts.forEach(p=>{ if(p.e1rm>best){ if(best>-Infinity) prs.push({ex,date:p.date,weight:p.weight,reps:p.reps,e1rm:p.e1rm}); best=p.e1rm; } });
+  });
+  const cutoff30=new Date(now.getTime()-30*864e5);
+  const recentPRs=prs.filter(p=>p.date>=cutoff30).sort((a,b)=>b.date-a.date);
+  document.getElementById('mPRCount').textContent=recentPRs.length;
+  document.getElementById('mPRDelta').textContent=recentPRs.length?`último: ${recentPRs[0].ex}`:'sin PRs recientes';
+  const prTable=document.getElementById('prTable');
+  prTable.innerHTML=recentPRs.length?recentPRs.slice(0,6).map(p=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:0.5px solid var(--border)"><span>${fmtLabel(p.date)} · ${p.ex}</span><span>${p.weight}kg × ${p.reps} <span style="color:var(--text3)">(≈${Math.round(p.e1rm)}kg 1RM)</span></span></div>`).join(''):'<span style="color:var(--text3)">Sin récords nuevos en los últimos 30 días.</span>';
+
+  // ── Balance push/pull (últimos 30 días, por tonelaje) ──
+  const rows30=rows.filter(r=>r.date>=cutoff30);
+  const pushVol=rows30.filter(r=>PUSH_GROUPS.has(r.group)).reduce((s,r)=>s+r.vol,0);
+  const pullVol=rows30.filter(r=>PULL_GROUPS.has(r.group)).reduce((s,r)=>s+r.vol,0);
+  const totalPP=pushVol+pullVol;
+  if(totalPP>0){
+    const pushPct=Math.round(pushVol/totalPP*100);
+    document.getElementById('mBalance').textContent=`${pushPct}/${100-pushPct}`;
+    document.getElementById('mBalanceDelta').textContent=Math.abs(pushPct-50)<=10?'✓ equilibrado':(pushPct>50?'push por encima de pull':'pull por encima de push');
+  } else {
+    document.getElementById('mBalance').textContent='—';
+    document.getElementById('mBalanceDelta').textContent='sin datos';
+  }
+
+  // ── Volumen semana actual vs promedio de las 4 semanas anteriores ──
+  const curWeekTon=curWeekRows.reduce((s,r)=>s+r.vol,0);
+  let sum4=0,n4=0;
+  for(let i=1;i<=4;i++){
+    const ws=new Date(weekStart); ws.setDate(ws.getDate()-7*i);
+    const we=new Date(ws); we.setDate(we.getDate()+7); we.setTime(we.getTime()-1);
+    const wRows=rows.filter(r=>r.date>=ws&&r.date<=we);
+    if(wRows.length){ sum4+=wRows.reduce((s2,r)=>s2+r.vol,0); n4++; }
+  }
+  const avg4WeeksTon=n4?sum4/n4:0;
+  if(avg4WeeksTon>0){
+    const ratioPct=Math.round(curWeekTon/avg4WeeksTon*100);
+    document.getElementById('mVolRatio').innerHTML=`${ratioPct}<span class="kpi-unit">%</span>`;
+    document.getElementById('mVolRatioDelta').textContent=`${(curWeekTon/1000).toFixed(1)}t vs prom. ${(avg4WeeksTon/1000).toFixed(1)}t`;
+  } else {
+    document.getElementById('mVolRatio').textContent='—';
+    document.getElementById('mVolRatioDelta').textContent='sin histórico suficiente';
+  }
+
+  // ── Insight resumen (calculado, sin depender de análisis manual) ──
+  const topEx=topExercises[0];
+  let insightTxt='';
+  if(topEx){
+    const first=topEx[1][0], last=topEx[1][topEx[1].length-1];
+    const delta=Math.round(last.e1rm-first.e1rm);
+    insightTxt=`${topEx[0]}: 1RM estimado ${Math.round(last.e1rm)}kg (${delta>=0?'+':''}${delta}kg desde ${fmtLabel(first.date)}). `;
+  }
+  insightTxt+=recentPRs.length?`${recentPRs.length} PR(s) en los últimos 30 días.`:'Sin nuevos récords en los últimos 30 días.';
+  if(insEl){ insEl.className='chart-insight info'; insEl.innerHTML=`<span class="ins-trend">${insightTxt}</span>`; }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // CHART INSIGHTS + KEY SUMMARY
 // ═══════════════════════════════════════════════════════════════════════════
 function setInsight(id, cls, trend, advice){
@@ -1490,6 +1629,7 @@ async function loadAll(){
     ]);
     processRenpho(rJson);
     const hevySessions=parseWorkouts(hJson.workouts||[],'Hevy');
+    hevyRaw=hJson.workouts||[];
     const jeitRaw=Array.isArray(jJson)?jJson:(jJson.workouts||[]);
     const jeitSessions=parseWorkouts(jeitRaw,'Jefit');
     allSessions=[...jeitSessions,...hevySessions].sort((a,b)=>a.date-b.date);
@@ -1521,6 +1661,7 @@ async function loadAll(){
     renderBP();
     renderHist();
     renderAnalysis();
+    renderMetrics();
     updateMeta();
   }catch(e){console.error('Load error:',e);}
   finally{document.getElementById('loadBar').classList.remove('active');}
