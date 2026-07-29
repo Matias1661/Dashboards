@@ -522,6 +522,7 @@ function getGroup(t){const tl=t.toLowerCase();for(const{group,kw}of MUSCLE_MAP){
 let activeCicloIdx=-1;
 let activePhaseShades=[]; // {type:'washout'|'pct', label, si, ei} — bucket index ranges (solo charts de composición)
 let bpPhaseShades=[]; // {type:'cycle'|'washout'|'pct', label, si, ei} — índices sobre el array activo de TA/pulso (readings o buckets semanales, según bpViewMode)
+let rm1PhaseShades=[]; // {type:'cycle'|'washout'|'pct', label, si, ei} — índices propios sobre `allWeeks` del gráfico 1RM (c-1rm); no reutiliza activePhaseShades (esos índices pertenecen a los buckets de composición corporal, ver fix BP 13 jul 2026 y fix 1RM 29 jul 2026)
 let bpViewMode='date'; // 'date' | 'week' — controla el eje X de los gráficos de TA y pulso
 const PHASE_SHADE_CHART_IDS=new Set(['c-peso','c-musc','c-grasa','c-agua','c-visceral']);
 const BP_PHASE_SHADE_CHART_IDS=new Set(['c-bp','c-pulse']);
@@ -538,7 +539,11 @@ Chart.register({
     const isBPChart=chart.canvas&&BP_PHASE_SHADE_CHART_IDS.has(chart.canvas.id);
     // Nota: activeBPShadeIdx ("Sem 11+") se eliminó el 15 jul 2026 por solaparse con
     // bpPhaseShades (Ciclo/Washout), que ya cubre ese mismo rango con su propia etiqueta.
-    if(!isBPChart && activeCicloIdx>=0){
+    const isRM1Chart=chart.canvas&&chart.canvas.id==='c-1rm';
+    // c-1rm queda excluido del sombreado genérico por activeCicloIdx: ese índice pertenece a los
+    // buckets de composición corporal (aggregate() en applyRange), no a `allWeeks` de este gráfico
+    // (arrays de distinta longitud/fechas) — ver fix 29 jul 2026. Usa rm1PhaseShades en su lugar.
+    if(!isBPChart && !isRM1Chart && activeCicloIdx>=0){
       const cx=xs.getPixelForValue(activeCicloIdx);
       ctx.save();ctx.fillStyle='rgba(13,138,82,0.05)';
       ctx.fillRect(cx,chartArea.top,chartArea.right-cx,chartArea.bottom-chartArea.top);
@@ -570,6 +575,26 @@ Chart.register({
     }
     if(!isBPChart && PHASE_SHADE_CHART_IDS.has(chart.canvas.id) && activePhaseShades.length){
       activePhaseShades.forEach(ph=>{
+        const{si,ei}=ph; if(si<0||ei<si) return;
+        const col=PHASE_COLORS[ph.type]; if(!col) return;
+        const x1=xs.getPixelForValue(si);
+        const x2=xs.getPixelForValue(Math.min(ei+1,xs.max));
+        if(x2<=x1) return;
+        ctx.save();
+        ctx.fillStyle=col.fill;
+        ctx.fillRect(x1,chartArea.top,x2-x1,chartArea.bottom-chartArea.top);
+        ctx.strokeStyle=col.border;ctx.lineWidth=1;ctx.setLineDash([3,3]);
+        ctx.beginPath();ctx.moveTo(x1,chartArea.top);ctx.lineTo(x1,chartArea.bottom);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(x2,chartArea.top);ctx.lineTo(x2,chartArea.bottom);ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle=col.text;ctx.font='8px DM Mono,monospace';
+        ctx.fillText(ph.label,x1+4,chartArea.top+10);
+        ctx.restore();
+      });
+    }
+    // Sombreado completo (Ciclo/Washout/PCT) en c-1rm — índices propios sobre `allWeeks`, ver rm1PhaseShades.
+    if(isRM1Chart && rm1PhaseShades.length){
+      rm1PhaseShades.forEach(ph=>{
         const{si,ei}=ph; if(si<0||ei<si) return;
         const col=PHASE_COLORS[ph.type]; if(!col) return;
         const x1=xs.getPixelForValue(si);
@@ -1511,6 +1536,20 @@ function renderMetrics(){
     const lastTime=allWeekTimes[allWeekTimes.length-1];
     while(cur.getTime()<=lastTime){ allWeeks.push(new Date(cur)); cur.setDate(cur.getDate()+7); }
   }
+  // Sombreado de fases (Ciclo/Washout/PCT) para c-1rm: índices propios sobre `allWeeks`
+  // (semana = lunes..domingo). No reutiliza activePhaseShades/activeCicloIdx, que pertenecen
+  // a los buckets de composición corporal de applyRange() — ver fix 29 jul 2026.
+  rm1PhaseShades=[];
+  PHASE_HISTORY.forEach(p=>{
+    const pStart=new Date(p.start), pEnd=new Date(p.end);
+    const overlapIdx=[];
+    allWeeks.forEach((wkStart,i)=>{
+      const wkEnd=new Date(wkStart); wkEnd.setDate(wkEnd.getDate()+6);
+      if(wkEnd>=pStart && wkStart<=pEnd) overlapIdx.push(i);
+    });
+    if(!overlapIdx.length) return; // fase fuera del rango de semanas con datos
+    rm1PhaseShades.push({type:p.type,label:p.label,si:overlapIdx[0],ei:overlapIdx[overlapIdx.length-1]});
+  });
   // Interpolación lineal para semanas sin datos (solo entre el primer y el último valor conocido)
   function interpolateWeekly(weekMap){
     const raw=allWeeks.map(wk=>weekMap.has(wk.getTime())?weekMap.get(wk.getTime()):null);
