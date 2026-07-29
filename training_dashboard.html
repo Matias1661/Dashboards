@@ -117,6 +117,14 @@ header{background:var(--surface);border-bottom:1px solid var(--border2);padding:
 .loading-bar{height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent);background-size:200% 100%;animation:slide 1.2s linear infinite;display:none;margin-bottom:0}
 @keyframes slide{0%{background-position:200% 0}100%{background-position:-200% 0}}
 .loading-bar.active{display:block}
+/* ── Tabs ─────────────────────────────────────── */
+.tabs-nav{display:flex;gap:2px;padding-top:16px;border-bottom:1px solid var(--border2)}
+.tab-btn{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);background:var(--surface2);border:1px solid var(--border2);border-bottom:none;border-radius:8px 8px 0 0;padding:9px 18px;cursor:pointer;position:relative;top:1px;transition:color .15s,background .15s}
+.tab-btn:hover{color:var(--text2)}
+.tab-btn.active{background:var(--bg);color:var(--text);border-bottom:1px solid var(--bg)}
+.tabpane-metrics{display:none}
+body.tab-metrics .tabpane-dashboard{display:none}
+body.tab-metrics .tabpane-metrics{display:block}
 footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:40px;padding-bottom:20px}
 </style>
 </head>
@@ -133,6 +141,13 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
 </header>
 
 <div class="wrap">
+
+  <div class="tabs-nav">
+    <button class="tab-btn active" id="tabBtn-dashboard" onclick="switchTab('dashboard')">Dashboard</button>
+    <button class="tab-btn" id="tabBtn-metrics" onclick="switchTab('metrics')">Métricas de Entrenamiento</button>
+  </div>
+
+  <div class="tabpane-dashboard">
 
   <!-- PROTOCOLO -->
   <div class="section">
@@ -317,6 +332,10 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
     </div>
   </div>
 
+  </div><!-- /tabpane-dashboard -->
+
+  <div class="tabpane-metrics">
+
   <!-- MÉTRICAS DE ENTRENAMIENTO -->
   <div class="section">
     <div class="section-title">Métricas de Entrenamiento</div>
@@ -335,6 +354,10 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       <div id="prTable" style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text2)">—</div>
     </div>
   </div>
+
+  </div><!-- /tabpane-metrics -->
+
+  <div class="tabpane-dashboard">
 
   <!-- RUTINA DIARIA -->
   <div class="section">
@@ -355,6 +378,8 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
       </div>
     </div>
   </div>
+
+  </div><!-- /tabpane-dashboard -->
 
 </div><!-- /wrap -->
 
@@ -1665,6 +1690,18 @@ async function loadAll(){
     updateMeta();
   }catch(e){console.error('Load error:',e);}
   finally{document.getElementById('loadBar').classList.remove('active');}
+}
+
+function switchTab(name){
+  document.body.classList.toggle('tab-metrics', name==='metrics');
+  document.getElementById('tabBtn-dashboard').classList.toggle('active', name==='dashboard');
+  document.getElementById('tabBtn-metrics').classList.toggle('active', name==='metrics');
+  // Los charts de la pestaña Métricas se crean con el panel oculto (display:none),
+  // por lo que Chart.js los calcula a 0x0. Al mostrar la pestaña, forzar resize.
+  if(name==='metrics'){
+    if(chartMuscleVol) chartMuscleVol.resize();
+    if(chart1RM) chart1RM.resize();
+  }
 }
 
 function openSettings(){
