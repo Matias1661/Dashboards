@@ -564,7 +564,7 @@ Chart.register({
         ctx.beginPath();ctx.moveTo(x2,chartArea.top);ctx.lineTo(x2,chartArea.bottom);ctx.stroke();
         ctx.setLineDash([]);
         ctx.fillStyle=col.text;ctx.font='8px DM Mono,monospace';
-        ctx.fillText(ph.label,x1+4,chartArea.top+20);
+        ctx.fillText(ph.label,Math.max(x1+4,chartArea.left+4),chartArea.top+20);
         ctx.restore();
       });
     }
