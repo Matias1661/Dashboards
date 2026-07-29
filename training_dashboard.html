@@ -293,6 +293,26 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
   <!-- ENTRENAMIENTO -->
   <div class="section">
     <div class="section-title">Entrenamiento</div>
+    <div class="card" style="margin-top:0">
+      <div class="card-header">
+        <span class="card-title">Análisis por Claude</span>
+        <span class="card-badge" id="claudeAnalysisDate" style="color:var(--text3)">27 de julio de 2026 · Claude Sonnet 4.6</span></div>
+      <p style="font-size:11px;color:var(--text3);margin:0 0 10px 0;line-height:1.5">El análisis se genera vía chat con Claude y se inyecta en el dashboard.</p>
+      <div id="claudeAnalysisBody" style="font-size:12px;color:var(--text2);line-height:1.65;font-family:'DM Sans',sans-serif"><h4>Análisis del Ciclo — PCT en curso (27 julio 2026)</h4>
+<p><strong>Resumen:</strong> Fase de PCT en curso (semana 3 desde inicio 20 jul). Peso y grasa corporal en corrección leve a la baja en los últimos 30 días, con el músculo esquelético en zona ámbar de retención tras el pico del ciclo. La frecuencia de entrenamiento se mantiene sólida (14 sesiones/30 días) y la tensión arterial permanece estable dentro de rangos normales sin señales de alerta.</p>
+<p><strong>Composición corporal:</strong> peso 89.5 kg (+3.30 vs baseline), músculo esquelético 60.41 kg (+1.19 vs baseline), grasa 28.9% (+1.2pp). Retención muscular post-ciclo: <strong>63.7%</strong> del pico de ciclo (zona ámbar). Nota: se corrigió una medición matutina afectada por cambio de pilas en la báscula (descartada por outlier).</p>
+<p><strong>Entrenamiento:</strong> 14 sesiones en los últimos 30 días (~3.3/semana), con buena distribución entre Leg, Push, Pull y V Taper. Duración y volumen de sets consistentes (10-22 sets/sesión), sin señales de caída en el rendimiento pese a estar en PCT.</p>
+<p><strong>Tensión arterial:</strong> Promedio últimas 5 lecturas sin café: 112/74, PP promedio 38. Ninguna lectura alcanza el umbral de aviso (PP>=55). Última lectura (27 jul): 105/69, la más baja del periodo reciente.</p></div>
+    </div>
+  </div>
+
+  </div><!-- /tabpane-dashboard -->
+
+  <div class="tabpane-metrics">
+
+  <!-- ENTRENAMIENTO (KPIs y gráficas) -->
+  <div class="section" style="margin-top:0">
+    <div class="section-title">Entrenamiento</div>
     <div class="train-kpi-grid">
       <div class="kpi"><div class="kpi-label">Sesiones (mes)</div><div class="kpi-val" id="tSes">—</div><div class="kpi-delta" id="tSesDelta">—</div></div>
       <div class="kpi"><div class="kpi-label">Volumen (mes)</div><div class="kpi-val" id="tVol">—</div><div class="kpi-delta" id="tVolDelta">—</div></div>
@@ -319,22 +339,7 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
         <div class="chart-wrap" style="height:220px"><canvas id="c-radar-month"></canvas></div>
       </div>
     </div>
-    <div class="card" style="margin-top:12px">
-      <div class="card-header">
-        <span class="card-title">Análisis por Claude</span>
-        <span class="card-badge" id="claudeAnalysisDate" style="color:var(--text3)">27 de julio de 2026 · Claude Sonnet 4.6</span></div>
-      <p style="font-size:11px;color:var(--text3);margin:0 0 10px 0;line-height:1.5">El análisis se genera vía chat con Claude y se inyecta en el dashboard.</p>
-      <div id="claudeAnalysisBody" style="font-size:12px;color:var(--text2);line-height:1.65;font-family:'DM Sans',sans-serif"><h4>Análisis del Ciclo — PCT en curso (27 julio 2026)</h4>
-<p><strong>Resumen:</strong> Fase de PCT en curso (semana 3 desde inicio 20 jul). Peso y grasa corporal en corrección leve a la baja en los últimos 30 días, con el músculo esquelético en zona ámbar de retención tras el pico del ciclo. La frecuencia de entrenamiento se mantiene sólida (14 sesiones/30 días) y la tensión arterial permanece estable dentro de rangos normales sin señales de alerta.</p>
-<p><strong>Composición corporal:</strong> peso 89.5 kg (+3.30 vs baseline), músculo esquelético 60.41 kg (+1.19 vs baseline), grasa 28.9% (+1.2pp). Retención muscular post-ciclo: <strong>63.7%</strong> del pico de ciclo (zona ámbar). Nota: se corrigió una medición matutina afectada por cambio de pilas en la báscula (descartada por outlier).</p>
-<p><strong>Entrenamiento:</strong> 14 sesiones en los últimos 30 días (~3.3/semana), con buena distribución entre Leg, Push, Pull y V Taper. Duración y volumen de sets consistentes (10-22 sets/sesión), sin señales de caída en el rendimiento pese a estar en PCT.</p>
-<p><strong>Tensión arterial:</strong> Promedio últimas 5 lecturas sin café: 112/74, PP promedio 38. Ninguna lectura alcanza el umbral de aviso (PP>=55). Última lectura (27 jul): 105/69, la más baja del periodo reciente.</p></div>
-    </div>
   </div>
-
-  </div><!-- /tabpane-dashboard -->
-
-  <div class="tabpane-metrics">
 
   <!-- MÉTRICAS DE ENTRENAMIENTO -->
   <div class="section">
@@ -1699,8 +1704,7 @@ function switchTab(name){
   // Los charts de la pestaña Métricas se crean con el panel oculto (display:none),
   // por lo que Chart.js los calcula a 0x0. Al mostrar la pestaña, forzar resize.
   if(name==='metrics'){
-    if(chartMuscleVol) chartMuscleVol.resize();
-    if(chart1RM) chart1RM.resize();
+    [chartVol, chartFreq, chartRadar, chartRadarMonth, chartMuscleVol, chart1RM].forEach(c=>{ if(c) c.resize(); });
   }
 }
 
