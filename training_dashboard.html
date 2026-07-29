@@ -535,7 +535,7 @@ Chart.register({
     const xs=scales.x;
     if(chart.canvas&&chart.canvas.id==='c-hist'){// handled separately below
     } else {
-    const isBPChart=chart.canvas&&chart.canvas.id==='c-bp';
+    const isBPChart=chart.canvas&&BP_PHASE_SHADE_CHART_IDS.has(chart.canvas.id);
     // Nota: activeBPShadeIdx ("Sem 11+") se eliminó el 15 jul 2026 por solaparse con
     // bpPhaseShades (Ciclo/Washout), que ya cubre ese mismo rango con su propia etiqueta.
     if(!isBPChart && activeCicloIdx>=0){
