@@ -593,12 +593,16 @@ Chart.register({
       });
     }
     // Sombreado completo (Ciclo/Washout/PCT) en c-1rm — índices propios sobre `allWeeks`, ver rm1PhaseShades.
+    // Usa el mismo truco de medio paso (si-0.5/ei+0.5) que bpPhaseShades (semanal): como las fases
+    // son contiguas en `allWeeks` (índice ei de una = índice si-1 de la siguiente), esto hace que el
+    // borde derecho de una fase coincida exactamente con el borde izquierdo de la próxima, sin hueco
+    // (con getPixelForValue(si)/getPixelForValue(ei+1) quedaba un hueco visible entre Washout y PCT).
     if(isRM1Chart && rm1PhaseShades.length){
       rm1PhaseShades.forEach(ph=>{
         const{si,ei}=ph; if(si<0||ei<si) return;
         const col=PHASE_COLORS[ph.type]; if(!col) return;
-        const x1=xs.getPixelForValue(si);
-        const x2=xs.getPixelForValue(Math.min(ei+1,xs.max));
+        const x1=xs.getPixelForValue(si-0.5);
+        const x2=xs.getPixelForValue(ei+0.5);
         if(x2<=x1) return;
         ctx.save();
         ctx.fillStyle=col.fill;
