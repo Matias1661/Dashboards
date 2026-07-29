@@ -1545,16 +1545,23 @@ function renderMetrics(){
   // Sombreado de fases (Ciclo/Washout/PCT) para c-1rm: índices propios sobre `allWeeks`
   // (semana = lunes..domingo). No reutiliza activePhaseShades/activeCicloIdx, que pertenecen
   // a los buckets de composición corporal de applyRange() — ver fix 29 jul 2026.
+  // Fase dominante por semana (mayoría de los 7 días calendario, no solo el lunes): evita que una
+  // misma semana quede asignada a dos fases a la vez (p.ej. semana del 6 jul: lunes es fin de Ciclo
+  // pero 6 de los 7 días son Washout) — con test de solape simple esa semana contaba para ambas
+  // fases y el fillRect de Washout se dibujaba encima del de Ciclo, dejando una franja más oscura.
   rm1PhaseShades=[];
-  PHASE_HISTORY.forEach(p=>{
-    const pStart=new Date(p.start), pEnd=new Date(p.end);
-    const overlapIdx=[];
-    allWeeks.forEach((wkStart,i)=>{
-      const wkEnd=new Date(wkStart); wkEnd.setDate(wkEnd.getDate()+6);
-      if(wkEnd>=pStart && wkStart<=pEnd) overlapIdx.push(i);
-    });
-    if(!overlapIdx.length) return; // fase fuera del rango de semanas con datos
-    rm1PhaseShades.push({type:p.type,label:p.label,si:overlapIdx[0],ei:overlapIdx[overlapIdx.length-1]});
+  allWeeks.forEach((wkStart,i)=>{
+    const counts={};
+    for(let d=0;d<7;d++){
+      const day=new Date(wkStart); day.setDate(day.getDate()+d);
+      const p=PHASE_HISTORY.find(ph=>day>=new Date(ph.start)&&day<=new Date(ph.end));
+      if(p) counts[p.type]=(counts[p.type]||0)+1;
+    }
+    const type=Object.keys(counts).sort((a,b)=>counts[b]-counts[a])[0];
+    if(!type) return; // semana fuera de cualquier fase conocida
+    const last=rm1PhaseShades[rm1PhaseShades.length-1];
+    if(last && last.type===type && last.ei===i-1){ last.ei=i; }
+    else { const ph=PHASE_HISTORY.find(p=>p.type===type); rm1PhaseShades.push({type,label:ph.label,si:i,ei:i}); }
   });
   // Interpolación lineal para semanas sin datos (solo entre el primer y el último valor conocido)
   function interpolateWeekly(weekMap){
