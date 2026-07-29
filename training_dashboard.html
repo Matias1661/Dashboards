@@ -577,8 +577,10 @@ Chart.register({
       activePhaseShades.forEach(ph=>{
         const{si,ei}=ph; if(si<0||ei<si) return;
         const col=PHASE_COLORS[ph.type]; if(!col) return;
-        const x1=xs.getPixelForValue(si);
-        const x2=xs.getPixelForValue(Math.min(ei+1,xs.max));
+        // Medio paso (si-0.5/ei+0.5) en vez de getPixelForValue(si)/getPixelForValue(min(ei+1,xs.max)):
+        // este último dejaba un hueco visible en el borde Washout→PCT (mismo bug que en c-1rm, fix 29 jul 2026).
+        const x1=xs.getPixelForValue(si-0.5);
+        const x2=xs.getPixelForValue(ei+0.5);
         if(x2<=x1) return;
         ctx.save();
         ctx.fillStyle=col.fill;
