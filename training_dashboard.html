@@ -277,8 +277,12 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
     <div class="section-title">Tensión arterial</div>
     <div class="card">
       <div class="card-header">
-        <span class="card-title">Lecturas · <span style="color:var(--purple)">■</span> médico &nbsp;<span style="color:var(--green)">■</span> tensiómetro casa</span>
+        <span class="card-title" id="bpTitleLabel">Lecturas · <span style="color:var(--purple)">■</span> médico &nbsp;<span style="color:var(--green)">■</span> tensiómetro casa</span>
         <span class="card-badge" id="bpBadge"></span>
+      </div>
+      <div class="range-btns" style="margin-bottom:8px">
+        <button class="range-btn active" id="bpViewBtn-date" onclick="setBPView('date')">Por fecha</button>
+        <button class="range-btn" id="bpViewBtn-week" onclick="setBPView('week')">Por semana</button>
       </div>
       <div id="bpStatus" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--amber);margin-bottom:8px;display:none"></div>
       <div class="chart-wrap" style="height:180px"><canvas id="c-bp"></canvas></div>
@@ -468,6 +472,15 @@ const bpDateOf = r => r.date ? parseDateISO(r.date) : (parseBPDate(r.d)||new Dat
 function fmtLabel(d){ return d.getDate()+' '+MESES_CAP[d.getMonth()]+' '+String(d.getFullYear()).slice(2); }
 function fmtMonth(d){ return MESES_ES[d.getMonth()]+' '+String(d.getFullYear()).slice(2); }
 function fmtWeek(d){ return d.getDate()+' '+MESES_ES[d.getMonth()]; }
+// Semana ISO 8601 (lunes=inicio, semana 1 = la que contiene el primer jueves del año)
+function isoWeek(d){
+  const date=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+  const dayNum=date.getUTCDay()||7;
+  date.setUTCDate(date.getUTCDate()+4-dayNum);
+  const yearStart=new Date(Date.UTC(date.getUTCFullYear(),0,1));
+  const week=Math.ceil((((date-yearStart)/86400000)+1)/7);
+  return {year:date.getUTCFullYear(),week};
+}
 function getMonday(d){const r=new Date(d);const day=r.getDay();r.setDate(r.getDate()-(day===0?6:day-1));r.setHours(0,0,0,0);return r;}
 function getCurrentWeek(){ const today=new Date(); today.setHours(0,0,0,0); const start=new Date(CYCLE_START); start.setHours(0,0,0,0); const diffDays=Math.round((today-start)/864e5); return Math.max(1,Math.floor((diffDays-1)/7)+1); }
 function getProtocolForWeek(w){ return PROTOCOL.find(p=>w>=p.from&&w<=p.to)||null; }
@@ -508,7 +521,8 @@ function getGroup(t){const tl=t.toLowerCase();for(const{group,kw}of MUSCLE_MAP){
 // ═══════════════════════════════════════════════════════════════════════════
 let activeCicloIdx=-1;
 let activePhaseShades=[]; // {type:'washout'|'pct', label, si, ei} — bucket index ranges (solo charts de composición)
-let bpPhaseShades=[]; // {type:'cycle'|'washout', label, si, ei} — índices sobre el array `readings` de TA/pulso (independiente de activePhaseShades)
+let bpPhaseShades=[]; // {type:'cycle'|'washout'|'pct', label, si, ei} — índices sobre el array activo de TA/pulso (readings o buckets semanales, según bpViewMode)
+let bpViewMode='date'; // 'date' | 'week' — controla el eje X de los gráficos de TA y pulso
 const PHASE_SHADE_CHART_IDS=new Set(['c-peso','c-musc','c-grasa','c-agua','c-visceral']);
 const BP_PHASE_SHADE_CHART_IDS=new Set(['c-bp','c-pulse']);
 const PHASE_COLORS={cycle:{fill:'rgba(13,138,82,0.07)',border:'rgba(13,138,82,0.3)',text:'rgba(13,138,82,0.85)'},washout:{fill:'rgba(107,109,112,0.10)',border:'rgba(107,109,112,0.35)',text:'rgba(90,90,90,0.85)'},pct:{fill:'rgba(191,144,0,0.10)',border:'rgba(191,144,0,0.35)',text:'rgba(154,110,0,0.9)'}};
@@ -1141,6 +1155,49 @@ const BP_TIPO_COLOR={medico:'rgba(109,79,194,0.85)',nocafe:'rgba(13,138,82,0.9)'
 const BP_TIPO_BORDER={medico:'#6d4fc2',nocafe:'#0d8a52'};
 const BP_TIPO_LABEL={medico:'chequeo médico',nocafe:'tensiómetro casa'};
 
+// Cambia entre vista "por fecha" (cada lectura) y "por semana" (promedio semanal ISO) — botones en el card de TA
+function setBPView(mode){
+  if(bpViewMode===mode) return;
+  bpViewMode=mode;
+  const bd=document.getElementById('bpViewBtn-date'), bw=document.getElementById('bpViewBtn-week');
+  if(bd) bd.classList.toggle('active',mode==='date');
+  if(bw) bw.classList.toggle('active',mode==='week');
+  renderBP();
+}
+
+// Agrupa lecturas de TA por semana ISO 8601 y calcula promedios + fase dominante (ciclo/washout/PCT) por semana.
+// Devuelve {weeks:[{label,year,n,sist,diast,pulso,phase}], shades:[{type,label,si,ei}]} — shades usa índices sobre `weeks`.
+function buildBPWeekly(readings){
+  const buckets=new Map();
+  readings.forEach(r=>{
+    const d=bpDateOf(r);
+    const{year,week}=isoWeek(d);
+    const key=year+'-'+week;
+    if(!buckets.has(key)) buckets.set(key,{year,week,sist:[],diast:[],pulso:[],dates:[]});
+    const b=buckets.get(key);
+    b.sist.push(r.sist); b.diast.push(r.diast);
+    if(r.pulso!==null&&r.pulso!==undefined) b.pulso.push(r.pulso);
+    b.dates.push(d);
+  });
+  const avg=arr=>arr.length?arr.reduce((a,v)=>a+v,0)/arr.length:null;
+  const phaseOf=d=>{ const p=PHASE_HISTORY.find(ph=>d>=parseDateISO(ph.start)&&d<=parseDateISO(ph.end)); return p?p.type:null; };
+  const weeks=[...buckets.values()].sort((a,b)=>(a.year-b.year)||(a.week-b.week)).map(b=>{
+    const counts={};
+    b.dates.forEach(d=>{ const t=phaseOf(d); if(t) counts[t]=(counts[t]||0)+1; });
+    const dominant=Object.keys(counts).sort((x,y)=>counts[y]-counts[x])[0]||null;
+    return {label:'S'+b.week,year:b.year,n:b.sist.length,sist:avg(b.sist),diast:avg(b.diast),pulso:avg(b.pulso),phase:dominant};
+  });
+  // Fusiona semanas consecutivas con la misma fase dominante en un solo bloque de sombreado
+  const shades=[];
+  weeks.forEach((w,i)=>{
+    if(!w.phase) return;
+    const last=shades[shades.length-1];
+    if(last && last.type===w.phase && last.ei===i-1){ last.ei=i; }
+    else { const ph=PHASE_HISTORY.find(p=>p.type===w.phase); shades.push({type:w.phase,label:ph?ph.label:w.phase,si:i,ei:i}); }
+  });
+  return {weeks,shades};
+}
+
 function renderBP(){
   const statusEl=document.getElementById('bpStatus');
   if(!bpReadings||!bpReadings.length){
@@ -1152,63 +1209,94 @@ function renderBP(){
 
   // Orden cronologico garantizado: usa campo ISO `date` si existe (fallback: parseo del label)
   const readings=[...bpReadings].sort((a,b)=>bpDateOf(a)-bpDateOf(b));
-  const n=readings.length;
-  const labels=readings.map(r=>r.d);
-  const sistData=readings.map(r=>r.sist);
-  const diastData=readings.map(r=>r.diast);
-  const bgColors=readings.map(r=>BP_TIPO_COLOR[r.tipo]||BP_TIPO_COLOR.nocafe);
-  const borderColors=readings.map(r=>BP_TIPO_BORDER[r.tipo]||BP_TIPO_BORDER.nocafe);
+  const round1=v=>(v===null||v===undefined)?null:Math.round(v*10)/10;
+  const weekly=bpViewMode==='week' ? buildBPWeekly(readings) : null;
 
-  // Sombreado de fases (ciclo/washout) para TA y pulso — índices propios sobre `readings`, no reutiliza activePhaseShades
-  // (esos índices pertenecen a los buckets de composición corporal y no son transferibles a este array; ver fix 13 jul 2026).
-  bpPhaseShades=['cycle','washout'].map(type=>{
-    const p=PHASE_HISTORY.find(ph=>ph.type===type); if(!p) return null;
-    const pStart=parseDateISO(p.start), pEnd=parseDateISO(p.end);
-    const idxs=[];
-    readings.forEach((r,i)=>{ const d=bpDateOf(r); if(d&&d>=pStart&&d<=pEnd) idxs.push(i); });
-    if(!idxs.length) return null;
-    return {type:p.type,label:p.label,si:idxs[0],ei:idxs[idxs.length-1]};
-  }).filter(Boolean);
+  // ---- Datos del gráfico: por fecha (cada lectura) o por semana (promedio semanal) ----
+  let labels, sistData, diastData, pulseData, tooltipN;
+  if(weekly){
+    labels=weekly.weeks.map(w=>w.label);
+    sistData=weekly.weeks.map(w=>round1(w.sist));
+    diastData=weekly.weeks.map(w=>round1(w.diast));
+    pulseData=weekly.weeks.map(w=>round1(w.pulso));
+    tooltipN=weekly.weeks.map(w=>w.n);
+    bpPhaseShades=weekly.shades;
+  } else {
+    labels=readings.map(r=>r.d);
+    sistData=readings.map(r=>r.sist);
+    diastData=readings.map(r=>r.diast);
+    pulseData=readings.map(r=>(r.pulso!==null&&r.pulso!==undefined)?r.pulso:null);
+    tooltipN=null;
+    // Sombreado de fases (ciclo/washout/PCT) — índices propios sobre `readings`, no reutiliza activePhaseShades
+    // (esos índices pertenecen a los buckets de composición corporal y no son transferibles a este array; ver fix 13 jul 2026).
+    bpPhaseShades=['cycle','washout','pct'].map(type=>{
+      const p=PHASE_HISTORY.find(ph=>ph.type===type); if(!p) return null;
+      const pStart=parseDateISO(p.start), pEnd=parseDateISO(p.end);
+      const idxs=[];
+      readings.forEach((r,i)=>{ const d=bpDateOf(r); if(d&&d>=pStart&&d<=pEnd) idxs.push(i); });
+      if(!idxs.length) return null;
+      return {type:p.type,label:p.label,si:idxs[0],ei:idxs[idxs.length-1]};
+    }).filter(Boolean);
+  }
+  const n=labels.length;
+
+  const sistColors=weekly?'#c94a30':readings.map(r=>BP_TIPO_COLOR[r.tipo]||BP_TIPO_COLOR.nocafe);
+  const sistBorders=weekly?'#c94a30':readings.map(r=>BP_TIPO_BORDER[r.tipo]||BP_TIPO_BORDER.nocafe);
+  const diastColors=weekly?'#9a6200':sistColors;
+  const diastBorders=weekly?'#9a6200':sistBorders;
+
+  const titleEl=document.getElementById('bpTitleLabel');
+  if(titleEl){
+    titleEl.innerHTML=weekly
+      ? 'Promedio semanal · <span style="color:#c94a30">■</span> sistólica &nbsp;<span style="color:#9a6200">■</span> diastólica'
+      : 'Lecturas · <span style="color:var(--purple)">■</span> médico &nbsp;<span style="color:var(--green)">■</span> tensiómetro casa';
+  }
 
   chartBP.data.labels=labels;
   chartBP.data.datasets[0].data=sistData;
-  chartBP.data.datasets[0].pointBackgroundColor=bgColors;
-  chartBP.data.datasets[0].pointBorderColor=borderColors;
+  chartBP.data.datasets[0].pointBackgroundColor=sistColors;
+  chartBP.data.datasets[0].pointBorderColor=sistBorders;
   chartBP.data.datasets[0].pointRadius=5;
   chartBP.data.datasets[1].data=diastData;
-  chartBP.data.datasets[1].pointBackgroundColor=bgColors;
-  chartBP.data.datasets[1].pointBorderColor=borderColors;
+  chartBP.data.datasets[1].pointBackgroundColor=diastColors;
+  chartBP.data.datasets[1].pointBorderColor=diastBorders;
   chartBP.data.datasets[1].pointRadius=4;
   chartBP.data.datasets[2].data=new Array(n).fill(140);
   chartBP.data.datasets[3].data=new Array(n).fill(90);
   chartBP.options.plugins.tooltip.callbacks={
-    title:ctx=>ctx&&ctx[0]?`${ctx[0].label}`:'',
+    title:ctx=>ctx&&ctx[0]?(weekly?`Semana ${ctx[0].label}`:`${ctx[0].label}`):'',
     label:ctx=>{
       if(ctx.datasetIndex>=2)return null;
-      const r=readings[ctx.dataIndex];
-      return `${ctx.datasetIndex===0?'Sistólica':'Diastólica'}: ${ctx.raw} mmHg`;
-    }
+      const suf=weekly?' (prom.)':'';
+      return `${ctx.datasetIndex===0?'Sistólica':'Diastólica'}${suf}: ${ctx.raw} mmHg`;
+    },
+    afterBody:ctx=>(weekly&&ctx&&ctx[0])?`n = ${tooltipN[ctx[0].dataIndex]} lectura(s)`:undefined
   };
   chartBP.update('none'); // 'none' skips animation for cleaner update
 
-  // Leyenda visible de fases (Ciclo/Washout) — evita depender solo del texto dentro del canvas
+  // Leyenda visible de fases (Ciclo/Washout/PCT) — evita depender solo del texto dentro del canvas
   const legendEl=document.getElementById('bpPhaseLegend');
   if(legendEl){
     legendEl.innerHTML=bpPhaseShades.map(ph=>{
       const col=PHASE_COLORS[ph.type];
-      const startLabel=readings[ph.si]?readings[ph.si].d:'';
-      const endLabel=readings[ph.ei]?readings[ph.ei].d:'';
+      const startLabel=labels[ph.si]||'';
+      const endLabel=labels[ph.ei]||'';
       return `<span><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:${col.border};margin-right:4px;vertical-align:middle"></span>${ph.label} (${startLabel}\u2013${endLabel})</span>`;
     }).join('');
   }
 
-  // Pulso en reposo: solo lecturas con pulso registrado, orden cronológico (mismo readings ya ordenado)
-  const pulseData=readings.map(r=>(r.pulso!==null&&r.pulso!==undefined)?r.pulso:null);
-  const pulseVals=pulseData.filter(v=>v!==null);
   chartPulse.data.labels=labels;
   chartPulse.data.datasets[0].data=pulseData;
-  if(pulseVals.length){const rP=autoRange(pulseVals,0.2,10); chartPulse.options.scales.y.min=rP.min; chartPulse.options.scales.y.max=rP.max;}
+  const pulseValsChart=pulseData.filter(v=>v!==null);
+  if(pulseValsChart.length){const rP=autoRange(pulseValsChart,0.2,10); chartPulse.options.scales.y.min=rP.min; chartPulse.options.scales.y.max=rP.max;}
+  chartPulse.options.plugins.tooltip.callbacks={
+    label:ctx=>`Pulso${weekly?' (prom.)':''}: ${ctx.raw} lpm`,
+    afterBody:ctx=>(weekly&&ctx&&ctx[0])?`n = ${tooltipN[ctx[0].dataIndex]} lectura(s)`:undefined
+  };
   chartPulse.update('none');
+
+  // ---- Estadísticas de las tarjetas (independientes de la vista): siempre sobre lecturas individuales ----
+  const pulseVals=readings.map(r=>r.pulso).filter(v=>v!==null&&v!==undefined);
   if(pulseVals.length){
     const avgPulse=Math.round(pulseVals.reduce((a,b)=>a+b,0)/pulseVals.length);
     const lastPulse=pulseVals[pulseVals.length-1];
