@@ -1494,13 +1494,44 @@ function renderMetrics(){
     perExSessions[ex]=[...byDay.values()].sort((a,b)=>a.date-b.date);
   });
   const topExercises=Object.entries(perExSessions).filter(([,v])=>v.length>=3).sort((a,b)=>b[1].length-a[1].length).slice(0,5);
-  const allDays=[...new Set(topExercises.flatMap(([,v])=>v.map(p=>p.day)))].sort();
+
+  // Agrupar por semana (lunes): si hay varios valores en la semana, usar el máximo.
+  // Se trabaja con timestamps (no strings ISO) para evitar desfases de huso horario.
+  const perExWeekly={};
+  topExercises.forEach(([ex,pts])=>{
+    const byWeek=new Map();
+    pts.forEach(p=>{ const wk=getMonday(p.date).getTime(); const cur=byWeek.get(wk); if(cur===undefined||p.e1rm>cur) byWeek.set(wk,p.e1rm); });
+    perExWeekly[ex]=byWeek;
+  });
+  const allWeekTimes=[...new Set(Object.values(perExWeekly).flatMap(m=>[...m.keys()]))].sort((a,b)=>a-b);
+  // Semanas continuas (sin huecos) entre la primera y la última con datos
+  const allWeeks=[];
+  if(allWeekTimes.length){
+    let cur=new Date(allWeekTimes[0]);
+    const lastTime=allWeekTimes[allWeekTimes.length-1];
+    while(cur.getTime()<=lastTime){ allWeeks.push(new Date(cur)); cur.setDate(cur.getDate()+7); }
+  }
+  // Interpolación lineal para semanas sin datos (solo entre el primer y el último valor conocido)
+  function interpolateWeekly(weekMap){
+    const raw=allWeeks.map(wk=>weekMap.has(wk.getTime())?weekMap.get(wk.getTime()):null);
+    const out=raw.slice();
+    let lastIdx=-1,lastVal=null;
+    for(let i=0;i<out.length;i++){
+      if(out[i]!=null){
+        if(lastIdx!==-1&&i-lastIdx>1){
+          const gap=i-lastIdx;
+          for(let j=1;j<gap;j++) out[lastIdx+j]=lastVal+(out[i]-lastVal)*(j/gap);
+        }
+        lastIdx=i; lastVal=out[i];
+      }
+    }
+    return out.map(v=>v==null?null:Math.round(v));
+  }
   if(chart1RM)chart1RM.destroy();
-  chart1RM=new Chart(document.getElementById('c-1rm'),{type:'line',data:{labels:allDays.map(d=>fmtLabel(new Date(d+'T00:00:00'))),datasets:topExercises.map(([ex,pts],i)=>{
-    const map=new Map(pts.map(p=>[p.day,Math.round(p.e1rm)]));
-    return {label:ex,data:allDays.map(d=>map.has(d)?map.get(d):null),spanGaps:true,borderColor:RM_COLORS[i%RM_COLORS.length],backgroundColor:RM_COLORS[i%RM_COLORS.length],pointRadius:3,tension:0.25,borderWidth:1.5};
+  chart1RM=new Chart(document.getElementById('c-1rm'),{type:'line',data:{labels:allWeeks.map(wk=>fmtLabel(wk)),datasets:topExercises.map(([ex],i)=>{
+    return {label:ex,data:interpolateWeekly(perExWeekly[ex]),spanGaps:true,borderColor:RM_COLORS[i%RM_COLORS.length],backgroundColor:RM_COLORS[i%RM_COLORS.length],pointRadius:3,tension:0.25,borderWidth:1.5};
   })},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{font:{family:'DM Mono',size:8},color:'#6b6d70',boxWidth:8,padding:8}},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.raw} kg`}}},scales:{x:{ticks:{font:{family:'DM Mono',size:8},color:'#a8aab0',maxRotation:45,autoSkip:true},grid:{display:false},border:{display:false}},y:{ticks:{font:{size:8},color:'#a8aab0'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}});
-  document.getElementById('e1rmBadge').textContent=topExercises.length?`fórmula Epley · top ${topExercises.length} ejercicios`:'sin datos suficientes (mín. 3 sesiones)';
+  document.getElementById('e1rmBadge').textContent=topExercises.length?`fórmula Epley · top ${topExercises.length} ejercicios (semanal)`:'sin datos suficientes (mín. 3 sesiones)';
 
   // ── PRs recientes (30 días) ──
   const prs=[];
