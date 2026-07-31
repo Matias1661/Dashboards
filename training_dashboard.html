@@ -213,7 +213,7 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
         <div class="kpi-delta" id="kAguaCycleDelta">—</div>
       </div>
       <div class="kpi" id="kpiRatio">
-        <div class="kpi-label">Ratio músculo/peso</div>
+        <div class="kpi-label">P-ratio (músculo/peso)</div>
         <div class="kpi-val" id="kRatio">—</div>
         <div class="kpi-date" id="kRatioDate"></div>
         <div class="kpi-delta" id="kRatioDelta">—</div>
@@ -962,16 +962,22 @@ function updateBodyKPIs(){
   document.getElementById('kAguaCycleDelta').textContent=`${fmt1d(dAguaCycle)} pp vs inicio ciclo (${cycleRef.agua.toFixed(1)}%)`;
   document.getElementById('kpiAgua').className='kpi '+(dAguaCycle>=0?'trend-up':dAguaCycle>=-1?'trend-neutral':'trend-down');
 
-  // Ratio músculo/peso ganado: puntos porcentuales de músculo esquelético (% Renpho) por kg de peso total ganado desde inicio de ciclo.
-  // Nota (31 jul 2026): corregido de "kg/kg" a "pp/kg" — skeletal_muscle en renpho_data.json es un porcentaje, no kg.
-  // Los umbrales (>0.5 excelente, 0.3–0.5 aceptable, <0.3 exceso de grasa/agua) quedan pendientes de revisión bajo la unidad correcta.
-  const dPesoCycle=latest.peso-cycleRef.peso;
-  const ratio = dPesoCycle>0 ? dMuscCycle/dPesoCycle : null;
-  document.getElementById('kRatio').innerHTML = ratio===null ? '—' : `${ratio.toFixed(2)} <span class="kpi-unit">pp/kg</span>`;
+  // P-ratio (músculo/peso ganado) — reconstruido 31 jul 2026.
+  // skeletal_muscle es % del peso corporal (Renpho), no kg — hay que convertir a kg antes de comparar contra el peso ganado.
+  // muscKg(r) = r.peso * r.musc / 100. P-ratio = (Δ músculo en kg) / (Δ peso en kg) × 100 — % del peso ganado que es masa muscular.
+  // Referencia: en la literatura de partición nutricional (P-ratio), un rango natural típico es ~40-60% en superávit moderado con entrenamiento de fuerza.
+  // Con soporte anabólico activo (ciclo) es normal y esperable superar ese rango — los umbrales de color de abajo son una calibración provisional para este contexto, no un estándar validado; ajustar si Matias lo pide.
+  // Además, la BIA (báscula Renpho) sobreestima el % de músculo cuando hay retención hídrica (ej. por Testo), así que el P-ratio en fases de subida de peso en ciclo puede estar inflado por agua, no solo por tejido nuevo.
+  const muscKgLatest = latest.peso * latest.musc / 100;
+  const muscKgCycleRef = cycleRef.peso * cycleRef.musc / 100;
+  const dMuscKgCycle = muscKgLatest - muscKgCycleRef;
+  const dPesoCycle = latest.peso - cycleRef.peso;
+  const pRatio = dPesoCycle>0 ? (dMuscKgCycle/dPesoCycle)*100 : null;
+  document.getElementById('kRatio').innerHTML = pRatio===null ? '—' : `${pRatio.toFixed(0)} <span class="kpi-unit">%</span>`;
   document.getElementById('kRatioDate').textContent=`al ${latestDate}`;
-  document.getElementById('kRatioDelta').textContent = `${fmt2d(dMuscCycle)} pp músculo / ${fmt2d(dPesoCycle)} kg peso`;
-  document.getElementById('kRatioCycleDelta').textContent = ratio===null ? 'sin peso ganado vs inicio ciclo' : (ratio>=0.5?'proporción alta de músculo':ratio>=0.3?'proporción aceptable (volumen)':'revisar grasa/sodio');
-  document.getElementById('kpiRatio').className='kpi '+(ratio===null?'trend-neutral':ratio>=0.5?'trend-up':ratio>=0.3?'trend-neutral':'trend-down');
+  document.getElementById('kRatioDelta').textContent = `${fmt2d(dMuscKgCycle)} kg músculo / ${fmt2d(dPesoCycle)} kg peso`;
+  document.getElementById('kRatioCycleDelta').textContent = pRatio===null ? 'sin peso ganado vs inicio ciclo' : (pRatio>=70?'proporción muy alta de músculo (revisar retención hídrica)':pRatio>=40?'proporción aceptable':'revisar grasa/sodio');
+  document.getElementById('kpiRatio').className='kpi '+(pRatio===null?'trend-neutral':pRatio>=70?'trend-up':pRatio>=40?'trend-neutral':'trend-down');
 
   // Retención muscular post-ciclo (mejora #10, orden 10)
   // Baseline pre-ciclo: 59.22% (11/03/2026). Pico = máximo músculo esquelético
