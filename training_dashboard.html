@@ -483,7 +483,12 @@ function isoWeek(d){
   return {year:date.getUTCFullYear(),week};
 }
 function getMonday(d){const r=new Date(d);const day=r.getDay();r.setDate(r.getDate()-(day===0?6:day-1));r.setHours(0,0,0,0);return r;}
-function getCurrentWeek(){ const today=new Date(); today.setHours(0,0,0,0); const start=new Date(CYCLE_START); start.setHours(0,0,0,0); const diffDays=Math.round((today-start)/864e5); return Math.max(1,Math.floor((diffDays-1)/7)+1); }
+// FIX 3 ago 2026: fórmula anterior (Math.floor((diffDays-1)/7)+1) hacía que la semana 1 durase 8 días
+// en vez de 7, desfasando en +1 día todas las semanas siguientes. Con diffDays=0 en CYCLE_START (día 1
+// del ciclo), la semana w debe cubrir diffDays [7(w-1), 7w-1] — eso es Math.floor(diffDays/7)+1.
+// Verificado contra getNextChange()/PROTOCOL, que ya usaba (p.from-1)*7 como offset de inicio de semana
+// (fórmula correcta): con esa referencia, semana 20 empieza el 3 ago 2026, no la 19.
+function getCurrentWeek(){ const today=new Date(); today.setHours(0,0,0,0); const start=new Date(CYCLE_START); start.setHours(0,0,0,0); const diffDays=Math.round((today-start)/864e5); return Math.max(1,Math.floor(diffDays/7)+1); }
 function getProtocolForWeek(w){ return PROTOCOL.find(p=>w>=p.from&&w<=p.to)||null; }
 function getNextChange(w){
   for(const p of PROTOCOL){ if(p.from>w){
@@ -578,8 +583,14 @@ Chart.register({
       // Con buckets mensuales (rango 12/24m), Washout y PCT a veces caen dentro del mismo mes
       // (jul 26 contiene ambos: Washout 7-19 jul, PCT arranca 20 jul) — sus cajas quedan en el
       // mismo rango de píxeles y las etiquetas se dibujaban una encima de la otra, ilegibles.
-      // Si la caja actual se solapa en X con la anterior, se apila su etiqueta debajo.
-      let labelPrevX2=-Infinity, labelPrevY=chartArea.top+10;
+      // FIX 3 ago 2026: el criterio anterior comparaba solo el borde de la CAJA (x1 < labelPrevX2),
+      // no el ancho real del TEXTO. Con buckets semanales (rango 6m), Washout dura ~2 semanas: su caja
+      // es angosta pero la etiqueta "Washout" es más ancha que la caja, así que invadía visualmente
+      // la etiqueta "PCT" aunque las cajas no se solaparan (bug reportado: labels ilegibles/pegados).
+      // Ahora se mide el ancho de texto con ctx.measureText() y se apila la etiqueta debajo solo si
+      // el texto anterior invadiría la posición de la etiqueta actual.
+      let labelPrevRight=-Infinity, labelPrevY=chartArea.top+10;
+      ctx.font='8px DM Mono,monospace';
       activePhaseShades.forEach(ph=>{
         const{si,ei}=ph; if(si<0||ei<si) return;
         const col=PHASE_COLORS[ph.type]; if(!col) return;
@@ -596,9 +607,11 @@ Chart.register({
         ctx.beginPath();ctx.moveTo(x2,chartArea.top);ctx.lineTo(x2,chartArea.bottom);ctx.stroke();
         ctx.setLineDash([]);
         ctx.fillStyle=col.text;ctx.font='8px DM Mono,monospace';
-        const labelY = x1 < labelPrevX2 ? labelPrevY+10 : chartArea.top+10;
-        ctx.fillText(ph.label,x1+4,labelY);
-        labelPrevX2=x2; labelPrevY=labelY;
+        const labelX=x1+4;
+        const textWidth=ctx.measureText(ph.label).width;
+        const labelY = labelX < labelPrevRight ? labelPrevY+10 : chartArea.top+10;
+        ctx.fillText(ph.label,labelX,labelY);
+        labelPrevRight=labelX+textWidth; labelPrevY=labelY;
         ctx.restore();
       });
     }
