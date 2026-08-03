@@ -995,17 +995,26 @@ function updateBodyKPIs(){
   // Retención muscular post-ciclo (mejora #10, orden 10)
   // Baseline pre-ciclo: 59.22 kg (11/03/2026). Pico = máximo músculo esquelético
   // en renpho_data.json entre CYCLE_START y fin de ciclo (última Testo, 6 jul 2026).
+  // Cambio 3 ago 2026: "actual" pasó de ser la última lectura puntual a la media de las
+  // últimas 3 lecturas válidas (agua>0). Motivo: el músculo día a día tiene ruido de
+  // ~0.1-0.4 kg (agua/glucógeno) que hacía oscilar el KPI (63.6%→60.4% entre el 31 jul y
+  // el 3 ago) sin que hubiera una tendencia real — la media de 3 puntos amortigua ese ruido
+  // sin perder sensibilidad a un cambio sostenido. El pico NO se suaviza (sigue siendo el
+  // máximo puntual histórico del ciclo — es un ancla fija, no sujeta al mismo ruido de "hoy").
   const CYCLE_END = new Date('2026-07-06');
   const kpiRetEl = document.getElementById('kpiRetencion');
   if(new Date() > CYCLE_END){
     const MUSC_BASELINE = 59.22;
     const cycleWindow = allData.filter(r=>r._date>=CYCLE_START && r._date<=CYCLE_END && r.agua>0);
     const peakMusc = cycleWindow.length ? Math.max(...cycleWindow.map(r=>r.musc)) : null;
+    const validReadings = allData.filter(r=>r.agua>0);
+    const last3 = validReadings.slice(-3);
+    const muscSmoothed = last3.length ? last3.reduce((s,r)=>s+r.musc,0)/last3.length : latest.musc;
     if(peakMusc!==null && peakMusc>MUSC_BASELINE){
-      const retencion = (latest.musc - MUSC_BASELINE) / (peakMusc - MUSC_BASELINE) * 100;
+      const retencion = (muscSmoothed - MUSC_BASELINE) / (peakMusc - MUSC_BASELINE) * 100;
       document.getElementById('kRetencion').innerHTML=`${retencion.toFixed(1)} <span class="kpi-unit">%</span>`;
-      document.getElementById('kRetencionDate').textContent=`al ${latestDate}`;
-      document.getElementById('kRetencionDelta').textContent=`pico ${peakMusc.toFixed(2)} kg / actual ${latest.musc.toFixed(2)} kg / baseline ${MUSC_BASELINE.toFixed(2)} kg`;
+      document.getElementById('kRetencionDate').textContent=`al ${latestDate} · media últ. ${last3.length} lecturas`;
+      document.getElementById('kRetencionDelta').textContent=`pico ${peakMusc.toFixed(2)} kg / media reciente ${muscSmoothed.toFixed(2)} kg (${last3.length} lecturas) / baseline ${MUSC_BASELINE.toFixed(2)} kg`;
       document.getElementById('kRetencionCycleDelta').textContent=retencion>=80?'retención alta':retencion>=60?'retención aceptable':'revisar entrenamiento/nutrición';
       kpiRetEl.className='kpi '+(retencion>=80?'trend-up':retencion>=60?'trend-neutral':'trend-down');
       kpiRetEl.style.display='';
