@@ -307,6 +307,31 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
 <p><strong>Tensión arterial</strong>: última lectura sin café (7 ago) 121/75, PP 46. Media últimas 5 lecturas: PP 43.0. Sin alertas activas (umbral PP≥55) desde principios de junio, pero las últimas dos lecturas suben respecto al rango previo — seguimiento recomendado la próxima semana.</p>
 <p><strong>Entrenamiento</strong>: 7 sesiones en los últimos 14 días, volumen 28d +10.2% vs periodo previo. Tren superior (dorsales, hombros, tríceps) cubierto dentro o cerca del rango de hipertrofia. Tren inferior (cuádriceps, glúteos, isquios) claramente por debajo del rango 10-20 sets/semana — margen de mejora si el objetivo es hipertrofia general.</p></div>
     </div>
+    <div class="kpi-grid" style="margin-bottom:14px">
+      <div class="kpi" id="kpiTSes">
+        <div class="kpi-label">Sesiones (mes)</div>
+        <div class="kpi-val" id="tSes">—</div>
+        <div class="kpi-delta" id="tSesDelta">—</div>
+      </div>
+      <div class="kpi" id="kpiTVol">
+        <div class="kpi-label">Volumen (mes)</div>
+        <div class="kpi-val" id="tVol">—</div>
+        <div class="kpi-delta" id="tVolDelta">—</div>
+      </div>
+      <div class="kpi" id="kpiTLast">
+        <div class="kpi-label">Última sesión</div>
+        <div class="kpi-val" id="tLast" style="font-size:14px">—</div>
+        <div class="kpi-delta" id="tLastVol">—</div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:0">
+      <div class="card-header"><span class="card-title">Volumen por sesión — ciclo</span><span class="card-badge" id="volBadge"></span></div>
+      <div class="chart-wrap" style="height:160px"><canvas id="c-vol"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Frecuencia mensual</span><span class="card-badge" id="freqBadge"></span></div>
+      <div class="chart-wrap" style="height:160px"><canvas id="c-freq"></canvas></div>
+    </div>
     <div class="chart-insight" id="ins-training">Últimos 28 días: 14 sesiones, 111.459 kg de volumen. 28 días previos: 15 sesiones, 101.162 kg — subida de +10.2%. Últimos 14 días: 7 sesiones. Tren superior bien cubierto (dorsales 11, hombros 9.5, tríceps 9 sets/semana); tren inferior por debajo del rango de hipertrofia (cuádriceps 6, glúteos 3.5, isquios 3 sets/semana). Última sesión: V Taper, 6 ago.</div>
     <div class="two-col" id="radarCard">
       <div class="card" style="margin-bottom:0">
