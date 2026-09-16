@@ -440,6 +440,11 @@ const PHASE_HISTORY = [
   {start:'2026-07-07', end:'2026-07-19', label:'Washout', type:'washout'},
   {start:'2026-07-20', end:'2026-08-16', label:'PCT', type:'pct'},
 ];
+// Fase "Actual" (natural, post-PCT): solo para los charts de TA/pulso (bpPhaseShades), NO vive en PHASE_HISTORY.
+// Motivo: activePhaseShades (composición corporal) e histPhases (c-hist) iteran PHASE_HISTORY completo sin filtrar
+// por tipo — añadirla ahí sombrearía también esos charts, que no fue lo pedido. end lejano porque es una fase abierta.
+const BP_EXTRA_PHASES = [{start:'2026-08-17', end:'2099-12-31', label:'Actual', type:'natural'}];
+const BP_PHASE_LIST = [...PHASE_HISTORY, ...BP_EXTRA_PHASES];
 const CYCLE_WEEKS = 21;
 // Baseline pre-ciclo histórica (11/03/2026), preservada como referencia permanente: peso 86.20, musc 59.22, grasa 27.7.
 // Baseline natural post-ciclo fijada 16/09/2026 (media de las lecturas Renpho del 07, 09 y 15/09/2026, tras el cierre de PCT).
@@ -549,7 +554,7 @@ let rm1PhaseShades=[]; // {type:'cycle'|'washout'|'pct', label, si, ei} — índ
 let bpViewMode='date'; // 'date' | 'week' — controla el eje X de los gráficos de TA y pulso
 const PHASE_SHADE_CHART_IDS=new Set(['c-peso','c-musc','c-grasa','c-agua','c-visceral']);
 const BP_PHASE_SHADE_CHART_IDS=new Set(['c-bp','c-pulse']);
-const PHASE_COLORS={cycle:{fill:'rgba(13,138,82,0.07)',border:'rgba(13,138,82,0.3)',text:'rgba(13,138,82,0.85)'},washout:{fill:'rgba(107,109,112,0.10)',border:'rgba(107,109,112,0.35)',text:'rgba(90,90,90,0.85)'},pct:{fill:'rgba(191,144,0,0.10)',border:'rgba(191,144,0,0.35)',text:'rgba(154,110,0,0.9)'}};
+const PHASE_COLORS={cycle:{fill:'rgba(13,138,82,0.07)',border:'rgba(13,138,82,0.3)',text:'rgba(13,138,82,0.85)'},washout:{fill:'rgba(107,109,112,0.10)',border:'rgba(107,109,112,0.35)',text:'rgba(90,90,90,0.85)'},pct:{fill:'rgba(191,144,0,0.10)',border:'rgba(191,144,0,0.35)',text:'rgba(154,110,0,0.9)'},natural:{fill:'rgba(37,99,190,0.07)',border:'rgba(37,99,190,0.3)',text:'rgba(37,99,190,0.85)'}};
 Chart.register({
   id:'annotPlugin',
   beforeDraw(chart){
@@ -575,7 +580,8 @@ Chart.register({
       ctx.restore();
     }
     if(BP_PHASE_SHADE_CHART_IDS.has(chart.canvas.id) && bpPhaseShades.length){
-      const isBPValuesChart=chart.canvas.id==='c-bp'; // solo c-bp tiene sistólica/diastólica; c-pulse no dibuja líneas de media
+      const isBPValuesChart=chart.canvas.id==='c-bp'; // c-bp: líneas de media sistólica/diastólica
+      const isPulseChart=chart.canvas.id==='c-pulse'; // c-pulse: línea de media de pulso
       bpPhaseShades.forEach(ph=>{
         const{si,ei}=ph; if(si<0||ei<si) return;
         const col=PHASE_COLORS[ph.type]; if(!col) return;
@@ -615,6 +621,20 @@ Chart.register({
             ctx.fillStyle='#9a6200';
             ctx.fillText(ph.meanDiast.toFixed(1),Math.min(x2+2,chartArea.right-22),yDiast-3);
           }
+          ctx.setLineDash([]);
+          ctx.restore();
+        }
+        // Línea horizontal punteada con la media de pulso de esta fase, mismo criterio que sist/diast.
+        if(isPulseChart && ph.meanPulso!=null){
+          const ys=chart.scales.y;
+          ctx.save();
+          ctx.setLineDash([5,3]);
+          ctx.font='7px DM Mono,monospace';
+          const yPulso=ys.getPixelForValue(ph.meanPulso);
+          ctx.strokeStyle='#6d4fc2';ctx.lineWidth=1.5;
+          ctx.beginPath();ctx.moveTo(x1,yPulso);ctx.lineTo(x2,yPulso);ctx.stroke();
+          ctx.fillStyle='#6d4fc2';
+          ctx.fillText(ph.meanPulso.toFixed(1),Math.min(x2+2,chartArea.right-22),yPulso-3);
           ctx.setLineDash([]);
           ctx.restore();
         }
@@ -1321,7 +1341,7 @@ function buildBPWeekly(readings){
     b.dates.push(d);
   });
   const avg=arr=>arr.length?arr.reduce((a,v)=>a+v,0)/arr.length:null;
-  const phaseOf=d=>{ const p=PHASE_HISTORY.find(ph=>d>=parseDateISO(ph.start)&&d<=parseDateISO(ph.end)); return p?p.type:null; };
+  const phaseOf=d=>{ const p=BP_PHASE_LIST.find(ph=>d>=parseDateISO(ph.start)&&d<=parseDateISO(ph.end)); return p?p.type:null; };
   const weeks=[...buckets.values()].sort((a,b)=>(a.year-b.year)||(a.week-b.week)).map(b=>{
     const counts={};
     b.dates.forEach(d=>{ const t=phaseOf(d); if(t) counts[t]=(counts[t]||0)+1; });
@@ -1334,7 +1354,7 @@ function buildBPWeekly(readings){
     if(!w.phase) return;
     const last=shades[shades.length-1];
     if(last && last.type===w.phase && last.ei===i-1){ last.ei=i; }
-    else { const ph=PHASE_HISTORY.find(p=>p.type===w.phase); shades.push({type:w.phase,label:ph?ph.label:w.phase,si:i,ei:i}); }
+    else { const ph=BP_PHASE_LIST.find(p=>p.type===w.phase); shades.push({type:w.phase,label:ph?ph.label:w.phase,si:i,ei:i}); }
   });
   return {weeks,shades};
 }
@@ -1370,8 +1390,8 @@ function renderBP(){
     tooltipN=null;
     // Sombreado de fases (ciclo/washout/PCT) — índices propios sobre `readings`, no reutiliza activePhaseShades
     // (esos índices pertenecen a los buckets de composición corporal y no son transferibles a este array; ver fix 13 jul 2026).
-    bpPhaseShades=['cycle','washout','pct'].map(type=>{
-      const p=PHASE_HISTORY.find(ph=>ph.type===type); if(!p) return null;
+    bpPhaseShades=['cycle','washout','pct','natural'].map(type=>{
+      const p=BP_PHASE_LIST.find(ph=>ph.type===type); if(!p) return null;
       const pStart=parseDateISO(p.start), pEnd=parseDateISO(p.end);
       const idxs=[];
       readings.forEach((r,i)=>{ const d=bpDateOf(r); if(d&&d>=pStart&&d<=pEnd) idxs.push(i); });
@@ -1381,18 +1401,22 @@ function renderBP(){
   }
   const n=labels.length;
 
-  // Media de sistólica/diastólica por fase (ciclo/washout/PCT), calculada siempre sobre `readings`
-  // (lecturas individuales) para que sea idéntica en vista por fecha y por semana. Se adjunta a cada
-  // entrada de bpPhaseShades para que el plugin de dibujo (annotPlugin) trace una línea horizontal
-  // de referencia con ese valor, recortada al rango x de la fase.
+  // Media de sistólica/diastólica/pulso por fase (ciclo/washout/PCT/Actual), calculada siempre sobre
+  // `readings` (lecturas individuales) para que sea idéntica en vista por fecha y por semana. Se adjunta
+  // a cada entrada de bpPhaseShades para que el plugin de dibujo (annotPlugin) trace una línea horizontal
+  // de referencia con ese valor, recortada al rango x de la fase, tanto en c-bp (sist/diast) como en
+  // c-pulse (pulso). "Actual" (BP_PHASE_LIST, natural post-PCT) no tiene fecha de fin fija — cubre desde
+  // el día siguiente al cierre de PCT hasta la lectura más reciente.
   bpPhaseShades.forEach(ph=>{
-    const p=PHASE_HISTORY.find(x=>x.type===ph.type); if(!p) return;
+    const p=BP_PHASE_LIST.find(x=>x.type===ph.type); if(!p) return;
     const pStart=parseDateISO(p.start), pEnd=parseDateISO(p.end);
     const inPhase=readings.filter(r=>{ const d=bpDateOf(r); return d&&d>=pStart&&d<=pEnd; });
     if(!inPhase.length) return;
     ph.meanSist=inPhase.reduce((a,r)=>a+r.sist,0)/inPhase.length;
     const diastVals=inPhase.filter(r=>r.diast!==null&&r.diast!==undefined);
     ph.meanDiast=diastVals.length?diastVals.reduce((a,r)=>a+r.diast,0)/diastVals.length:null;
+    const pulsoVals=inPhase.filter(r=>r.pulso!==null&&r.pulso!==undefined);
+    ph.meanPulso=pulsoVals.length?pulsoVals.reduce((a,r)=>a+r.pulso,0)/pulsoVals.length:null;
   });
 
   const sistColors=weekly?'#c94a30':readings.map(r=>BP_TIPO_COLOR[r.tipo]||BP_TIPO_COLOR.nocafe);
@@ -1437,7 +1461,8 @@ function renderBP(){
       const startLabel=labels[ph.si]||'';
       const endLabel=labels[ph.ei]||'';
       const meanTxt=(ph.meanSist!=null)?` · media ${ph.meanSist.toFixed(1)}${ph.meanDiast!=null?'/'+ph.meanDiast.toFixed(1):''}`:'';
-      return `<span><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:${col.border};margin-right:4px;vertical-align:middle"></span>${ph.label} (${startLabel}\u2013${endLabel})${meanTxt}</span>`;
+      const pulsoTxt=(ph.meanPulso!=null)?` · pulso ${ph.meanPulso.toFixed(1)}`:'';
+      return `<span><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:${col.border};margin-right:4px;vertical-align:middle"></span>${ph.label} (${startLabel}\u2013${endLabel})${meanTxt}${pulsoTxt}</span>`;
     }).join('');
   }
 
