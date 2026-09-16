@@ -575,6 +575,7 @@ Chart.register({
       ctx.restore();
     }
     if(BP_PHASE_SHADE_CHART_IDS.has(chart.canvas.id) && bpPhaseShades.length){
+      const isBPValuesChart=chart.canvas.id==='c-bp'; // solo c-bp tiene sistólica/diastólica; c-pulse no dibuja líneas de media
       bpPhaseShades.forEach(ph=>{
         const{si,ei}=ph; if(si<0||ei<si) return;
         const col=PHASE_COLORS[ph.type]; if(!col) return;
@@ -594,6 +595,29 @@ Chart.register({
         ctx.fillStyle=col.text;ctx.font='8px DM Mono,monospace';
         ctx.fillText(ph.label,Math.max(x1+4,chartArea.left+4),chartArea.top+20);
         ctx.restore();
+        // Línea horizontal punteada con la media de sistólica/diastólica de esta fase, recortada a su rango x.
+        if(isBPValuesChart && (ph.meanSist!=null || ph.meanDiast!=null)){
+          const ys=chart.scales.y;
+          ctx.save();
+          ctx.setLineDash([5,3]);
+          ctx.font='7px DM Mono,monospace';
+          if(ph.meanSist!=null){
+            const ySist=ys.getPixelForValue(ph.meanSist);
+            ctx.strokeStyle='#c94a30';ctx.lineWidth=1.5;
+            ctx.beginPath();ctx.moveTo(x1,ySist);ctx.lineTo(x2,ySist);ctx.stroke();
+            ctx.fillStyle='#c94a30';
+            ctx.fillText(ph.meanSist.toFixed(1),Math.min(x2+2,chartArea.right-22),ySist-3);
+          }
+          if(ph.meanDiast!=null){
+            const yDiast=ys.getPixelForValue(ph.meanDiast);
+            ctx.strokeStyle='#9a6200';ctx.lineWidth=1.5;
+            ctx.beginPath();ctx.moveTo(x1,yDiast);ctx.lineTo(x2,yDiast);ctx.stroke();
+            ctx.fillStyle='#9a6200';
+            ctx.fillText(ph.meanDiast.toFixed(1),Math.min(x2+2,chartArea.right-22),yDiast-3);
+          }
+          ctx.setLineDash([]);
+          ctx.restore();
+        }
       });
     }
     if(!isBPChart && PHASE_SHADE_CHART_IDS.has(chart.canvas.id) && activePhaseShades.length){
@@ -1357,6 +1381,20 @@ function renderBP(){
   }
   const n=labels.length;
 
+  // Media de sistólica/diastólica por fase (ciclo/washout/PCT), calculada siempre sobre `readings`
+  // (lecturas individuales) para que sea idéntica en vista por fecha y por semana. Se adjunta a cada
+  // entrada de bpPhaseShades para que el plugin de dibujo (annotPlugin) trace una línea horizontal
+  // de referencia con ese valor, recortada al rango x de la fase.
+  bpPhaseShades.forEach(ph=>{
+    const p=PHASE_HISTORY.find(x=>x.type===ph.type); if(!p) return;
+    const pStart=parseDateISO(p.start), pEnd=parseDateISO(p.end);
+    const inPhase=readings.filter(r=>{ const d=bpDateOf(r); return d&&d>=pStart&&d<=pEnd; });
+    if(!inPhase.length) return;
+    ph.meanSist=inPhase.reduce((a,r)=>a+r.sist,0)/inPhase.length;
+    const diastVals=inPhase.filter(r=>r.diast!==null&&r.diast!==undefined);
+    ph.meanDiast=diastVals.length?diastVals.reduce((a,r)=>a+r.diast,0)/diastVals.length:null;
+  });
+
   const sistColors=weekly?'#c94a30':readings.map(r=>BP_TIPO_COLOR[r.tipo]||BP_TIPO_COLOR.nocafe);
   const sistBorders=weekly?'#c94a30':readings.map(r=>BP_TIPO_BORDER[r.tipo]||BP_TIPO_BORDER.nocafe);
   const diastColors=weekly?'#9a6200':sistColors;
@@ -1398,7 +1436,8 @@ function renderBP(){
       const col=PHASE_COLORS[ph.type];
       const startLabel=labels[ph.si]||'';
       const endLabel=labels[ph.ei]||'';
-      return `<span><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:${col.border};margin-right:4px;vertical-align:middle"></span>${ph.label} (${startLabel}\u2013${endLabel})</span>`;
+      const meanTxt=(ph.meanSist!=null)?` · media ${ph.meanSist.toFixed(1)}${ph.meanDiast!=null?'/'+ph.meanDiast.toFixed(1):''}`:'';
+      return `<span><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:${col.border};margin-right:4px;vertical-align:middle"></span>${ph.label} (${startLabel}\u2013${endLabel})${meanTxt}</span>`;
     }).join('');
   }
 
