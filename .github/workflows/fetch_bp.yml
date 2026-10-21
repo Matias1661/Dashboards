@@ -95,13 +95,13 @@ jobs:
 
       - name: Push via GitHub API
         env:
-          GH_PAT: ${{ secrets.GH_PAT }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FNAME: bp_data.json
         run: |
           python3 - <<'PYPUSH'
           import base64, json, urllib.request, urllib.error, os, sys, time
           from datetime import datetime, timezone
-          token = os.environ['GH_PAT']
+          token = os.environ['GH_TOKEN']
           repo  = 'Matias1661/Dashboards'
           fname = os.environ['FNAME']
           if not os.path.exists(fname):
