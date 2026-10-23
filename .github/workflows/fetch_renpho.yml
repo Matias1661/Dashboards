@@ -45,12 +45,11 @@ jobs:
               return unpad(cipher.decrypt(base64.b64decode(enc)), AES.block_size).decode()
 
           def api_post(path, session=None, data=None, empty=False):
-              headers = {'Content-Type': 'application/json'}
+              # Desde 19-oct-2026 Renpho exige appVersion/platform tambien en el login (si no, code=-114)
+              headers = {'Content-Type': 'application/json',
+                         'appVersion': '7.0.0', 'platform': 'android'}
               if session:
-                  headers.update({
-                      'token': session['token'], 'userId': session['userId'],
-                      'appVersion': '7.0.0', 'platform': 'android'
-                  })
+                  headers.update({'token': session['token'], 'userId': session['userId']})
               r = requests.post(
                   f'{API_BASE}/{path}',
                   headers=headers,
@@ -60,7 +59,7 @@ jobs:
               r.raise_for_status()
               resp = r.json()
               if resp.get('code') != 101:
-                  raise RuntimeError(f"API error [{path}]: code={resp.get('code')} msg={resp.get('msg')}")
+                  raise RuntimeError(f"API error [{path}]: code={resp.get('code')} msg={resp.get('msg') or resp.get('message')}")
               return json.loads(decrypt(resp['data']))
 
           login_data = api_post('renpho-aggregation/user/login', data={
