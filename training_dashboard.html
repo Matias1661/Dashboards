@@ -149,8 +149,8 @@ footer{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var
 
   <div class="tabpane-dashboard">
 
-  <!-- PROTOCOLO -->
-  <div class="section">
+  <!-- PROTOCOLO (oculto mientras SHOW_PROTOCOL=false) -->
+  <div class="section" id="protocolSection" style="display:none">
     <div class="section-title">Protocolo del ciclo</div>
     <div class="proto-card">
       <div class="proto-top">
@@ -446,6 +446,8 @@ const PHASE_HISTORY = [
 const BP_EXTRA_PHASES = [{start:'2026-08-17', end:'2099-12-31', label:'Actual', type:'natural'}];
 const BP_PHASE_LIST = [...PHASE_HISTORY, ...BP_EXTRA_PHASES];
 const CYCLE_WEEKS = 21;
+// Visibilidad de la sección Protocolo del ciclo y del badge de semana del header. Poner true al iniciar el próximo ciclo (y actualizar CYCLE_START / PROTOCOL).
+const SHOW_PROTOCOL = false;
 // Baseline pre-ciclo histórica (11/03/2026), preservada como referencia permanente: peso 86.20, musc 59.22, grasa 27.7.
 // Baseline natural post-ciclo fijada 16/09/2026 (media de las lecturas Renpho del 07, 09 y 15/09/2026, tras el cierre de PCT).
 const BASELINE    = { peso: 86.37, musc: 59.25, grasa: 27.8 };
@@ -936,6 +938,9 @@ function aggregate(type){
 // RENDER PROTOCOL
 // ═══════════════════════════════════════════════════════════════════════════
 function renderProtocol(){
+  const sec=document.getElementById('protocolSection'), badge=document.getElementById('weekBadge');
+  if(!SHOW_PROTOCOL){ if(sec)sec.style.display='none'; if(badge)badge.style.display='none'; return; }
+  if(sec)sec.style.display='';
   const w=getCurrentWeek();
   const proto=getProtocolForWeek(w);
   const next=getNextChange(w);
